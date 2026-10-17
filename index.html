@@ -81,7 +81,7 @@
       </div>
       <div>
         <h1 class="text-base font-bold text-gray-900 leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-gray-400">精準跨縣市定位版</p>
+        <p class="text-[10px] text-gray-400">私人專屬 · 支援精確座標貼上</p>
       </div>
     </div>
     
@@ -110,17 +110,10 @@
   <main class="flex-1 relative w-full h-full overflow-hidden">
     <!-- 地圖 View -->
     <div id="mapView" class="w-full h-full relative">
-      <!-- 懸浮搜尋列 -->
-      <div class="absolute top-3 left-3 right-3 z-[500] max-w-md mx-auto">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 flex items-center space-x-2">
-          <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
-          <input type="text" id="homeSearchInput" placeholder="搜尋日記店名、路名、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-gray-700" />
-          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
-            <i class="fa-solid fa-circle-xmark"></i>
-          </button>
-        </div>
-
-        <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-2xl border border-gray-150 max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
+      <!-- 懸浮提示條 -->
+      <div id="mapPickHint" class="hidden absolute top-3 left-4 right-4 z-[500] bg-theme text-white text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl flex items-center justify-between animate-bounce">
+        <span>📍 請在地圖上滑動，點選店家的確切位置</span>
+        <button onclick="cancelMapPick()" class="text-white underline text-[11px] ml-2">取消</button>
       </div>
 
       <!-- GPS 定位按鈕 -->
@@ -136,16 +129,12 @@
       <div class="bg-white p-3.5 rounded-2xl shadow-sm mb-3 space-y-2.5 border border-gray-150">
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="font-bold text-gray-700 flex items-center">
-              <span class="w-2 h-2 rounded-full bg-theme mr-1.5"></span>1. 選擇國家
-            </label>
+            <label class="font-bold text-gray-700">1. 選擇國家</label>
             <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg p-2 font-medium focus:border-theme outline-none">
             </select>
           </div>
           <div>
-            <label class="font-bold text-gray-700 flex items-center">
-              <span class="w-2 h-2 rounded-full bg-gray-300 mr-1.5" id="cityDot"></span>2. 選擇城市 / 縣市
-            </label>
+            <label class="font-bold text-gray-700">2. 選擇城市</label>
             <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-gray-200 rounded-lg p-2 font-medium outline-none transition cursor-not-allowed">
               <option value="">請先選擇國家</option>
             </select>
@@ -168,16 +157,6 @@
               <option value="lt_3.0">⚠️ 未滿 3.0 星 (避雷區)</option>
             </select>
           </div>
-        </div>
-
-        <div class="text-xs">
-          <label class="font-bold text-gray-500">🔄 排序方式</label>
-          <select id="sortOrder" onchange="renderListView()" class="w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg p-2 font-medium">
-            <option value="rating_desc">評分：高到低</option>
-            <option value="visits_desc">拜訪次數：多到少</option>
-            <option value="date_desc">日期：最新到最舊</option>
-            <option value="rating_asc">評分：低到高</option>
-          </select>
         </div>
       </div>
 
@@ -204,109 +183,101 @@
       <div class="px-5 py-3.5 border-b border-gray-150 flex justify-between items-center bg-gray-50">
         <div>
           <h3 class="font-bold text-gray-800 text-sm" id="modalMainTitle">記錄美食日記</h3>
-          <p class="text-[10px] text-gray-400" id="modalSubTitle">精準地址對應 GPS</p>
+          <p class="text-[10px] text-gray-400" id="modalSubTitle">精準定位方式</p>
         </div>
         <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
 
-      <div class="p-5 overflow-y-auto space-y-4 text-xs">
-        <div class="bg-theme-light p-3 rounded-2xl border border-purple-100">
-          <label class="block font-bold text-theme-dark mb-0.5">店家資訊</label>
-          <input type="text" id="inputStoreName" placeholder="店家名稱 *" class="w-full bg-transparent font-bold text-gray-900 text-sm outline-none border-b border-purple-200 pb-1" />
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <input type="text" id="inputCountry" placeholder="國家 (例: 台灣)" class="bg-white/80 border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
-            <input type="text" id="inputCity" placeholder="城市/縣市 (例: 新竹市)" class="bg-white/80 border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
+      <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
+        <div class="bg-theme-light p-3 rounded-2xl border border-purple-100 space-y-2">
+          <input type="text" id="inputStoreName" placeholder="店家名稱 (必填) *" class="w-full bg-transparent font-bold text-gray-900 text-sm outline-none border-b border-purple-200 pb-1" />
+          
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="inputCountry" placeholder="國家 (例: 台灣)" class="bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
+            <input type="text" id="inputCity" placeholder="城市 (例: 新竹市)" class="bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
           </div>
           
-          <div class="mt-2">
+          <input type="text" id="inputStoreAddress" placeholder="地址 (選填)" class="w-full bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
+
+          <!-- 【核心升級 1】：直接貼上 Google 座標 -->
+          <div class="bg-white/80 p-2 rounded-xl border border-purple-200 space-y-1">
+            <label class="block font-bold text-theme-dark text-[11px]">📍 方式一：貼上 Google Maps 座標（最精準）</label>
             <div class="flex items-center space-x-1.5">
-              <input type="text" id="inputStoreAddress" placeholder="詳細地址 (例: 東區光復路一段XX號)" class="flex-1 bg-white/80 border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
-              <button type="button" onclick="verifyAndLocateAddress()" class="bg-white hover:bg-theme hover:text-white text-theme-dark border border-purple-200 px-2.5 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap shadow-xs active:scale-95 transition">
-                📍 驗證定位
+              <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1 text-xs outline-none font-mono" />
+              <button type="button" onclick="pasteFromClipboard()" class="bg-theme text-white px-2 py-1 rounded-lg font-bold text-[10px] whitespace-nowrap active:scale-95">
+                貼上
               </button>
             </div>
-            <div class="flex justify-between items-center mt-1">
-              <p id="geoStatusText" class="text-[10px] text-gray-500 font-medium truncate">輸入地址後點驗證，自動鎖定真實位置</p>
-            </div>
+            <p class="text-[9px] text-gray-400">💡 打開 Google Maps 長按店家 ➔ 複製上方座標數字 ➔ 貼到此處</p>
           </div>
+
+          <!-- 【核心升級 2】：在地圖上滑動點選 -->
+          <button type="button" onclick="startMapPickMode()" class="w-full bg-white hover:bg-theme hover:text-white text-theme-dark border border-purple-200 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1 active:scale-95">
+            <i class="fa-solid fa-map-pin text-theme"></i>
+            <span>方式二：在地圖上直接點選這家店</span>
+          </button>
+          
+          <p id="geoStatusText" class="text-[10px] text-center font-bold text-gray-500"></p>
         </div>
 
         <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200">
           <div class="flex justify-between items-center mb-2">
-            <span class="font-bold text-gray-700">本次評分給分 (0.5 級距)</span>
-            <div class="flex items-center space-x-1">
-              <span class="text-[11px] text-gray-500 font-medium">手動輸入：</span>
-              <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" 
-                     oninput="handleNumberInput(this.value)" 
-                     class="w-16 text-center font-black text-theme bg-white border border-gray-300 rounded-lg py-1 text-sm outline-none focus:border-theme" />
-            </div>
+            <span class="font-bold text-gray-700">評分 (0.5 級距)</span>
+            <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-theme bg-white border border-gray-300 rounded-lg py-1 text-sm outline-none" />
           </div>
-
-          <div class="flex items-center justify-center space-x-2 py-1.5 bg-white rounded-xl border border-gray-150">
+          <div class="flex items-center justify-center space-x-2 py-1 bg-white rounded-xl border border-gray-150">
             <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer select-none space-x-1"></div>
             <span id="starScoreLabel" class="text-sm font-black text-amber-600 ml-2">4.5 分</span>
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1.5">用餐照片 (自動壓縮保存)</label>
-          <label id="uploadBox" class="border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 hover:bg-theme-light rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition">
-            <div class="w-10 h-10 rounded-full bg-theme-light flex items-center justify-center text-theme mb-2">
-              <i class="fa-solid fa-camera text-base"></i>
-            </div>
-            <span class="font-bold text-gray-700 text-xs">拍照或選取照片</span>
+          <label class="block font-bold text-gray-700 mb-1">用餐照片</label>
+          <label id="uploadBox" class="border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer transition">
+            <span class="font-bold text-gray-700 text-xs">📸 上傳照片</span>
             <input type="file" id="inputPhoto" accept="image/*" onchange="handlePhotoSelect(event)" class="hidden" />
           </label>
-
           <div id="photoPreviewArea" class="hidden relative rounded-2xl overflow-hidden border border-gray-200">
-            <img id="previewImg" class="w-full h-40 object-cover" />
-            <button onclick="removeSelectedPhoto()" type="button" class="absolute top-2 right-2 bg-black/60 hover:bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs transition">
+            <img id="previewImg" class="w-full h-36 object-cover" />
+            <button onclick="removeSelectedPhoto()" type="button" class="absolute top-2 right-2 bg-black/60 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2.5">
+        <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-bold text-gray-700 mb-1">用餐日期</label>
-            <input type="date" id="inputDate" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs" />
+            <input type="date" id="inputDate" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-2 py-1.5 text-xs" />
           </div>
           <div>
             <label class="block font-bold text-gray-700 mb-1">人均消費</label>
-            <input type="number" id="inputCost" placeholder="例如: 350" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs" />
+            <input type="number" id="inputCost" placeholder="例: 350" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-2 py-1.5 text-xs" />
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1">美食標籤 (逗號分隔)</label>
-          <div class="flex flex-wrap gap-1 mb-2">
-            <button type="button" onclick="appendTag('甜點')" class="px-2 py-1 bg-gray-100 hover:bg-theme-light text-[11px] rounded-full text-gray-600">+甜點</button>
-            <button type="button" onclick="appendTag('拉麵')" class="px-2 py-1 bg-gray-100 hover:bg-theme-light text-[11px] rounded-full text-gray-600">+拉麵</button>
-            <button type="button" onclick="appendTag('咖啡廳')" class="px-2 py-1 bg-gray-100 hover:bg-theme-light text-[11px] rounded-full text-gray-600">+咖啡廳</button>
-            <button type="button" onclick="appendTag('小吃')" class="px-2 py-1 bg-gray-100 hover:bg-theme-light text-[11px] rounded-full text-gray-600">+小吃</button>
-          </div>
-          <input type="text" id="inputTags" placeholder="自訂標籤 (多個以逗號分開)" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs" />
+          <label class="block font-bold text-gray-700 mb-1">標籤 (逗號分隔)</label>
+          <input type="text" id="inputTags" placeholder="小吃, 甜點, 拉麵" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-1.5 text-xs" />
         </div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1">用餐感受與筆記評論</label>
-          <textarea id="inputReview" rows="3" placeholder="寫下必點招牌、用餐感受或私房避雷心得..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs leading-relaxed"></textarea>
+          <label class="block font-bold text-gray-700 mb-1">用餐感受心得</label>
+          <textarea id="inputReview" rows="3" placeholder="記錄必點料理或踩雷筆記..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 text-xs leading-relaxed"></textarea>
         </div>
 
-        <div class="flex items-center space-x-2 pt-1">
+        <div class="flex items-center space-x-2">
           <input type="checkbox" id="inputRevisit" checked class="w-4 h-4 rounded border-gray-300 accent-theme" />
           <label for="inputRevisit" class="font-bold text-gray-700 text-xs">推薦再訪 👍</label>
         </div>
       </div>
 
-      <div class="p-3.5 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
-        <div class="flex items-center space-x-2">
-          <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="hidden py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition flex items-center">
-            <i class="fa-solid fa-trash mr-1"></i> 刪除此筆記
-          </button>
-          <button onclick="closeModal()" class="py-2.5 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs active:scale-95">取消</button>
-        </div>
-        <button onclick="confirmSaveRecord()" class="flex-1 py-2.5 bg-theme bg-theme-hover text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition" id="submitBtnText">存入美食日記</button>
+      <div class="p-3 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
+        <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs">
+          刪除
+        </button>
+        <button onclick="closeModal()" class="py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">取消</button>
+        <button onclick="confirmSaveRecord()" class="flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md" id="submitBtnText">存入美食日記</button>
       </div>
     </div>
   </div>
@@ -314,7 +285,7 @@
   <!-- IndexedDB 本機資料庫 -->
   <script>
     let db;
-    const DB_NAME = "FreeFoodDiaryDB_v6";
+    const DB_NAME = "FreeFoodDiaryDB_v7";
     const STORE_NAME = "restaurants";
 
     function initDB() {
@@ -323,108 +294,68 @@
           const req = indexedDB.open(DB_NAME, 1);
           req.onupgradeneeded = (e) => {
             const d = e.target.result;
-            if (!d.objectStoreNames.contains(STORE_NAME)) {
-              d.createObjectStore(STORE_NAME, { keyPath: "id" });
-            }
+            if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME, { keyPath: "id" });
           };
-          req.onsuccess = (e) => {
-            db = e.target.result;
-            resolve();
-          };
+          req.onsuccess = (e) => { db = e.target.result; resolve(); };
           req.onerror = () => resolve();
-        } catch(e) {
-          resolve();
-        }
+        } catch(e) { resolve(); }
       });
     }
 
     function dbGetAll() {
       return new Promise((resolve) => {
         if (!db) return resolve([]);
-        try {
-          const tx = db.transaction([STORE_NAME], "readonly");
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        } catch(e) {
-          resolve([]);
-        }
+        const tx = db.transaction([STORE_NAME], "readonly");
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
       });
     }
 
     function dbPut(item) {
       return new Promise((resolve) => {
         if (!db) return resolve();
-        try {
-          const tx = db.transaction([STORE_NAME], "readwrite");
-          const store = tx.objectStore(STORE_NAME);
-          store.put(item);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => resolve();
-        } catch(e) {
-          resolve();
-        }
+        const tx = db.transaction([STORE_NAME], "readwrite");
+        tx.objectStore(STORE_NAME).put(item);
+        tx.oncomplete = () => resolve();
       });
     }
 
     function dbDelete(id) {
       return new Promise((resolve) => {
         if (!db) return resolve();
-        try {
-          const tx = db.transaction([STORE_NAME], "readwrite");
-          const store = tx.objectStore(STORE_NAME);
-          store.delete(id);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => resolve();
-        } catch(e) {
-          resolve();
-        }
+        const tx = db.transaction([STORE_NAME], "readwrite");
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = () => resolve();
       });
     }
   </script>
 
   <!-- 應用程式邏輯 -->
   <script>
-    // 台灣 22 縣市真實官方核心座標庫 (杜絕新竹跑到台北的元兇)
-    const TAIWAN_CITY_COORDS = {
-      "新竹市": { lat: 24.8138, lng: 120.9675 },
-      "新竹縣": { lat: 24.8383, lng: 121.0177 },
-      "台北市": { lat: 25.0375, lng: 121.5637 },
-      "新北市": { lat: 25.0169, lng: 121.4628 },
-      "台中市": { lat: 24.1631, lng: 120.6473 },
-      "高雄市": { lat: 22.6273, lng: 120.3014 },
-      "台南市": { lat: 22.9997, lng: 120.2270 },
-      "桃園市": { lat: 24.9936, lng: 121.3010 },
-      "基隆市": { lat: 25.1276, lng: 121.7392 },
-      "苗栗縣": { lat: 24.5602, lng: 120.8214 },
-      "彰化縣": { lat: 24.0518, lng: 120.5161 },
-      "南投縣": { lat: 23.9609, lng: 120.9718 },
-      "雲林縣": { lat: 23.7092, lng: 120.4313 },
-      "嘉義市": { lat: 23.4800, lng: 120.4491 },
-      "嘉義縣": { lat: 23.4518, lng: 120.2559 },
-      "屏東縣": { lat: 22.5519, lng: 120.5487 },
-      "宜蘭縣": { lat: 24.7021, lng: 121.7377 },
-      "花蓮縣": { lat: 23.9871, lng: 121.6015 },
-      "台東縣": { lat: 22.7583, lng: 121.1444 },
-      "澎湖縣": { lat: 23.5711, lng: 119.5793 },
-      "金門縣": { lat: 24.4493, lng: 118.3766 },
-      "連江縣": { lat: 26.1505, lng: 119.9499 }
+    const TAIWAN_CITIES = {
+      "新竹市": [24.8138, 120.9675],
+      "新竹縣": [24.8383, 121.0177],
+      "台北市": [25.0375, 121.5637],
+      "新北市": [25.0169, 121.4628],
+      "台中市": [24.1631, 120.6473],
+      "高雄市": [22.6273, 120.3014],
+      "台南市": [22.9997, 120.2270],
+      "桃園市": [24.9936, 121.3010]
     };
 
     let appData = [];
     let map, markersLayer, tempPinMarker = null;
     let currentModalMode = 'CREATE';
-    let editingStoreId = null;
-    let editingVisitId = null;
+    let editingStoreId = null, editingVisitId = null;
     let currentRatingValue = 4.5;
     let uploadedPhotoBase64 = "";
     let userLocationMarker = null;
     let pendingLocation = null;
+    let isPickingOnMap = false;
 
     async function initApp() {
       initMap();
-
       await initDB();
       appData = await dbGetAll();
 
@@ -437,14 +368,14 @@
           address: "台北市大同區南京西路25巷28號",
           lat: 25.0537,
           lng: 121.5208,
-          tags: ["拉麵", "排隊名店"],
+          tags: ["拉麵"],
           visits: [{
             visitId: "v_sample",
             date: new Date().toISOString().split("T")[0],
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "歡迎使用！已修復定位跨縣市問題，輸入新竹或其他縣市，保證精準落點！",
+            review: "範例筆記：點擊旁邊編輯，可貼上 Google Maps 座標或在地上選點！",
             photo: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"
           }]
         };
@@ -454,496 +385,85 @@
 
       buildStarsUI();
       refreshViews();
-
-      setTimeout(() => {
-        if (map) map.invalidateSize();
-      }, 200);
+      setTimeout(() => { if (map) map.invalidateSize(); }, 200);
     }
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 11);
-
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-
+      map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 12);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
       markersLayer = L.layerGroup().addTo(map);
 
-      // 地圖直接點擊插旗（100% 精準絕對不偏）
-      map.on('click', async (e) => {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-        pendingLocation = { lat, lng };
-
-        if (tempPinMarker) map.removeLayer(tempPinMarker);
-        tempPinMarker = L.circleMarker([lat, lng], {
-          radius: 9,
-          fillColor: "#9C95DB",
-          color: "#FFFFFF",
-          weight: 3,
-          opacity: 1,
-          fillOpacity: 0.95
-        }).addTo(map);
-
-        let country = "台灣", city = "新竹市", roadAddress = "";
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=zh-TW`);
-          const data = await res.json();
-          if (data && data.address) {
-            country = data.address.country || "台灣";
-            city = data.address.city || data.address.county || data.address.state || "新竹市";
-            roadAddress = (data.address.road || "") + (data.address.house_number ? data.address.house_number + "號" : "");
-            if (!roadAddress) roadAddress = data.display_name.split(',')[0];
-          }
-        } catch(err) {}
-
-        currentModalMode = 'CREATE';
-        document.getElementById("modalMainTitle").innerText = "在此位置記錄美食 📍";
-        document.getElementById("inputStoreName").value = "";
-        document.getElementById("inputCountry").value = country;
-        document.getElementById("inputCity").value = city;
-        document.getElementById("inputStoreAddress").value = roadAddress;
-        document.getElementById("geoStatusText").innerText = `✅ 已精準選定座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-        document.getElementById("geoStatusText").className = "text-[10px] text-green-600 font-bold mt-1";
-        document.getElementById("inputTags").value = "美食";
-        document.getElementById("inputReview").value = "";
-        document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
-        document.getElementById("submitBtnText").innerText = "存入美食日記";
-        document.getElementById("modalDeleteBtn").classList.add("hidden");
-        removeSelectedPhoto();
-        setRating(4.5);
-
-        document.getElementById("entryModal").classList.remove("hidden");
+      // 地圖點擊事件
+      map.on('click', (e) => {
+        if (isPickingOnMap) {
+          // 在地圖選點模式中
+          setPickedLocation(e.latlng.lat, e.latlng.lng);
+        }
       });
     }
 
-    // 智能座標解析器 (門牌 ➔ 路名 ➔ 縣市中心，絕不退回台北)
-    async function resolveSmartCoordinates(country, city, address) {
-      const cleanCity = city.trim();
-      const cleanAddress = address.trim();
+    // ========== 選點與貼上座標核心 ==========
 
-      // 1. 嘗試完整門牌查詢
-      if (cleanAddress) {
-        try {
-          const q = `${country} ${cleanCity} ${cleanAddress}`;
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=tw,jp&limit=1&accept-language=zh-TW`);
-          const data = await res.json();
-          if (data && data.length > 0) {
-            return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-          }
-        } catch(e) {}
-
-        // 2. 門牌查不到，退回查路名 (例如把 "光復路一段100號" 提取成 "光復路")
-        const roadMatch = cleanAddress.match(/([^縣市區鄉鎮]+(?:路|街|大道|巷))/);
-        if (roadMatch) {
-          try {
-            const roadQ = `${country} ${cleanCity} ${roadMatch[1]}`;
-            const res2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(roadQ)}&countrycodes=tw,jp&limit=1&accept-language=zh-TW`);
-            const data2 = await res2.json();
-            if (data2 && data2.length > 0) {
-              return { lat: parseFloat(data2[0].lat), lng: parseFloat(data2[0].lon) };
-            }
-          } catch(e) {}
-        }
-      }
-
-      // 3. 核心救星：直接比對台灣 22 縣市中心點，寫新竹就必在新竹！
-      for (const cityName in TAIWAN_CITY_COORDS) {
-        if (cleanCity.includes(cityName) || cleanAddress.includes(cityName)) {
-          return TAIWAN_CITY_COORDS[cityName];
-        }
-      }
-
-      // 如果寫新竹但沒打「市」字
-      if (cleanCity.includes("新竹") || cleanAddress.includes("新竹")) {
-        return TAIWAN_CITY_COORDS["新竹市"];
-      }
-
-      return TAIWAN_CITY_COORDS["台北市"];
+    // 啟動地圖選點模式
+    function startMapPickMode() {
+      isPickingOnMap = true;
+      document.getElementById("entryModal").classList.add("hidden");
+      document.getElementById("mapPickHint").classList.remove("hidden");
+      switchTab('map');
     }
 
-    // 點擊「📍 驗證定位」按鈕
-    async function verifyAndLocateAddress() {
-      const country = document.getElementById("inputCountry").value.trim() || "台灣";
-      const city = document.getElementById("inputCity").value.trim();
-      const address = document.getElementById("inputStoreAddress").value.trim();
-      const statusText = document.getElementById("geoStatusText");
+    function cancelMapPick() {
+      isPickingOnMap = false;
+      document.getElementById("mapPickHint").classList.add("hidden");
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
 
-      if (!city && !address) return alert("請先填寫城市或地址！");
+    function setPickedLocation(lat, lng) {
+      isPickingOnMap = false;
+      pendingLocation = { lat, lng };
+      document.getElementById("mapPickHint").classList.add("hidden");
 
-      statusText.innerText = "🔍 正在查詢真實 GPS 座標...";
-      statusText.className = "text-[10px] text-gray-500 font-bold mt-1";
+      if (tempPinMarker) map.removeLayer(tempPinMarker);
+      tempPinMarker = L.circleMarker([lat, lng], {
+        radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
+      }).addTo(map);
 
-      const coords = await resolveSmartCoordinates(country, city, address);
-      if (coords) {
-        pendingLocation = coords;
-        statusText.innerText = `✅ 定位成功！已鎖定在 ${city || '目標區域'} (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
-        statusText.className = "text-[10px] text-green-600 font-bold mt-1";
+      document.getElementById("inputCoords").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      document.getElementById("geoStatusText").innerText = `✅ 已在地圖上選定位置 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
 
-        map.flyTo([coords.lat, coords.lng], 15, { duration: 1.2 });
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
+
+    // 處理手動輸入或貼上 Google 座標 (支援 24.8085, 120.9712 格式)
+    function handleCoordsInput(val) {
+      const match = val.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
+      if (match) {
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
+        pendingLocation = { lat, lng };
+        document.getElementById("geoStatusText").innerText = `✅ 已解析 Google 座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
+
+        map.flyTo([lat, lng], 16);
         if (tempPinMarker) map.removeLayer(tempPinMarker);
-        tempPinMarker = L.circleMarker([coords.lat, coords.lng], {
+        tempPinMarker = L.circleMarker([lat, lng], {
           radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
         }).addTo(map);
       }
     }
 
-    function refreshViews() {
-      initCountryFilter();
-      initTagFilter();
-      renderMarkers();
-      renderListView();
-    }
-
-    function initCountryFilter() {
-      const countrySet = new Set(appData.map(i => i.country).filter(Boolean));
-      const countrySelect = document.getElementById("filterCountry");
-      countrySelect.innerHTML = `<option value="">全部國家 (${countrySet.size})</option>` + 
-        [...countrySet].map(c => `<option value="${c}">${c}</option>`).join('');
-    }
-
-    function onCountryChange() {
-      const selectedCountry = document.getElementById("filterCountry").value;
-      const citySelect = document.getElementById("filterCity");
-      const cityDot = document.getElementById("cityDot");
-
-      if (!selectedCountry) {
-        citySelect.disabled = true;
-        citySelect.className = "w-full mt-1 bg-gray-100 text-gray-400 border border-gray-200 rounded-lg p-2 font-medium outline-none cursor-not-allowed";
-        citySelect.innerHTML = `<option value="">請先選擇國家</option>`;
-        cityDot.className = "w-2 h-2 rounded-full bg-gray-300 mr-1.5";
-      } else {
-        citySelect.disabled = false;
-        citySelect.className = "w-full mt-1 bg-gray-50 text-gray-800 border border-gray-200 rounded-lg p-2 font-medium focus:border-theme outline-none";
-        cityDot.className = "w-2 h-2 rounded-full bg-theme mr-1.5";
-
-        const citiesInCountry = new Set(
-          appData.filter(i => i.country === selectedCountry).map(i => i.city).filter(Boolean)
-        );
-
-        citySelect.innerHTML = `<option value="">全部城市 (${citiesInCountry.size})</option>` + 
-          [...citiesInCountry].map(c => `<option value="${c}">${c}</option>`).join('');
-
-        if (selectedCountry === "日本") map.flyTo([35.68, 139.76], 7, { duration: 1.5 });
-        if (selectedCountry === "台灣") map.flyTo([24.0, 120.9], 8, { duration: 1.2 });
-      }
-      renderListView();
-    }
-
-    function onCityChange() {
-      const city = document.getElementById("filterCity").value;
-      const matches = appData.filter(i => i.city === city);
-      if (matches.length > 0) {
-        map.flyTo([matches[0].lat, matches[0].lng], 13, { duration: 1.2 });
-      } else if (TAIWAN_CITY_COORDS[city]) {
-        map.flyTo([TAIWAN_CITY_COORDS[city].lat, TAIWAN_CITY_COORDS[city].lng], 13, { duration: 1.2 });
-      }
-      renderListView();
-    }
-
-    function initTagFilter() {
-      const tagSet = new Set();
-      appData.forEach(item => (item.tags || []).forEach(t => tagSet.add(t)));
-      document.getElementById("filterTag").innerHTML = `<option value="">全部標籤 (${tagSet.size})</option>` + 
-        [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
-    }
-
-    let searchTimeout = null;
-    function handleSearch(val) {
-      clearTimeout(searchTimeout);
-      const card = document.getElementById("searchResultsCard");
-      const clearBtn = document.getElementById("clearSearchBtn");
-
-      if (!val.trim()) {
-        card.classList.add("hidden");
-        clearBtn.classList.add("hidden");
-        return;
-      }
-
-      clearBtn.classList.remove("hidden");
-      const v = val.toLowerCase();
-      const localMatches = appData.filter(s => 
-        s.name.toLowerCase().includes(v) || 
-        (s.address && s.address.toLowerCase().includes(v)) ||
-        (s.city && s.city.toLowerCase().includes(v))
-      );
-
-      searchTimeout = setTimeout(() => {
-        let html = "";
-        if (localMatches.length > 0) {
-          html += `<div class="text-[10px] font-bold text-theme-dark px-2 py-0.5">我的日記已記錄：</div>`;
-          localMatches.forEach(item => {
-            html += `
-              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="flex items-center justify-between p-2 hover:bg-purple-50/50 rounded-xl cursor-pointer">
-                <div>
-                  <h4 class="font-bold text-gray-800 text-xs">${item.name}</h4>
-                  <p class="text-[10px] text-gray-400 truncate">${item.city} · ${item.address || ''}</p>
-                </div>
-                <span class="text-[10px] bg-theme-light text-theme-dark px-2 py-0.5 rounded-full font-bold whitespace-nowrap">直達</span>
-              </div>
-            `;
-          });
-        }
-
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&countrycodes=tw,jp&limit=4&accept-language=zh-TW`)
-          .then(res => res.json())
-          .then(results => {
-            if (results && results.length > 0) {
-              html += `<div class="text-[10px] font-bold text-gray-400 px-2 py-0.5 mt-1">地圖新地點：</div>`;
-              results.forEach(place => {
-                const parts = place.display_name.split(',');
-                const title = parts[0];
-                const cleanAddress = parts.slice(1, 4).join(',');
-                html += `
-                  <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl">
-                    <div class="pr-2 truncate" onclick="quickFlyTo('${title.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})">
-                      <h4 class="font-bold text-gray-800 text-xs truncate">${title}</h4>
-                      <p class="text-[10px] text-gray-400 truncate">${cleanAddress}</p>
-                    </div>
-                    <button onclick="selectAndAddPlace('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="bg-theme text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
-                      記這家
-                    </button>
-                  </div>
-                `;
-              });
-            }
-
-            if (!html) html = `<div class="p-3 text-center text-xs text-gray-400">查無結果，建議直接在地圖點一下插旗！</div>`;
-            card.innerHTML = html;
-            card.classList.remove("hidden");
-          })
-          .catch(() => {
-            if (html) { card.innerHTML = html; card.classList.remove("hidden"); }
-          });
-      }, 350);
-    }
-
-    function quickFlyTo(storeName, lat, lng) {
-      document.getElementById("homeSearchInput").value = storeName;
-      document.getElementById("searchResultsCard").classList.add("hidden");
-      switchTab('map');
-      map.flyTo([lat, lng], 16, { duration: 1.2 });
-      setTimeout(() => {
-        markersLayer.eachLayer(layer => {
-          if (Math.abs(layer.getLatLng().lat - lat) < 0.001 && Math.abs(layer.getLatLng().lng - lng) < 0.001) {
-            layer.openPopup();
-          }
-        });
-      }, 1300);
-    }
-
-    function selectAndAddPlace(name, address, lat, lon) {
-      currentModalMode = 'CREATE';
-      pendingLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
-      
-      document.getElementById("modalMainTitle").innerText = "記錄新店家";
-      document.getElementById("inputStoreName").value = name;
-      document.getElementById("inputStoreAddress").value = address;
-      document.getElementById("inputCountry").value = "台灣";
-      document.getElementById("inputCity").value = "新竹市";
-      document.getElementById("geoStatusText").innerText = `✅ 已鎖定座標 (${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)})`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-green-600 font-bold mt-1";
-      document.getElementById("inputTags").value = "美食";
-      document.getElementById("inputReview").value = "";
-      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
-      document.getElementById("submitBtnText").innerText = "存入美食日記";
-      document.getElementById("modalDeleteBtn").classList.add("hidden");
-      removeSelectedPhoto();
-      setRating(4.5);
-      
-      document.getElementById("searchResultsCard").classList.add("hidden");
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
-    function clearSearch() {
-      document.getElementById("homeSearchInput").value = "";
-      handleSearch("");
-    }
-
-    function buildStarsUI() {
-      const container = document.getElementById("starContainer");
-      container.innerHTML = "";
-      for (let i = 1; i <= 5; i++) {
-        const star = document.createElement("span");
-        star.className = "inline-block transition active:scale-125";
-        star.onclick = (e) => handleStarClick(e, i);
-        star.id = `star_${i}`;
-        container.appendChild(star);
-      }
-      updateStarsDisplay(currentRatingValue);
-    }
-
-    function handleStarClick(e, starIndex) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const isLeft = (e.clientX - rect.left) < (rect.width / 2);
-      let val = isLeft ? (starIndex - 0.5) : starIndex;
-      if (val < 1.0) val = 1.0;
-      setRating(val);
-    }
-
-    function handleNumberInput(val) {
-      let num = parseFloat(val);
-      if (isNaN(num)) return;
-      if (num > 5.0) num = 5.0;
-      if (num < 1.0) num = 1.0;
-      num = Math.round(num * 2) / 2;
-      setRating(num, false);
-    }
-
-    function setRating(val, updateInputBox = true) {
-      currentRatingValue = val;
-      if (updateInputBox) document.getElementById("inputRatingNumber").value = val.toFixed(1);
-      document.getElementById("starScoreLabel").innerText = `${val.toFixed(1)} 分`;
-      updateStarsDisplay(val);
-    }
-
-    function updateStarsDisplay(score) {
-      for (let i = 1; i <= 5; i++) {
-        const star = document.getElementById(`star_${i}`);
-        if (!star) continue;
-        if (score >= i) star.innerHTML = '<i class="fa-solid fa-star text-amber-400"></i>';
-        else if (score >= i - 0.5) star.innerHTML = '<i class="fa-solid fa-star-half-stroke text-amber-400"></i>';
-        else star.innerHTML = '<i class="fa-regular fa-star text-gray-300"></i>';
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById("inputCoords").value = text;
+        handleCoordsInput(text);
+      } catch(e) {
+        alert("請長按輸入框手動貼上座標！");
       }
     }
 
-    function handlePhotoSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let w = img.width, h = img.height;
-          const maxDim = 900;
-          if (w > maxDim) {
-            h = Math.round((maxDim / w) * h);
-            w = maxDim;
-          }
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, w, h);
-          uploadedPhotoBase64 = canvas.toDataURL("image/jpeg", 0.75);
-
-          document.getElementById("previewImg").src = uploadedPhotoBase64;
-          document.getElementById("uploadBox").classList.add("hidden");
-          document.getElementById("photoPreviewArea").classList.remove("hidden");
-        };
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function removeSelectedPhoto() {
-      uploadedPhotoBase64 = "";
-      document.getElementById("inputPhoto").value = "";
-      document.getElementById("uploadBox").classList.remove("hidden");
-      document.getElementById("photoPreviewArea").classList.add("hidden");
-    }
-
-    function openManualAddModal() {
-      currentModalMode = 'CREATE';
-      pendingLocation = null; // 清空舊座標，絕不重用舊的台北點
-      document.getElementById("modalMainTitle").innerText = "記錄新店家";
-      document.getElementById("inputStoreName").value = "";
-      document.getElementById("inputCountry").value = "台灣";
-      document.getElementById("inputCity").value = "新竹市";
-      document.getElementById("inputStoreAddress").value = "";
-      document.getElementById("geoStatusText").innerText = "💡 填好城市與地址後點「驗證定位」";
-      document.getElementById("geoStatusText").className = "text-[10px] text-gray-500 font-medium mt-1";
-      document.getElementById("inputTags").value = "";
-      document.getElementById("inputReview").value = "";
-      document.getElementById("inputCost").value = "";
-      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
-      document.getElementById("submitBtnText").innerText = "存入美食日記";
-      document.getElementById("modalDeleteBtn").classList.add("hidden");
-      removeSelectedPhoto();
-      setRating(4.5);
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
-    function openRevisitModal(storeId) {
-      const store = appData.find(s => s.id === storeId);
-      if (!store) return;
-      currentModalMode = 'REVISIT';
-      editingStoreId = storeId;
-      pendingLocation = { lat: store.lat, lng: store.lng };
-      const nextVisitNum = store.visits.length + 1;
-
-      document.getElementById("modalMainTitle").innerText = `第 ${nextVisitNum} 次再訪美食日記 ✍️`;
-      document.getElementById("inputStoreName").value = store.name;
-      document.getElementById("inputCountry").value = store.country || "台灣";
-      document.getElementById("inputCity").value = store.city || "";
-      document.getElementById("inputStoreAddress").value = store.address || "";
-      document.getElementById("geoStatusText").innerText = `✅ 已綁定位置 (${store.lat.toFixed(4)}, ${store.lng.toFixed(4)})`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-green-600 font-bold mt-1";
-      document.getElementById("inputTags").value = (store.tags || []).join(', ');
-      document.getElementById("inputReview").value = "";
-      document.getElementById("inputCost").value = store.visits[0]?.cost || "";
-      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
-      document.getElementById("submitBtnText").innerText = `儲存第 ${nextVisitNum} 次再訪紀錄`;
-      document.getElementById("modalDeleteBtn").classList.add("hidden");
-      removeSelectedPhoto();
-      setRating(5.0);
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
-    function openEditModal(storeId, visitId) {
-      const store = appData.find(s => s.id === storeId);
-      if (!store) return;
-      const visitIndex = store.visits.findIndex(v => v.visitId === visitId);
-      const visit = store.visits[visitIndex] || store.visits[0];
-      if (!visit) return;
-
-      currentModalMode = 'EDIT';
-      editingStoreId = storeId;
-      editingVisitId = visit.visitId;
-      pendingLocation = { lat: store.lat, lng: store.lng };
-
-      const actualVisitNum = store.visits.length - visitIndex;
-      const visitLabel = actualVisitNum === 1 ? "初訪筆記" : `第 ${actualVisitNum} 次拜訪筆記`;
-
-      document.getElementById("modalMainTitle").innerText = `編輯${visitLabel} ✏️`;
-      document.getElementById("inputStoreName").value = store.name;
-      document.getElementById("inputCountry").value = store.country || "台灣";
-      document.getElementById("inputCity").value = store.city || "";
-      document.getElementById("inputStoreAddress").value = store.address || "";
-      document.getElementById("geoStatusText").innerText = `✅ 點選驗證可將此店搬移至新地址`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-gray-500 font-bold mt-1";
-      document.getElementById("inputTags").value = (store.tags || []).join(', ');
-      document.getElementById("inputDate").value = visit.date;
-      document.getElementById("inputCost").value = visit.cost || "";
-      document.getElementById("inputReview").value = visit.review || "";
-      document.getElementById("inputRevisit").checked = !!visit.revisit;
-      document.getElementById("submitBtnText").innerText = `確認儲存修改 (${visitLabel})`;
-
-      document.getElementById("modalDeleteBtn").classList.remove("hidden");
-
-      setRating(visit.rating);
-
-      if (visit.photo) {
-        uploadedPhotoBase64 = visit.photo;
-        document.getElementById("previewImg").src = visit.photo;
-        document.getElementById("uploadBox").classList.add("hidden");
-        document.getElementById("photoPreviewArea").classList.remove("hidden");
-      } else {
-        removeSelectedPhoto();
-      }
-
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
-    function closeModal() { document.getElementById("entryModal").classList.add("hidden"); }
-    function appendTag(t) {
-      const el = document.getElementById("inputTags");
-      el.value = el.value ? el.value + ", " + t : t;
-    }
-
-    // 儲存邏輯 (智能解析座標，保證不跑偏)
+    // ========== 儲存邏輯 ==========
     async function confirmSaveRecord() {
       const name = document.getElementById("inputStoreName").value.trim();
       const country = document.getElementById("inputCountry").value.trim() || "台灣";
@@ -957,12 +477,21 @@
 
       if (!name) return alert("請輸入店家名稱！");
 
+      // 決定最終坐標
       let finalCoords = pendingLocation;
 
-      // 如果尚未透過點地圖定位，執行智能縣市座標解析
+      // 如果使用者沒貼座標也沒選點，依城市自動對齊（新竹就在新竹中心）
       if (!finalCoords) {
-        document.getElementById("submitBtnText").innerText = "鎖定精準位置中...";
-        finalCoords = await resolveSmartCoordinates(country, city, address);
+        for (const c in TAIWAN_CITIES) {
+          if (city.includes(c) || address.includes(c)) {
+            finalCoords = { lat: TAIWAN_CITIES[c][0], lng: TAIWAN_CITIES[c][1] };
+            break;
+          }
+        }
+      }
+
+      if (!finalCoords) {
+        finalCoords = { lat: 24.8138, lng: 120.9675 }; // 預設新竹
       }
 
       if (currentModalMode === 'EDIT') {
@@ -1026,47 +555,46 @@
       }
 
       closeModal();
-      clearSearch();
       refreshViews();
-
-      // 地圖起飛平移至精確位置 (新竹就直飛新竹)
-      map.flyTo([finalCoords.lat, finalCoords.lng], 15, { duration: 1.2 });
+      map.flyTo([finalCoords.lat, finalCoords.lng], 16);
     }
 
-    async function deleteRestaurant(id) {
-      const store = appData.find(s => s.id === id);
-      const name = store ? `「${store.name}」` : "這家餐廳";
-      if (confirm(`確定要徹底刪除 ${name} 及其所有拜訪紀錄嗎？此動作無法復原。`)) {
-        await dbDelete(id);
-        appData = appData.filter(i => i.id !== id);
-        refreshViews();
-        alert("已成功刪除該店家與所有紀錄！");
-      }
+    // ========== 介面更新 ==========
+    function refreshViews() {
+      initCountryFilter();
+      initTagFilter();
+      renderMarkers();
+      renderListView();
     }
 
-    async function deleteSingleVisit(storeId, visitId) {
-      const store = appData.find(s => s.id === storeId);
-      if (!store) return;
-
-      if (store.visits.length <= 1) {
-        if (confirm(`這是「${store.name}」唯一的紀錄，刪除後將會一併移除該店家。確定要刪除嗎？`)) {
-          await deleteRestaurant(storeId);
-        }
-        return;
-      }
-
-      if (confirm("確定要刪除這一次的拜訪筆記嗎？其他次拜訪將會保留。")) {
-        store.visits = store.visits.filter(v => v.visitId !== visitId);
-        await dbPut(store);
-        refreshViews();
-        alert("已成功刪除該次拜訪筆記！");
-      }
+    function initCountryFilter() {
+      const countrySet = new Set(appData.map(i => i.country).filter(Boolean));
+      document.getElementById("filterCountry").innerHTML = `<option value="">全部國家 (${countrySet.size})</option>` + 
+        [...countrySet].map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    async function deleteCurrentEditingVisit() {
-      if (!editingStoreId || !editingVisitId) return;
-      closeModal();
-      await deleteSingleVisit(editingStoreId, editingVisitId);
+    function onCountryChange() {
+      const country = document.getElementById("filterCountry").value;
+      const citySelect = document.getElementById("filterCity");
+      if (!country) {
+        citySelect.disabled = true;
+        citySelect.innerHTML = `<option value="">請先選擇國家</option>`;
+      } else {
+        citySelect.disabled = false;
+        const cities = new Set(appData.filter(i => i.country === country).map(i => i.city).filter(Boolean));
+        citySelect.innerHTML = `<option value="">全部城市 (${cities.size})</option>` + 
+          [...cities].map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+      renderListView();
+    }
+
+    function onCityChange() { renderListView(); }
+
+    function initTagFilter() {
+      const tagSet = new Set();
+      appData.forEach(item => (item.tags || []).forEach(t => tagSet.add(t)));
+      document.getElementById("filterTag").innerHTML = `<option value="">全部標籤 (${tagSet.size})</option>` + 
+        [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
     function renderMarkers() {
@@ -1074,56 +602,33 @@
       appData.forEach(item => {
         const latest = item.visits[0];
         if (!latest) return;
-        const isLow = latest.rating < 3.0;
-
         const icon = L.divIcon({
           className: '',
-          html: `
-            <div class="custom-marker ${isLow ? 'low-score' : ''}">
-              <span class="custom-marker-text">${latest.rating.toFixed(1)}</span>
-            </div>
-          `,
+          html: `<div class="custom-marker ${latest.rating < 3 ? 'low-score':''}"><span class="custom-marker-text">${latest.rating.toFixed(1)}</span></div>`,
           iconSize: [38, 48],
           iconAnchor: [19, 48],
           popupAnchor: [0, -42]
         });
 
         const revisitBadge = latest.revisit
-          ? `<span style="color:#DC2626; font-weight:900; background:#FEE2E2; padding:2px 6px; border-radius:6px; border:1px solid #FCA5A5;">推薦再訪 👍</span>`
+          ? `<span style="color:#DC2626; font-weight:900; background:#FEE2E2; padding:2px 6px; border-radius:6px;">推薦再訪 👍</span>`
           : `<span style="color:#6B7280; font-weight:bold; background:#F3F4F6; padding:2px 6px; border-radius:6px;">不再訪 ❌</span>`;
 
         const content = `
           <div style="font-family: system-ui; width: 220px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <span style="font-size:10px; background:#F2F0FB; color:#52479B; padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:10px; background:#F2F0FB; color:#52479B; padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country} · ${item.city}</span>
               ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FEF3C7; color:#D97706; padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
             </div>
             ${latest.photo ? `<img src="${latest.photo}" style="width:100%; height:95px; object-fit:cover; border-radius:10px; margin-bottom:6px;" />` : ''}
-            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:#111;">${item.name}</h4>
-            <div style="font-size:11px; margin-bottom:4px;">
-              <b style="color:#9C95DB; font-size:13px;">★ ${latest.rating.toFixed(1)}</b> 
-              ${revisitBadge}
-            </div>
-            
-            <div style="background:#F9FAFB; padding:6px; border-radius:8px; border:1px solid #F3F4F6; margin:6px 0;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                <span style="font-size:10px; color:#6B7280; font-weight:bold;">最新筆記 (${latest.date})</span>
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" style="background:#FFFFFF; color:#52479B; border:1px solid #E9D5FF; border-radius:4px; padding:1px 5px; font-size:10px; font-weight:bold; cursor:pointer;">
-                  ✏️ 編輯
-                </button>
-              </div>
-              <p style="font-size:11px; color:#4B5563; margin:0; line-height:1.4;">${latest.review || '無心得文字'}</p>
-            </div>
-
-            <button onclick="openRevisitModal('${item.id}')" style="width:100%; background:#9C95DB; color:white; border:none; border-radius:8px; padding:5px 0; font-size:11px; font-weight:bold; cursor:pointer;">
-              ＋ 寫新一次再訪日記
-            </button>
+            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px;">${item.name}</h4>
+            <div style="font-size:11px; margin-bottom:4px;"><b style="color:#9C95DB; font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
+            <p style="font-size:11px; color:#555; margin:0 0 6px;">${latest.review || '無心得'}</p>
+            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" style="width:100%; background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold; cursor:pointer;">✏️ 編輯或重新定位</button>
           </div>
         `;
 
-        L.marker([item.lat, item.lng], { icon: icon, recordId: item.id })
-          .bindPopup(content)
-          .addTo(markersLayer);
+        L.marker([item.lat, item.lng], { icon: icon, recordId: item.id }).bindPopup(content).addTo(markersLayer);
       });
     }
 
@@ -1132,228 +637,164 @@
       const cityFilter = document.getElementById("filterCity").value;
       const tagFilter = document.getElementById("filterTag").value;
       const ratingFilter = document.getElementById("filterRating").value;
-      const sortOrder = document.getElementById("sortOrder").value;
 
       let list = [...appData];
-
       if (countryFilter) list = list.filter(i => i.country === countryFilter);
       if (cityFilter) list = list.filter(i => i.city === cityFilter);
       if (tagFilter) list = list.filter(i => (i.tags || []).includes(tagFilter));
-
       if (ratingFilter === "gte_4.5") list = list.filter(i => i.visits[0]?.rating >= 4.5);
-      else if (ratingFilter === "gte_4.0") list = list.filter(i => i.visits[0]?.rating >= 4.0);
-      else if (ratingFilter === "gte_3.0") list = list.filter(i => i.visits[0]?.rating >= 3.0);
       else if (ratingFilter === "lt_3.0") list = list.filter(i => i.visits[0]?.rating < 3.0);
-
-      list.sort((a, b) => {
-        const ra = a.visits[0]?.rating || 0;
-        const rb = b.visits[0]?.rating || 0;
-        const da = a.visits[0]?.date || "";
-        const db = b.visits[0]?.date || "";
-
-        if (sortOrder === "rating_desc") return rb - ra;
-        if (sortOrder === "rating_asc") return ra - rb;
-        if (sortOrder === "visits_desc") return b.visits.length - a.visits.length;
-        if (sortOrder === "date_desc") return new Date(db) - new Date(da);
-        return 0;
-      });
 
       document.getElementById("totalCount").innerText = list.length;
       const container = document.getElementById("restaurantCards");
 
       if (!list.length) {
-        container.innerHTML = `<div class="text-center text-gray-400 py-12 text-xs">查無符合條件的美食日記</div>`;
+        container.innerHTML = `<div class="text-center text-gray-400 py-12 text-xs">查無美食日記</div>`;
         return;
       }
 
       container.innerHTML = list.map(item => {
         const latest = item.visits[0];
-        const isMulti = item.visits.length > 1;
-
         return `
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-150 flex flex-col space-y-3 transition">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-150 flex flex-col space-y-2.5">
             <div class="flex justify-between items-start">
               <div>
-                <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
-                  <span class="bg-theme-light text-theme-dark text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country || ''} · ${item.city || ''}</span>
-                  <h3 class="font-bold text-gray-900 text-sm">${item.name}</h3>
-                  ${isMulti ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-extrabold flex items-center"><i class="fa-solid fa-rotate-right mr-1 text-[8px]"></i>已訪 ${item.visits.length} 次</span>` : ''}
-                </div>
-                <p class="text-[11px] text-gray-400 mt-1">${item.address || '無詳細地址'}</p>
+                <span class="bg-theme-light text-theme-dark text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country} · ${item.city}</span>
+                <h3 class="font-bold text-gray-900 text-sm mt-0.5">${item.name}</h3>
+                <p class="text-[11px] text-gray-400">${item.address || '無詳細地址'}</p>
               </div>
-
-              <div>
-                ${latest.revisit 
-                  ? '<span class="bg-red-50 text-red-600 border border-red-200 text-[11px] px-2.5 py-1 rounded-full font-black tracking-wide shadow-xs whitespace-nowrap">推薦再訪 👍</span>' 
-                  : '<span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">不再回訪</span>'}
-              </div>
-            </div>
-
-            ${latest.photo ? `<img src="${latest.photo}" class="w-full h-40 object-cover rounded-xl" />` : ''}
-
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200/80 space-y-2">
-              <div class="flex justify-between items-center text-xs border-b border-gray-200/60 pb-1.5">
-                <div class="flex items-center space-x-2">
-                  <span class="font-bold text-gray-800 flex items-center">
-                    <i class="fa-solid fa-comment-dots text-theme mr-1"></i>
-                    ${isMulti ? `第 ${item.visits.length} 次拜訪` : '初訪筆記'} 
-                    <span class="text-[11px] text-gray-400 font-normal ml-1">(${latest.date})</span>
-                  </span>
-                  <span class="font-black text-amber-500 text-xs">★ ${latest.rating.toFixed(1)}</span>
-                </div>
-                
-                <div class="flex items-center space-x-1.5">
-                  <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="text-theme-dark bg-white hover:bg-theme hover:text-white border border-purple-200 px-2 py-0.5 rounded-lg text-[11px] font-bold transition flex items-center shadow-xs active:scale-95">
-                    <i class="fa-solid fa-pen mr-1 text-[10px]"></i> 編輯
-                  </button>
-                  <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次紀錄" class="text-gray-400 hover:text-red-500 p-1 text-xs">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
-              </div>
-
-              <p class="text-xs text-gray-600 leading-relaxed font-medium">"${latest.review || '無心得'}"</p>
-            </div>
-
-            ${isMulti ? `
-              <details class="text-xs text-gray-600 bg-purple-50/40 border border-purple-100 rounded-xl p-2.5">
-                <summary class="font-bold text-theme-dark cursor-pointer select-none">
-                  📜 查看過往全部 ${item.visits.length} 次拜訪歷史回顧
-                </summary>
-                <div class="mt-2 space-y-2 pt-2 border-t border-purple-100">
-                  ${item.visits.map((v, idx) => {
-                    const visitNum = item.visits.length - idx;
-                    const isLatest = idx === 0;
-                    return `
-                      <div class="bg-white p-2.5 rounded-xl border border-purple-100/70 space-y-1.5">
-                        <div class="flex justify-between items-center text-[11px] border-b border-gray-100 pb-1">
-                          <div class="flex items-center space-x-1.5">
-                            <span class="font-bold text-gray-800">${visitNum === 1 ? '初訪' : `第 ${visitNum} 次`} (${v.date})</span>
-                            <span class="font-bold text-amber-500">★ ${v.rating.toFixed(1)}</span>
-                            ${isLatest ? '<span class="bg-purple-100 text-theme-dark text-[9px] px-1.5 py-0.2 rounded font-bold">最新</span>' : ''}
-                          </div>
-                          
-                          <div class="flex items-center space-x-1.5">
-                            <button onclick="openEditModal('${item.id}', '${v.visitId}')" class="text-gray-500 hover:text-theme bg-gray-50 hover:bg-purple-50 border border-gray-200 px-2 py-0.5 rounded-md text-[10px] font-bold transition flex items-center active:scale-95">
-                              <i class="fa-solid fa-pen mr-1 text-[9px]"></i> 編輯
-                            </button>
-                            <button onclick="deleteSingleVisit('${item.id}', '${v.visitId}')" title="刪除本次紀錄" class="text-gray-400 hover:text-red-500 p-0.5 text-xs">
-                              <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                          </div>
-                        </div>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">${v.review || ''}</p>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </details>
-            ` : ''}
-
-            <div class="flex flex-wrap gap-1">
-              ${(item.tags || []).map(t => `<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">#${t}</span>`).join('')}
-            </div>
-
-            <div class="flex justify-between items-center text-[11px] text-gray-400 pt-1 border-t border-gray-150">
-              <div class="flex items-center space-x-3">
-                <span>均消 ${latest.cost ? `$${latest.cost}` : '未記'}</span>
-                <button onclick="deleteRestaurant('${item.id}')" class="text-gray-400 hover:text-red-500 flex items-center space-x-1 text-xs">
-                  <i class="fa-solid fa-trash-can"></i>
-                  <span>刪除店家</span>
-                </button>
-              </div>
-              <button onclick="openRevisitModal('${item.id}')" class="bg-theme-light hover:bg-theme text-theme-dark hover:text-white px-3 py-1 rounded-full font-bold transition flex items-center active:scale-95 shadow-xs">
-                <i class="fa-solid fa-pen-nib mr-1"></i> ＋ 寫新一次再訪
+              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="text-theme-dark bg-purple-50 border border-purple-200 px-2 py-1 rounded-lg text-xs font-bold">
+                ✏️ 編輯/換座標
               </button>
+            </div>
+            ${latest.photo ? `<img src="${latest.photo}" class="w-full h-36 object-cover rounded-xl" />` : ''}
+            <div class="bg-gray-50 p-2.5 rounded-xl text-xs text-gray-600">
+              <span class="font-bold text-amber-500 mr-1">★ ${latest.rating.toFixed(1)}</span>
+              "${latest.review || '無心得'}"
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function switchTab(tab) {
-      const mapView = document.getElementById("mapView");
-      const listView = document.getElementById("listView");
-      const tabMapBtn = document.getElementById("tabMapBtn");
-      const tabListBtn = document.getElementById("tabListBtn");
+    // ========== 彈窗輔助 ==========
+    function openManualAddModal() {
+      currentModalMode = 'CREATE';
+      pendingLocation = null;
+      document.getElementById("modalMainTitle").innerText = "記錄新店家";
+      document.getElementById("inputStoreName").value = "";
+      document.getElementById("inputCountry").value = "台灣";
+      document.getElementById("inputCity").value = "新竹市";
+      document.getElementById("inputStoreAddress").value = "";
+      document.getElementById("inputCoords").value = "";
+      document.getElementById("geoStatusText").innerText = "可貼上 Google 座標或點選地圖選點";
+      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-gray-400";
+      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
 
+    function openEditModal(storeId, visitId) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      const visit = store.visits.find(v => v.visitId === visitId) || store.visits[0];
+
+      currentModalMode = 'EDIT';
+      editingStoreId = storeId;
+      editingVisitId = visit.visitId;
+      pendingLocation = { lat: store.lat, lng: store.lng };
+
+      document.getElementById("modalMainTitle").innerText = `編輯與重新定位 ✏️`;
+      document.getElementById("inputStoreName").value = store.name;
+      document.getElementById("inputCountry").value = store.country || "台灣";
+      document.getElementById("inputCity").value = store.city || "新竹市";
+      document.getElementById("inputStoreAddress").value = store.address || "";
+      document.getElementById("inputCoords").value = `${store.lat.toFixed(5)}, ${store.lng.toFixed(5)}`;
+      document.getElementById("geoStatusText").innerText = `目前位置：${store.lat.toFixed(4)}, ${store.lng.toFixed(4)}`;
+      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-theme-dark";
+      document.getElementById("inputReview").value = visit.review || "";
+      document.getElementById("inputCost").value = visit.cost || "";
+      document.getElementById("inputDate").value = visit.date;
+      document.getElementById("modalDeleteBtn").classList.remove("hidden");
+
+      setRating(visit.rating);
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
+
+    function closeModal() { document.getElementById("entryModal").classList.add("hidden"); }
+
+    function buildStarsUI() {
+      const container = document.getElementById("starContainer");
+      container.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement("span");
+        star.className = "inline-block cursor-pointer";
+        star.onclick = (e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          let val = (e.clientX - rect.left) < (rect.width / 2) ? i - 0.5 : i;
+          setRating(val);
+        };
+        star.id = `star_${i}`;
+        container.appendChild(star);
+      }
+      setRating(4.5);
+    }
+
+    function setRating(val) {
+      currentRatingValue = val;
+      document.getElementById("inputRatingNumber").value = val.toFixed(1);
+      document.getElementById("starScoreLabel").innerText = `${val.toFixed(1)} 分`;
+      for (let i = 1; i <= 5; i++) {
+        const s = document.getElementById(`star_${i}`);
+        if (!s) continue;
+        if (val >= i) s.innerHTML = '<i class="fa-solid fa-star text-amber-400"></i>';
+        else if (val >= i - 0.5) s.innerHTML = '<i class="fa-solid fa-star-half-stroke text-amber-400"></i>';
+        else s.innerHTML = '<i class="fa-regular fa-star text-gray-300"></i>';
+      }
+    }
+
+    function handleNumberInput(val) {
+      let num = parseFloat(val) || 1.0;
+      setRating(Math.round(num * 2) / 2);
+    }
+
+    function handlePhotoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedPhotoBase64 = e.target.result;
+        document.getElementById("previewImg").src = uploadedPhotoBase64;
+        document.getElementById("uploadBox").classList.add("hidden");
+        document.getElementById("photoPreviewArea").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeSelectedPhoto() {
+      uploadedPhotoBase64 = "";
+      document.getElementById("uploadBox").classList.remove("hidden");
+      document.getElementById("photoPreviewArea").classList.add("hidden");
+    }
+
+    function switchTab(tab) {
       if (tab === 'map') {
-        mapView.classList.remove("hidden");
-        listView.classList.add("hidden");
-        tabMapBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
-        tabListBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
+        document.getElementById("mapView").classList.remove("hidden");
+        document.getElementById("listView").classList.add("hidden");
         setTimeout(() => map.invalidateSize(), 150);
       } else {
-        mapView.classList.add("hidden");
-        listView.classList.remove("hidden");
-        tabListBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
-        tabMapBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
+        document.getElementById("mapView").classList.add("hidden");
+        document.getElementById("listView").classList.remove("hidden");
         renderListView();
       }
     }
 
     function locateUser() {
-      if (!navigator.geolocation) return alert("您的裝置不支援 GPS 定位");
-      const btn = document.querySelector('button[title="定位我的位置"]');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-theme"></i>';
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          btn.innerHTML = '<i class="fa-solid fa-crosshairs text-theme text-lg"></i>';
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          if (userLocationMarker) map.removeLayer(userLocationMarker);
-          userLocationMarker = L.circleMarker([lat, lng], {
-            radius: 8, fillColor: "#9C95DB", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
-          }).addTo(map).bindPopup("📍 您的目前位置").openPopup();
-          map.flyTo([lat, lng], 15, { duration: 1.5 });
-        },
-        () => {
-          btn.innerHTML = '<i class="fa-solid fa-crosshairs text-lg"></i>';
-          alert("定位失敗，請確認已開啟定位權限！");
-        },
-        { enableHighAccuracy: true, timeout: 8000 }
-      );
-    }
-
-    function toggleBackupMenu() {
-      document.getElementById("backupMenu").classList.toggle("hidden");
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `我的美食日記備份_${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      toggleBackupMenu();
-    }
-
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const list = JSON.parse(e.target.result);
-          if (Array.isArray(list)) {
-            for (const item of list) {
-              await dbPut(item);
-            }
-            appData = await dbGetAll();
-            refreshViews();
-            alert(`✅ 還原成功！已匯入 ${list.length} 間餐廳紀錄。`);
-          }
-        } catch {
-          alert("匯入失敗，請確認檔案格式是否正確。");
-        }
-      };
-      reader.readAsText(file);
-      toggleBackupMenu();
+      navigator.geolocation.getCurrentPosition((pos) => {
+        map.flyTo([pos.coords.latitude, pos.coords.longitude], 15);
+      });
     }
 
     window.onload = initApp;
   </script>
 </body>
-  </html>
+</html>
