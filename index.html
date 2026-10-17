@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>我的美食日記</title>
 
   <!-- PWA 設定 -->
@@ -20,7 +20,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body { -webkit-tap-highlight-color: transparent; }
+    body { 
+      -webkit-tap-highlight-color: transparent;
+    }
 
     :root {
       --theme-color: #9C95DB;
@@ -40,6 +42,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* 防止地圖容器遮擋下方按鈕 */
     #mapView, #map {
       width: 100% !important;
       height: 100% !important;
@@ -49,6 +52,12 @@
       left: 0;
       right: 0;
       bottom: 0;
+    }
+
+    /* 確保觸控按鈕在 Android 與三星瀏覽器能被精準感應 */
+    .touch-btn {
+      touch-action: manipulation;
+      cursor: pointer;
     }
 
     .custom-marker {
@@ -74,43 +83,43 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col h-screen overflow-hidden select-none">
+<body class="bg-gray-50 text-gray-800 flex flex-col h-screen overflow-hidden">
 
   <!-- 頂部導覽列 -->
-  <header class="bg-white border-b border-gray-150 px-4 py-2.5 flex items-center justify-between z-10 shadow-sm relative">
+  <header class="bg-white border-b border-gray-150 px-4 py-2.5 flex items-center justify-between z-20 shadow-sm relative flex-shrink-0">
     <div class="flex items-center space-x-2.5">
       <div class="w-8 h-8 rounded-full bg-theme-light flex items-center justify-center">
         <i class="fa-solid fa-book-bookmark text-theme text-base"></i>
       </div>
       <div>
         <h1 class="text-base font-bold text-gray-900 leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-gray-400">私人專屬 · 隨時可刪改</p>
+        <p class="text-[10px] text-gray-400">私人專屬 · 跨裝置隨行</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
+      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
       </button>
-      <button onclick="openManualAddModal()" class="bg-theme bg-theme-hover text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-md active:scale-95 transition">
+      <button onclick="openManualAddModal()" class="touch-btn bg-theme bg-theme-hover text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-md active:scale-95 transition">
         <i class="fa-solid fa-plus mr-1"></i> 寫一篇
       </button>
     </div>
   </header>
 
   <!-- 備份與匯入選單 -->
-  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-gray-150 p-2.5 z-[1100] w-56 text-xs space-y-1.5">
-    <label class="w-full text-left py-2 px-2.5 bg-purple-50 hover:bg-theme-light text-theme-dark rounded-xl flex items-center font-bold cursor-pointer transition">
+  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-gray-150 p-2.5 z-[1500] w-56 text-xs space-y-1.5">
+    <label class="touch-btn w-full text-left py-2 px-2.5 bg-purple-50 hover:bg-theme-light text-theme-dark rounded-xl flex items-center font-bold cursor-pointer transition">
       <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
       <input type="file" id="importGoogleMapsInput" accept=".json,.geojson" onchange="importGoogleMapsData(event)" class="hidden" />
     </label>
     
     <div class="border-t border-gray-100 my-1"></div>
 
-    <button onclick="exportData()" class="w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700">
+    <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700">
       <i class="fa-solid fa-download mr-2 text-gray-400"></i> 匯出本機備份檔
     </button>
-    <label class="w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700 cursor-pointer">
+    <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700 cursor-pointer">
       <i class="fa-solid fa-upload mr-2 text-gray-400"></i> 還原備份檔
       <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden" />
     </label>
@@ -120,18 +129,21 @@
   <main class="flex-1 relative w-full h-full overflow-hidden">
     <!-- 地圖 View -->
     <div id="mapView" class="w-full h-full relative">
-      <div class="absolute top-3 left-3 right-3 z-[500] max-w-md mx-auto">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 flex items-center space-x-2">
+      <!-- 懸浮搜尋列 (層級提升至 z-[900]) -->
+      <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-150 p-2 flex items-center space-x-2">
           <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
           <input type="text" id="homeSearchInput" placeholder="搜尋日記店名、路名、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-gray-700" />
-          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
+          <button onclick="clearSearch()" id="clearSearchBtn" class="touch-btn hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
+        <!-- 搜尋結果下拉清單 -->
         <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-2xl border border-gray-150 max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <button onclick="locateUser()" title="定位我的位置" class="absolute bottom-6 right-4 z-[500] bg-white text-gray-700 hover:text-theme w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-gray-200 active:scale-90 transition">
+      <!-- GPS 定位按鈕 -->
+      <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-6 right-4 z-[900] bg-white text-gray-700 hover:text-theme w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-gray-200 active:scale-90 transition">
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
 
@@ -139,7 +151,7 @@
     </div>
 
     <!-- 列表 View -->
-    <div id="listView" class="hidden w-full h-full bg-gray-50 overflow-y-auto px-4 py-3 pb-24 absolute inset-0 z-10">
+    <div id="listView" class="hidden w-full h-full bg-gray-50 overflow-y-auto px-4 py-3 pb-28 absolute inset-0 z-10">
       <div class="bg-white p-3.5 rounded-2xl shadow-sm mb-3 space-y-2.5 border border-gray-150">
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -179,27 +191,27 @@
     </div>
   </main>
 
-  <!-- 底部 Tab 列 -->
-  <nav class="bg-white border-t border-gray-200 px-8 py-2 flex justify-around items-center z-10 shadow-lg relative">
-    <button onclick="switchTab('map')" id="tabMapBtn" class="flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition">
+  <!-- 底部 Tab 列：關鍵修復！層級提升至 z-[950]，加入 pointer-events-auto 與安全邊距 -->
+  <nav class="bg-white border-t border-gray-200 px-8 py-2.5 flex justify-around items-center z-[950] shadow-lg relative flex-shrink-0 pointer-events-auto pb-[max(0.6rem,env(safe-area-inset-bottom))]">
+    <button onclick="switchTab('map')" id="tabMapBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4">
       <i class="fa-solid fa-map-location-dot text-lg mb-0.5"></i>
       地圖模式
     </button>
-    <button onclick="switchTab('list')" id="tabListBtn" class="flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition">
+    <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4">
       <i class="fa-solid fa-book text-lg mb-0.5"></i>
       日記列表 (<span id="totalCount">0</span>)
     </button>
   </nav>
 
   <!-- 彈跳表單視窗 -->
-  <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[92vh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-gray-150 flex justify-between items-center bg-gray-50">
         <div>
           <h3 class="font-bold text-gray-800 text-sm" id="modalMainTitle">記錄美食日記</h3>
           <p class="text-[10px] text-gray-400">智慧查找 · 支援座標修正</p>
         </div>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        <button onclick="closeModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
 
       <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
@@ -226,7 +238,7 @@
           </div>
 
           <!-- 方法一：系統查找 -->
-          <button type="button" onclick="autoSearchRestaurantLocation()" class="w-full bg-theme hover:bg-theme-hover text-white py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center space-x-1.5 active:scale-95">
+          <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme hover:bg-theme-hover text-white py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：系統直接在地圖查找此餐廳</span>
           </button>
@@ -235,20 +247,20 @@
           <div class="bg-white/90 p-2.5 rounded-xl border border-purple-200 space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="font-bold text-theme-dark text-[11px]">📍 方法二：位置錯誤？輸入座標修正</label>
-              <button type="button" onclick="pasteFromClipboard()" class="text-theme font-bold text-[10px] underline">
+              <button type="button" onclick="pasteFromClipboard()" class="touch-btn text-theme font-bold text-[10px] underline">
                 貼上剪貼簿
               </button>
             </div>
             <div class="flex items-center space-x-1.5">
               <input type="text" id="inputCoords" placeholder="輸入經緯度，例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
-              <button type="button" onclick="applyManualCoords()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
+              <button type="button" onclick="applyManualCoords()" class="touch-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
                 定位
               </button>
             </div>
           </div>
 
           <!-- 方法三：現場定位 -->
-          <button type="button" onclick="autoLocateCurrentSpot()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center space-x-1.5 active:scale-95">
+          <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位餐廳地點 (我在現場)</span>
           </button>
@@ -262,7 +274,7 @@
             <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-theme bg-white border border-gray-300 rounded-lg py-1 text-sm outline-none" />
           </div>
           <div class="flex items-center justify-center space-x-2 py-1 bg-white rounded-xl border border-gray-150">
-            <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer select-none space-x-1"></div>
+            <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer space-x-1"></div>
             <span id="starScoreLabel" class="text-sm font-black text-amber-600 ml-2">4.5 分</span>
           </div>
         </div>
@@ -273,7 +285,7 @@
             <span id="photoCountBadge" class="text-[11px] text-theme-dark font-bold">已選 0 張</span>
           </div>
           <div id="photosThumbnailGrid" class="grid grid-cols-3 gap-2 mb-2"></div>
-          <label class="border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 hover:bg-theme-light rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
+          <label class="touch-btn border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 hover:bg-theme-light rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
             <i class="fa-solid fa-camera text-theme text-sm"></i>
             <span class="font-bold text-gray-700 text-xs">拍照或選取照片（可複選）</span>
             <input type="file" id="inputPhotos" accept="image/*" multiple onchange="handlePhotosSelect(event)" class="hidden" />
@@ -307,15 +319,12 @@
         </div>
       </div>
 
-      <!-- 彈窗底部按鈕：含刪除 -->
       <div class="p-3.5 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
-        <div class="flex items-center space-x-2">
-          <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="hidden py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition flex items-center">
-            <i class="fa-solid fa-trash mr-1"></i> 刪除此筆記
-          </button>
-          <button onclick="closeModal()" class="py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs active:scale-95">取消</button>
-        </div>
-        <button onclick="confirmSaveRecord()" class="flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition" id="submitBtnText">存入美食日記</button>
+        <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="touch-btn hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition">
+          刪除
+        </button>
+        <button onclick="closeModal()" class="touch-btn py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
+        <button onclick="confirmSaveRecord()" class="touch-btn flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition" id="submitBtnText">存入美食日記</button>
       </div>
     </div>
   </div>
@@ -323,7 +332,7 @@
   <!-- IndexedDB 本機資料庫 -->
   <script>
     let db;
-    const DB_NAME = "FreeFoodDiaryDB_v11";
+    const DB_NAME = "FreeFoodDiaryDB_v12";
     const STORE_NAME = "restaurants";
 
     function initDB() {
@@ -395,7 +404,6 @@
       await initDB();
       appData = await dbGetAll();
 
-      // 只在首次使用時產生示範，若使用者刪除後絕不自動重新產生！
       const isInitialized = localStorage.getItem("food_diary_initialized");
       if (!isInitialized && appData.length === 0) {
         const sample = {
@@ -433,7 +441,128 @@
       markersLayer = L.layerGroup().addTo(map);
     }
 
-    // 方法一：系統直接在地圖查找該餐廳位子
+    // ========== 【關鍵修復 1】：首頁搜尋處理函數 (支援日記店家、路名、景點) ==========
+    let searchTimeout = null;
+    function handleSearch(val) {
+      clearTimeout(searchTimeout);
+      const card = document.getElementById("searchResultsCard");
+      const clearBtn = document.getElementById("clearSearchBtn");
+
+      if (!val || !val.trim()) {
+        card.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+        return;
+      }
+
+      clearBtn.classList.remove("hidden");
+      const v = val.trim().toLowerCase();
+
+      // 1. 優先搜尋本機日記內已記錄的店家
+      const localMatches = appData.filter(s => 
+        (s.name && s.name.toLowerCase().includes(v)) || 
+        (s.address && s.address.toLowerCase().includes(v)) ||
+        (s.city && s.city.toLowerCase().includes(v)) ||
+        (s.tags && s.tags.some(t => t.toLowerCase().includes(v)))
+      );
+
+      searchTimeout = setTimeout(() => {
+        let html = "";
+        if (localMatches.length > 0) {
+          html += `<div class="text-[10px] font-bold text-theme-dark px-2 py-0.5">我的日記中已有記錄：</div>`;
+          localMatches.forEach(item => {
+            html += `
+              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="touch-btn flex items-center justify-between p-2 hover:bg-purple-50/50 rounded-xl cursor-pointer">
+                <div>
+                  <h4 class="font-bold text-gray-800 text-xs">${item.name}</h4>
+                  <p class="text-[10px] text-gray-400 truncate">${item.city} · ${item.address || ''}</p>
+                </div>
+                <span class="text-[10px] bg-theme-light text-theme-dark px-2 py-0.5 rounded-full font-bold whitespace-nowrap">前往</span>
+              </div>
+            `;
+          });
+        }
+
+        // 2. 線上搜尋外部景點與地址 (限制台灣與日本)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&countrycodes=tw,jp&limit=4&accept-language=zh-TW`)
+          .then(res => res.json())
+          .then(results => {
+            if (results && results.length > 0) {
+              html += `<div class="text-[10px] font-bold text-gray-400 px-2 py-0.5 mt-1">地圖外部地點：</div>`;
+              results.forEach(place => {
+                const parts = place.display_name.split(',');
+                const title = parts[0];
+                const cleanAddress = parts.slice(1, 4).join(',');
+                html += `
+                  <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl">
+                    <div class="pr-2 truncate cursor-pointer" onclick="quickFlyTo('${title.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})">
+                      <h4 class="font-bold text-gray-800 text-xs truncate">${title}</h4>
+                      <p class="text-[10px] text-gray-400 truncate">${cleanAddress}</p>
+                    </div>
+                    <button onclick="selectAndAddFromSearch('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="touch-btn bg-theme text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
+                      記這家
+                    </button>
+                  </div>
+                `;
+              });
+            }
+
+            if (!html) {
+              html = `<div class="p-3 text-center text-xs text-gray-400">查無結果，可直接點右上角「寫一篇」手動記錄</div>`;
+            }
+            card.innerHTML = html;
+            card.classList.remove("hidden");
+          })
+          .catch(() => {
+            if (html) { card.innerHTML = html; card.classList.remove("hidden"); }
+          });
+      }, 350);
+    }
+
+    function clearSearch() {
+      document.getElementById("homeSearchInput").value = "";
+      handleSearch("");
+    }
+
+    function quickFlyTo(storeName, lat, lng) {
+      document.getElementById("homeSearchInput").value = storeName;
+      document.getElementById("searchResultsCard").classList.add("hidden");
+      switchTab('map');
+      map.flyTo([lat, lng], 16, { duration: 1.2 });
+      setTimeout(() => {
+        markersLayer.eachLayer(layer => {
+          if (Math.abs(layer.getLatLng().lat - lat) < 0.001 && Math.abs(layer.getLatLng().lng - lng) < 0.001) {
+            layer.openPopup();
+          }
+        });
+      }, 1300);
+    }
+
+    function selectAndAddFromSearch(name, address, lat, lon) {
+      currentModalMode = 'CREATE';
+      pendingLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
+      uploadedPhotosList = [];
+      
+      document.getElementById("modalMainTitle").innerText = "記錄新店家";
+      document.getElementById("inputStoreName").value = name;
+      document.getElementById("inputStoreAddress").value = address;
+      document.getElementById("inputCountry").value = "台灣";
+      document.getElementById("inputCity").value = "";
+      document.getElementById("inputCoords").value = `${parseFloat(lat).toFixed(5)}, ${parseFloat(lon).toFixed(5)}`;
+      document.getElementById("geoStatusText").innerText = `✅ 已帶入座標 (${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)})`;
+      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
+      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("inputTags").value = "美食";
+      document.getElementById("inputReview").value = "";
+      document.getElementById("inputCost").value = "";
+      document.getElementById("modalDeleteBtn").classList.add("hidden");
+      
+      renderPhotosThumbnails();
+      setRating(4.5);
+      document.getElementById("searchResultsCard").classList.add("hidden");
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
+
+    // 方法一：系統查找
     async function autoSearchRestaurantLocation() {
       const name = document.getElementById("inputStoreName").value.trim();
       const city = document.getElementById("inputCity").value.trim();
@@ -553,7 +682,7 @@
             }
           } catch(e) {}
         },
-        (err) => {
+        () => {
           statusText.innerText = "❌ 定位失敗，請確認已允許手機開啟定位權限！";
           statusText.className = "text-[10px] text-center font-bold text-red-500";
         },
@@ -673,7 +802,7 @@
       grid.innerHTML = uploadedPhotosList.map((imgSrc, idx) => `
         <div class="relative rounded-xl overflow-hidden border border-gray-200 h-20">
           <img src="${imgSrc}" class="w-full h-full object-cover" />
-          <button type="button" onclick="removePhotoAtIndex(${idx})" class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
+          <button type="button" onclick="removePhotoAtIndex(${idx})" class="touch-btn absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -773,16 +902,12 @@
       map.flyTo([finalCoords.lat, finalCoords.lng], 16);
     }
 
-    // ========== 【關鍵修復】：完整刪除邏輯 ==========
-
-    // 1. 編輯彈窗內的刪除處理函數
+    // 刪除處理函數
     async function deleteCurrentEditingVisit() {
       if (!editingStoreId) return;
-
       const store = appData.find(s => s.id === editingStoreId);
       if (!store) return;
 
-      // 如果這家店只有 1 筆紀錄，刪除它就等於刪除整家店
       if (store.visits.length <= 1) {
         if (confirm(`這是「${store.name}」唯一的紀錄，刪除此筆記將一併移除該店家與地圖標記。確定要刪除嗎？`)) {
           await dbDelete(editingStoreId);
@@ -794,7 +919,6 @@
         return;
       }
 
-      // 若有多次紀錄，只刪除當前這一次
       if (confirm(`確定要刪除「${store.name}」的這一次拜訪筆記嗎？其他次紀錄將會保留。`)) {
         store.visits = store.visits.filter(v => v.visitId !== editingVisitId);
         await dbPut(store);
@@ -804,7 +928,6 @@
       }
     }
 
-    // 2. 列表卡片上刪除整間店
     async function deleteRestaurant(storeId) {
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
@@ -816,7 +939,6 @@
       }
     }
 
-    // 3. 列表卡片上單獨刪除某一次拜訪
     async function deleteSingleVisit(storeId, visitId) {
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
@@ -834,7 +956,6 @@
       }
     }
 
-    // 畫面更新
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
@@ -914,7 +1035,7 @@
             <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px;">${item.name}</h4>
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:#9C95DB; font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
             <p style="font-size:11px; color:#555; margin:0 0 6px;">${latest.review || '無心得'}</p>
-            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" style="width:100%; background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold; cursor:pointer;">✏️ 編輯或改座標</button>
+            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="width:100%; background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯或改座標</button>
           </div>
         `;
 
@@ -977,16 +1098,14 @@
                 <p class="text-[11px] text-gray-400">${item.address || '無詳細地址'}</p>
               </div>
               <div class="flex items-center space-x-1.5">
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="text-theme-dark bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
+                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-theme-dark bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
                   ✏️ 編輯
                 </button>
               </div>
             </div>
 
-            <!-- 照片展示區 -->
             ${photosRenderHtml}
 
-            <!-- 評論區塊 (附帶單獨刪除垃圾桶) -->
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1.5">
               <div class="flex justify-between items-center text-xs border-b border-gray-200/60 pb-1">
                 <div class="flex items-center space-x-1">
@@ -994,7 +1113,7 @@
                   <span class="text-gray-400 text-[10px]">(${latest.date})</span>
                   ${latest.revisit ? '<span class="text-red-500 font-bold text-[10px] ml-1">· 推薦再訪 👍</span>' : ''}
                 </div>
-                <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="text-gray-400 hover:text-red-500 p-1 text-xs">
+                <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="touch-btn text-gray-400 hover:text-red-500 p-1 text-xs">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
@@ -1005,9 +1124,8 @@
               ${(item.tags || []).map(t => `<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">#${t}</span>`).join('')}
             </div>
 
-            <!-- 卡片底部動作 -->
             <div class="flex justify-between items-center text-[11px] text-gray-400 pt-1 border-t border-gray-150">
-              <button onclick="deleteRestaurant('${item.id}')" class="text-gray-400 hover:text-red-500 flex items-center space-x-1 font-bold">
+              <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-gray-400 hover:text-red-500 flex items-center space-x-1 font-bold">
                 <i class="fa-solid fa-trash-can"></i>
                 <span>刪除整間店</span>
               </button>
@@ -1063,8 +1181,6 @@
       document.getElementById("inputCost").value = visit.cost || "";
       document.getElementById("inputDate").value = visit.date;
       document.getElementById("inputTags").value = (store.tags || []).join(', ');
-      
-      // 編輯時顯示紅色刪除按鈕
       document.getElementById("modalDeleteBtn").classList.remove("hidden");
 
       renderPhotosThumbnails();
@@ -1079,7 +1195,7 @@
       container.innerHTML = "";
       for (let i = 1; i <= 5; i++) {
         const star = document.createElement("span");
-        star.className = "inline-block cursor-pointer";
+        star.className = "touch-btn inline-block cursor-pointer";
         star.onclick = (e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           let val = (e.clientX - rect.left) < (rect.width / 2) ? i - 0.5 : i;
@@ -1109,6 +1225,7 @@
       setRating(Math.round(num * 2) / 2);
     }
 
+    // 【關鍵修復 2】：切換 Tab 邏輯增強，配合三星瀏覽器
     function switchTab(tab) {
       const mapView = document.getElementById("mapView");
       const listView = document.getElementById("listView");
@@ -1118,14 +1235,14 @@
       if (tab === 'map') {
         mapView.classList.remove("hidden");
         listView.classList.add("hidden");
-        tabMapBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
-        tabListBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
-        setTimeout(() => map.invalidateSize(), 150);
+        tabMapBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4";
+        tabListBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4";
+        setTimeout(() => { if (map) map.invalidateSize(); }, 150);
       } else {
         mapView.classList.add("hidden");
         listView.classList.remove("hidden");
-        tabListBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
-        tabMapBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
+        tabListBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4";
+        tabMapBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4";
         renderListView();
       }
     }
