@@ -37,7 +37,6 @@
     .border-theme { border-color: var(--theme-color) !important; }
     .accent-theme { accent-color: var(--theme-color) !important; }
 
-    /* 隱藏滾動條但保持滑動順暢 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -85,12 +84,13 @@
       </div>
       <div>
         <h1 class="text-base font-bold text-gray-900 leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-gray-400">私人專屬 · 支援多圖相簿</p>
+        <p class="text-[10px] text-gray-400">私人專屬 · 智慧多重定位</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <button onclick="toggleBackupMenu()" title="資料備份" class="text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
+      <!-- 備份與匯入選單 -->
+      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
       </button>
       <button onclick="openManualAddModal()" class="bg-theme bg-theme-hover text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-md active:scale-95 transition">
@@ -99,13 +99,20 @@
     </div>
   </header>
 
-  <!-- 備份選單 -->
-  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-gray-150 p-2.5 z-[1100] w-48 text-xs space-y-1">
-    <button onclick="exportData()" class="w-full text-left py-2 px-2.5 hover:bg-theme-light rounded-xl flex items-center font-bold text-gray-700">
-      <i class="fa-solid fa-download mr-2 text-theme"></i> 匯出日記備份檔
+  <!-- 備份與匯入選單 -->
+  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-gray-150 p-2.5 z-[1100] w-56 text-xs space-y-1.5">
+    <label class="w-full text-left py-2 px-2.5 bg-purple-50 hover:bg-theme-light text-theme-dark rounded-xl flex items-center font-bold cursor-pointer transition">
+      <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
+      <input type="file" id="importGoogleMapsInput" accept=".json,.geojson" onchange="importGoogleMapsData(event)" class="hidden" />
+    </label>
+    
+    <div class="border-t border-gray-100 my-1"></div>
+
+    <button onclick="exportData()" class="w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700">
+      <i class="fa-solid fa-download mr-2 text-gray-400"></i> 匯出本機備份檔
     </button>
-    <label class="w-full text-left py-2 px-2.5 hover:bg-theme-light rounded-xl flex items-center font-bold text-gray-700 cursor-pointer">
-      <i class="fa-solid fa-upload mr-2 text-blue-500"></i> 還原匯入備份
+    <label class="w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700 cursor-pointer">
+      <i class="fa-solid fa-upload mr-2 text-gray-400"></i> 還原備份檔
       <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden" />
     </label>
   </div>
@@ -114,13 +121,17 @@
   <main class="flex-1 relative w-full h-full overflow-hidden">
     <!-- 地圖 View -->
     <div id="mapView" class="w-full h-full relative">
-      <!-- 懸浮提示條 -->
-      <div id="mapPickHint" class="hidden absolute top-3 left-4 right-4 z-[500] bg-theme text-white text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl flex items-center justify-between animate-bounce">
-        <span>📍 請在地圖上滑動，點選店家的確切位置</span>
-        <button onclick="cancelMapPick()" class="text-white underline text-[11px] ml-2">取消</button>
+      <div class="absolute top-3 left-3 right-3 z-[500] max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 flex items-center space-x-2">
+          <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
+          <input type="text" id="homeSearchInput" placeholder="搜尋日記店名、路名、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-gray-700" />
+          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        </div>
+        <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-2xl border border-gray-150 max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <!-- GPS 定位按鈕 -->
       <button onclick="locateUser()" title="定位我的位置" class="absolute bottom-6 right-4 z-[500] bg-white text-gray-700 hover:text-theme w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-gray-200 active:scale-90 transition">
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
@@ -181,47 +192,70 @@
     </button>
   </nav>
 
-  <!-- 彈跳表單視窗 (支援多張照片上傳) -->
+  <!-- 彈跳表單視窗 (全新定位結構) -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[92vh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-gray-150 flex justify-between items-center bg-gray-50">
         <div>
           <h3 class="font-bold text-gray-800 text-sm" id="modalMainTitle">記錄美食日記</h3>
-          <p class="text-[10px] text-gray-400" id="modalSubTitle">支援多圖紀錄</p>
+          <p class="text-[10px] text-gray-400">智慧查找 · 支援座標修正</p>
         </div>
         <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
 
       <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
-        <div class="bg-theme-light p-3 rounded-2xl border border-purple-100 space-y-2">
-          <input type="text" id="inputStoreName" placeholder="店家名稱 (必填) *" class="w-full bg-transparent font-bold text-gray-900 text-sm outline-none border-b border-purple-200 pb-1" />
+        <div class="bg-theme-light p-3 rounded-2xl border border-purple-100 space-y-2.5">
+          <div>
+            <label class="block font-bold text-theme-dark text-[11px] mb-1">店家名稱 *</label>
+            <input type="text" id="inputStoreName" placeholder="輸入店名 (例如: 鴨肉許、CJSJ)" class="w-full bg-white font-bold text-gray-900 text-sm rounded-xl p-2 outline-none border border-purple-200" />
+          </div>
           
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="inputCountry" placeholder="國家 (例: 台灣)" class="bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
-            <input type="text" id="inputCity" placeholder="城市 (例: 新竹市)" class="bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
+            <div>
+              <label class="block text-gray-600 font-medium text-[10px] mb-0.5">國家</label>
+              <input type="text" id="inputCountry" placeholder="國家" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-gray-600 font-medium text-[10px] mb-0.5">城市 / 縣市</label>
+              <input type="text" id="inputCity" placeholder="城市 (例: 新竹市)" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+            </div>
           </div>
           
-          <input type="text" id="inputStoreAddress" placeholder="地址 (選填)" class="w-full bg-white border border-purple-100 rounded-lg p-1.5 text-xs outline-none" />
+          <div>
+            <label class="block text-gray-600 font-medium text-[10px] mb-0.5">詳細地址 (選填)</label>
+            <input type="text" id="inputStoreAddress" placeholder="輸入路名或門牌" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+          </div>
 
-          <!-- 方式一：貼上 Google 座標 -->
-          <div class="bg-white/80 p-2 rounded-xl border border-purple-200 space-y-1">
-            <label class="block font-bold text-theme-dark text-[11px]">📍 方式一：貼上 Google Maps 座標（最精準）</label>
-            <div class="flex items-center space-x-1.5">
-              <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1 text-xs outline-none font-mono" />
-              <button type="button" onclick="pasteFromClipboard()" class="bg-theme text-white px-2 py-1 rounded-lg font-bold text-[10px] whitespace-nowrap active:scale-95">
-                貼上
+          <!-- 【方法一】：系統直接在地圖查找該餐廳的位子 -->
+          <button type="button" onclick="autoSearchRestaurantLocation()" class="w-full bg-theme hover:bg-theme-hover text-white py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center space-x-1.5 active:scale-95">
+            <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
+            <span>方法一：系統直接在地圖查找此餐廳</span>
+          </button>
+
+          <!-- 【方法二】：位子錯誤時改由輸入 IP / 經緯度座標解決 -->
+          <div class="bg-white/90 p-2.5 rounded-xl border border-purple-200 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <label class="font-bold text-theme-dark text-[11px]">📍 方法二：位置錯誤？輸入座標修正</label>
+              <button type="button" onclick="pasteFromClipboard()" class="text-theme font-bold text-[10px] underline">
+                貼上剪貼簿
               </button>
             </div>
-            <p class="text-[9px] text-gray-400">💡 Google Maps 長按店家 ➔ 複製上方座標數字 ➔ 貼到此處</p>
+            <div class="flex items-center space-x-1.5">
+              <input type="text" id="inputCoords" placeholder="輸入經緯度，例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
+              <button type="button" onclick="applyManualCoords()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
+                定位
+              </button>
+            </div>
+            <p class="text-[9px] text-gray-400">💡 Google Maps 長按店家位置 ➔ 複製上方座標數字貼上</p>
           </div>
 
-          <!-- 方式二：地圖直接選點 -->
-          <button type="button" onclick="startMapPickMode()" class="w-full bg-white hover:bg-theme hover:text-white text-theme-dark border border-purple-200 py-1.5 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1 active:scale-95">
-            <i class="fa-solid fa-map-pin text-theme"></i>
-            <span>方式二：在地圖上直接點選這家店</span>
+          <!-- 【方法三】：系統自動定位餐廳地點 (我在現場) -->
+          <button type="button" onclick="autoLocateCurrentSpot()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center space-x-1.5 active:scale-95">
+            <i class="fa-solid fa-location-crosshairs text-sm"></i>
+            <span>方法三：系統自動定位餐廳地點 (我在現場)</span>
           </button>
           
-          <p id="geoStatusText" class="text-[10px] text-center font-bold text-gray-500"></p>
+          <p id="geoStatusText" class="text-[10px] text-center font-bold text-gray-500 pt-0.5"></p>
         </div>
 
         <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200">
@@ -235,17 +269,12 @@
           </div>
         </div>
 
-        <!-- 【核心亮點】：多張照片上傳與縮圖管理 -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label class="block font-bold text-gray-700">用餐照片 (支援上傳多張)</label>
+            <label class="block font-bold text-gray-700">用餐照片 (支援多張)</label>
             <span id="photoCountBadge" class="text-[11px] text-theme-dark font-bold">已選 0 張</span>
           </div>
-
-          <!-- 縮圖預覽牆 -->
           <div id="photosThumbnailGrid" class="grid grid-cols-3 gap-2 mb-2"></div>
-
-          <!-- 上傳按鈕 (支援 multiple 多選) -->
           <label class="border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 hover:bg-theme-light rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
             <i class="fa-solid fa-camera text-theme text-sm"></i>
             <span class="font-bold text-gray-700 text-xs">拍照或選取照片（可複選）</span>
@@ -266,7 +295,7 @@
 
         <div>
           <label class="block font-bold text-gray-700 mb-1">標籤 (逗號分隔)</label>
-          <input type="text" id="inputTags" placeholder="小吃, 甜點, 拉麵" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-1.5 text-xs" />
+          <input type="text" id="inputTags" placeholder="小吃, 甜點, 拉麵" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs" />
         </div>
 
         <div>
@@ -293,7 +322,7 @@
   <!-- IndexedDB 本機資料庫 -->
   <script>
     let db;
-    const DB_NAME = "FreeFoodDiaryDB_v8";
+    const DB_NAME = "FreeFoodDiaryDB_v10";
     const STORE_NAME = "restaurants";
 
     function initDB() {
@@ -357,9 +386,8 @@
     let currentModalMode = 'CREATE';
     let editingStoreId = null, editingVisitId = null;
     let currentRatingValue = 4.5;
-    let uploadedPhotosList = []; // 存儲本次編輯的多張照片 Base64 陣列
+    let uploadedPhotosList = [];
     let pendingLocation = null;
-    let isPickingOnMap = false;
 
     async function initApp() {
       initMap();
@@ -382,11 +410,8 @@
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "範例筆記：支援多張照片！左右滑動卡片可瀏覽全部菜色與店面照片。",
-            photos: [
-              "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop",
-              "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=500&auto=format&fit=crop"
-            ]
+            review: "範例筆記：支援「方法一系統查找」、「方法二座標修正」與「方法三現場定位」！",
+            photos: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"]
           }]
         };
         await dbPut(sample);
@@ -402,52 +427,74 @@
       map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 12);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
       markersLayer = L.layerGroup().addTo(map);
-
-      map.on('click', (e) => {
-        if (isPickingOnMap) {
-          setPickedLocation(e.latlng.lat, e.latlng.lng);
-        }
-      });
     }
 
-    // 地圖選點
-    function startMapPickMode() {
-      isPickingOnMap = true;
-      document.getElementById("entryModal").classList.add("hidden");
-      document.getElementById("mapPickHint").classList.remove("hidden");
-      switchTab('map');
+    // ========== 【核心定位流程】 ==========
+
+    // 【方法一】：系統直接在地圖查找該餐廳位子
+    async function autoSearchRestaurantLocation() {
+      const name = document.getElementById("inputStoreName").value.trim();
+      const city = document.getElementById("inputCity").value.trim();
+      const address = document.getElementById("inputStoreAddress").value.trim();
+      const statusText = document.getElementById("geoStatusText");
+
+      if (!name) return alert("請先填寫「店家名稱」！");
+
+      statusText.innerText = "🔍 正在地圖搜尋該餐廳位置...";
+      statusText.className = "text-[10px] text-center font-bold text-amber-600 animate-pulse";
+
+      // 優先組合搜尋：城市 + 店名 + 地址
+      const queryList = [
+        `${city} ${name} ${address}`.trim(),
+        `${city} ${name}`.trim(),
+        `${name}`.trim(),
+        `${city} ${address}`.trim()
+      ];
+
+      let foundCoords = null;
+      let foundAddress = "";
+
+      for (const q of queryList) {
+        if (!q) continue;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=tw,jp&limit=1&accept-language=zh-TW`);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            foundCoords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            foundAddress = data[0].display_name;
+            break;
+          }
+        } catch(e) {}
+      }
+
+      if (foundCoords) {
+        pendingLocation = foundCoords;
+        document.getElementById("inputCoords").value = `${foundCoords.lat.toFixed(5)}, ${foundCoords.lng.toFixed(5)}`;
+        statusText.innerText = `✅ 系統已成功定位！(${foundCoords.lat.toFixed(4)}, ${foundCoords.lng.toFixed(4)}) 若有微偏可用方法二輸入座標修改`;
+        statusText.className = "text-[10px] text-center font-bold text-green-600";
+
+        map.flyTo([foundCoords.lat, foundCoords.lng], 16);
+        if (tempPinMarker) map.removeLayer(tempPinMarker);
+        tempPinMarker = L.circleMarker([foundCoords.lat, foundCoords.lng], {
+          radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
+        }).addTo(map);
+      } else {
+        // 如果查無特定店家，先退回該城市中心，並提示使用者
+        let cityFallback = TAIWAN_CITIES[city] || [24.8138, 120.9675];
+        pendingLocation = { lat: cityFallback[0], lng: cityFallback[1] };
+        statusText.innerText = `⚠️ 系統查無此店名，已先暫定在 ${city || '當地'} 中心。請改用【方法二貼上座標】或【方法三】修正！`;
+        statusText.className = "text-[10px] text-center font-bold text-amber-600";
+      }
     }
 
-    function cancelMapPick() {
-      isPickingOnMap = false;
-      document.getElementById("mapPickHint").classList.add("hidden");
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
-    function setPickedLocation(lat, lng) {
-      isPickingOnMap = false;
-      pendingLocation = { lat, lng };
-      document.getElementById("mapPickHint").classList.add("hidden");
-
-      if (tempPinMarker) map.removeLayer(tempPinMarker);
-      tempPinMarker = L.circleMarker([lat, lng], {
-        radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
-      }).addTo(map);
-
-      document.getElementById("inputCoords").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-      document.getElementById("geoStatusText").innerText = `✅ 已在地圖上選定位置 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
-
-      document.getElementById("entryModal").classList.remove("hidden");
-    }
-
+    // 【方法二】：輸入座標或貼上修正
     function handleCoordsInput(val) {
       const match = val.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
       if (match) {
         const lat = parseFloat(match[1]);
         const lng = parseFloat(match[2]);
         pendingLocation = { lat, lng };
-        document.getElementById("geoStatusText").innerText = `✅ 已解析 Google 座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        document.getElementById("geoStatusText").innerText = `✅ 已解析座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
         document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
 
         map.flyTo([lat, lng], 16);
@@ -456,6 +503,11 @@
           radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
         }).addTo(map);
       }
+    }
+
+    function applyManualCoords() {
+      const val = document.getElementById("inputCoords").value.trim();
+      handleCoordsInput(val);
     }
 
     async function pasteFromClipboard() {
@@ -468,18 +520,123 @@
       }
     }
 
-    // ========== 多圖上傳、壓縮與縮圖管理 ==========
+    // 【方法三】：系統自動定位餐廳地點 (我在現場)
+    function autoLocateCurrentSpot() {
+      if (!navigator.geolocation) return alert("您的手機不支援 GPS 定位！");
+      const statusText = document.getElementById("geoStatusText");
+      statusText.innerText = "🛰️ 正在讀取手機現場真實 GPS 座標...";
+      statusText.className = "text-[10px] text-center font-bold text-indigo-600 animate-pulse";
 
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          pendingLocation = { lat, lng };
+
+          document.getElementById("inputCoords").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          statusText.innerText = `✅ 現場定位成功！(${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+          statusText.className = "text-[10px] text-center font-bold text-green-600";
+
+          map.flyTo([lat, lng], 16);
+          if (tempPinMarker) map.removeLayer(tempPinMarker);
+          tempPinMarker = L.circleMarker([lat, lng], {
+            radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
+          }).addTo(map);
+
+          // 自動反查地址與城市填入表單
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=zh-TW`);
+            const data = await res.json();
+            if (data && data.address) {
+              if (data.address.country) document.getElementById("inputCountry").value = data.address.country;
+              const city = data.address.city || data.address.county || data.address.town || "";
+              if (city) document.getElementById("inputCity").value = city;
+              const road = (data.address.road || "") + (data.address.house_number ? data.address.house_number + "號" : "");
+              if (road) document.getElementById("inputStoreAddress").value = road;
+            }
+          } catch(e) {}
+        },
+        (err) => {
+          statusText.innerText = "❌ 定位失敗，請確認已允許手機開啟定位權限！";
+          statusText.className = "text-[10px] text-center font-bold text-red-500";
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    // ========== 匯入 Google Maps 收藏 (免 API) ==========
+    async function importGoogleMapsData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          let count = 0;
+          const text = e.target.result;
+          const json = JSON.parse(text);
+          const features = json.features || (Array.isArray(json) ? json : []);
+
+          if (!features.length) {
+            return alert("檔案內無地點資料，請確認是 Google Maps 匯出的 JSON 檔案！");
+          }
+
+          for (const f of features) {
+            const coords = f.geometry?.coordinates;
+            const props = f.properties || {};
+            const title = props.Title || props.name || props.title;
+
+            if (coords && coords.length >= 2 && title) {
+              const address = props.Address || props.address || "";
+              let city = "新竹市";
+              for (const c in TAIWAN_CITIES) {
+                if (address.includes(c)) { city = c; break; }
+              }
+
+              const newStore = {
+                id: "store_g_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+                name: title,
+                country: "台灣",
+                city: city,
+                address: address,
+                lat: coords[1],
+                lng: coords[0],
+                tags: ["Google收藏"],
+                visits: [{
+                  visitId: "v_" + Date.now(),
+                  date: new Date().toISOString().split("T")[0],
+                  rating: 5.0,
+                  cost: null,
+                  revisit: true,
+                  review: props.Comment || props.Note || "從 Google Maps 匯入的收藏地點",
+                  photos: []
+                }]
+              };
+              await dbPut(newStore);
+              count++;
+            }
+          }
+
+          appData = await dbGetAll();
+          refreshViews();
+          alert(`🎉 成功從 Google Maps 匯入了 ${count} 間餐廳與景點！已全數在地圖標記。`);
+        } catch(err) {
+          alert("匯入失敗，請確認檔案格式是否正確。");
+        }
+      };
+      reader.readAsText(file);
+      toggleBackupMenu();
+    }
+
+    // 多圖壓縮與處理
     async function handlePhotosSelect(event) {
       const files = Array.from(event.target.files);
       if (!files.length) return;
-
       for (const file of files) {
         const base64 = await compressSingleImage(file);
         uploadedPhotosList.push(base64);
       }
-
-      event.target.value = ""; // 重設以允許重複選取
+      event.target.value = "";
       renderPhotosThumbnails();
     }
 
@@ -517,24 +674,18 @@
       const grid = document.getElementById("photosThumbnailGrid");
       const badge = document.getElementById("photoCountBadge");
       badge.innerText = `已選 ${uploadedPhotosList.length} 張`;
-
-      if (!uploadedPhotosList.length) {
-        grid.innerHTML = "";
-        return;
-      }
-
+      if (!uploadedPhotosList.length) { grid.innerHTML = ""; return; }
       grid.innerHTML = uploadedPhotosList.map((imgSrc, idx) => `
-        <div class="relative rounded-xl overflow-hidden border border-gray-200 group h-20">
+        <div class="relative rounded-xl overflow-hidden border border-gray-200 h-20">
           <img src="${imgSrc}" class="w-full h-full object-cover" />
-          <button type="button" onclick="removePhotoAtIndex(${idx})" class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition">
+          <button type="button" onclick="removePhotoAtIndex(${idx})" class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
       `).join('');
     }
 
-    // ========== 儲存邏輯 (支援 photos 陣列) ==========
-
+    // 儲存邏輯
     async function confirmSaveRecord() {
       const name = document.getElementById("inputStoreName").value.trim();
       const country = document.getElementById("inputCountry").value.trim() || "台灣";
@@ -579,7 +730,7 @@
             visit.review = review;
             visit.revisit = revisit;
             visit.photos = photosToSave;
-            delete visit.photo; // 升級舊單圖欄位
+            delete visit.photo;
           }
           await dbPut(store);
         }
@@ -627,8 +778,7 @@
       map.flyTo([finalCoords.lat, finalCoords.lng], 16);
     }
 
-    // ========== 畫面與標記渲染 ==========
-
+    // 畫面更新
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
@@ -666,7 +816,6 @@
         [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
-    // 取得照片陣列 (向下相容舊資料的單張 photo)
     function getVisitPhotos(visit) {
       if (visit.photos && Array.isArray(visit.photos) && visit.photos.length) return visit.photos;
       if (visit.photo) return [visit.photo];
@@ -717,7 +866,6 @@
       });
     }
 
-    // 清單渲染 (支援左右滑動相簿)
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -743,7 +891,6 @@
         const latest = item.visits[0];
         const photos = getVisitPhotos(latest);
 
-        // 多張照片左右橫向滑動渲染
         let photosRenderHtml = "";
         if (photos.length === 1) {
           photosRenderHtml = `<img src="${photos[0]}" class="w-full h-44 object-cover rounded-2xl border border-gray-100" />`;
@@ -778,7 +925,6 @@
               </button>
             </div>
 
-            <!-- 照片展示區 -->
             ${photosRenderHtml}
 
             <div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-600 border border-gray-100">
@@ -790,7 +936,6 @@
               <p class="leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
             </div>
 
-            <!-- 標籤 -->
             <div class="flex flex-wrap gap-1">
               ${(item.tags || []).map(t => `<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">#${t}</span>`).join('')}
             </div>
@@ -799,8 +944,7 @@
       }).join('');
     }
 
-    // ========== 彈窗與模式控制 ==========
-
+    // 彈窗與模式
     function openManualAddModal() {
       currentModalMode = 'CREATE';
       pendingLocation = null;
@@ -811,7 +955,7 @@
       document.getElementById("inputCity").value = "新竹市";
       document.getElementById("inputStoreAddress").value = "";
       document.getElementById("inputCoords").value = "";
-      document.getElementById("geoStatusText").innerText = "可貼上 Google 座標或點選地圖選點";
+      document.getElementById("geoStatusText").innerText = "點擊「方法一」自動查找，或依需求選擇方法二/三";
       document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-gray-400";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
       document.getElementById("inputTags").value = "";
@@ -832,7 +976,7 @@
       editingStoreId = storeId;
       editingVisitId = visit.visitId;
       pendingLocation = { lat: store.lat, lng: store.lng };
-      uploadedPhotosList = [...getVisitPhotos(visit)]; // 載入該次拜訪的全部照片！
+      uploadedPhotosList = [...getVisitPhotos(visit)];
 
       document.getElementById("modalMainTitle").innerText = `編輯美食筆記 ✏️`;
       document.getElementById("inputStoreName").value = store.name;
@@ -915,7 +1059,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `美食日記相簿備份_${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `美食日記備份_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       toggleBackupMenu();
     }
