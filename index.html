@@ -84,12 +84,11 @@
       </div>
       <div>
         <h1 class="text-base font-bold text-gray-900 leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-gray-400">私人專屬 · 智慧多重定位</p>
+        <p class="text-[10px] text-gray-400">私人專屬 · 隨時可刪改</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <!-- 備份與匯入選單 -->
       <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
       </button>
@@ -192,7 +191,7 @@
     </button>
   </nav>
 
-  <!-- 彈跳表單視窗 (全新定位結構) -->
+  <!-- 彈跳表單視窗 -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[92vh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-gray-150 flex justify-between items-center bg-gray-50">
@@ -226,13 +225,13 @@
             <input type="text" id="inputStoreAddress" placeholder="輸入路名或門牌" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 【方法一】：系統直接在地圖查找該餐廳的位子 -->
+          <!-- 方法一：系統查找 -->
           <button type="button" onclick="autoSearchRestaurantLocation()" class="w-full bg-theme hover:bg-theme-hover text-white py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：系統直接在地圖查找此餐廳</span>
           </button>
 
-          <!-- 【方法二】：位子錯誤時改由輸入 IP / 經緯度座標解決 -->
+          <!-- 方法二：輸入座標 -->
           <div class="bg-white/90 p-2.5 rounded-xl border border-purple-200 space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="font-bold text-theme-dark text-[11px]">📍 方法二：位置錯誤？輸入座標修正</label>
@@ -246,10 +245,9 @@
                 定位
               </button>
             </div>
-            <p class="text-[9px] text-gray-400">💡 Google Maps 長按店家位置 ➔ 複製上方座標數字貼上</p>
           </div>
 
-          <!-- 【方法三】：系統自動定位餐廳地點 (我在現場) -->
+          <!-- 方法三：現場定位 -->
           <button type="button" onclick="autoLocateCurrentSpot()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位餐廳地點 (我在現場)</span>
@@ -309,12 +307,15 @@
         </div>
       </div>
 
-      <div class="p-3 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
-        <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs">
-          刪除
-        </button>
-        <button onclick="closeModal()" class="py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs">取消</button>
-        <button onclick="confirmSaveRecord()" class="flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md" id="submitBtnText">存入美食日記</button>
+      <!-- 彈窗底部按鈕：含刪除 -->
+      <div class="p-3.5 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
+        <div class="flex items-center space-x-2">
+          <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="hidden py-2 px-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition flex items-center">
+            <i class="fa-solid fa-trash mr-1"></i> 刪除此筆記
+          </button>
+          <button onclick="closeModal()" class="py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs active:scale-95">取消</button>
+        </div>
+        <button onclick="confirmSaveRecord()" class="flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition" id="submitBtnText">存入美食日記</button>
       </div>
     </div>
   </div>
@@ -322,7 +323,7 @@
   <!-- IndexedDB 本機資料庫 -->
   <script>
     let db;
-    const DB_NAME = "FreeFoodDiaryDB_v10";
+    const DB_NAME = "FreeFoodDiaryDB_v11";
     const STORE_NAME = "restaurants";
 
     function initDB() {
@@ -394,7 +395,9 @@
       await initDB();
       appData = await dbGetAll();
 
-      if (appData.length === 0) {
+      // 只在首次使用時產生示範，若使用者刪除後絕不自動重新產生！
+      const isInitialized = localStorage.getItem("food_diary_initialized");
+      if (!isInitialized && appData.length === 0) {
         const sample = {
           id: "store_sample",
           name: "隱家拉麵 赤峰店",
@@ -410,12 +413,13 @@
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "範例筆記：支援「方法一系統查找」、「方法二座標修正」與「方法三現場定位」！",
+            review: "範例筆記：點擊旁邊編輯，可以自由修改內容或點擊刪除！",
             photos: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"]
           }]
         };
         await dbPut(sample);
         appData = [sample];
+        localStorage.setItem("food_diary_initialized", "true");
       }
 
       buildStarsUI();
@@ -429,9 +433,7 @@
       markersLayer = L.layerGroup().addTo(map);
     }
 
-    // ========== 【核心定位流程】 ==========
-
-    // 【方法一】：系統直接在地圖查找該餐廳位子
+    // 方法一：系統直接在地圖查找該餐廳位子
     async function autoSearchRestaurantLocation() {
       const name = document.getElementById("inputStoreName").value.trim();
       const city = document.getElementById("inputCity").value.trim();
@@ -443,7 +445,6 @@
       statusText.innerText = "🔍 正在地圖搜尋該餐廳位置...";
       statusText.className = "text-[10px] text-center font-bold text-amber-600 animate-pulse";
 
-      // 優先組合搜尋：城市 + 店名 + 地址
       const queryList = [
         `${city} ${name} ${address}`.trim(),
         `${city} ${name}`.trim(),
@@ -452,7 +453,6 @@
       ];
 
       let foundCoords = null;
-      let foundAddress = "";
 
       for (const q of queryList) {
         if (!q) continue;
@@ -461,7 +461,6 @@
           const data = await res.json();
           if (data && data.length > 0) {
             foundCoords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-            foundAddress = data[0].display_name;
             break;
           }
         } catch(e) {}
@@ -470,7 +469,7 @@
       if (foundCoords) {
         pendingLocation = foundCoords;
         document.getElementById("inputCoords").value = `${foundCoords.lat.toFixed(5)}, ${foundCoords.lng.toFixed(5)}`;
-        statusText.innerText = `✅ 系統已成功定位！(${foundCoords.lat.toFixed(4)}, ${foundCoords.lng.toFixed(4)}) 若有微偏可用方法二輸入座標修改`;
+        statusText.innerText = `✅ 系統已成功定位！(${foundCoords.lat.toFixed(4)}, ${foundCoords.lng.toFixed(4)})`;
         statusText.className = "text-[10px] text-center font-bold text-green-600";
 
         map.flyTo([foundCoords.lat, foundCoords.lng], 16);
@@ -479,22 +478,21 @@
           radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
         }).addTo(map);
       } else {
-        // 如果查無特定店家，先退回該城市中心，並提示使用者
         let cityFallback = TAIWAN_CITIES[city] || [24.8138, 120.9675];
         pendingLocation = { lat: cityFallback[0], lng: cityFallback[1] };
-        statusText.innerText = `⚠️ 系統查無此店名，已先暫定在 ${city || '當地'} 中心。請改用【方法二貼上座標】或【方法三】修正！`;
+        statusText.innerText = `⚠️ 查無此店名，已先設在 ${city || '當地'} 中心，請用【方法二輸入座標】或【方法三】修正！`;
         statusText.className = "text-[10px] text-center font-bold text-amber-600";
       }
     }
 
-    // 【方法二】：輸入座標或貼上修正
+    // 方法二：輸入座標
     function handleCoordsInput(val) {
       const match = val.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
       if (match) {
         const lat = parseFloat(match[1]);
         const lng = parseFloat(match[2]);
         pendingLocation = { lat, lng };
-        document.getElementById("geoStatusText").innerText = `✅ 已解析座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        document.getElementById("geoStatusText").innerText = `✅ 已設定座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
         document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
 
         map.flyTo([lat, lng], 16);
@@ -520,7 +518,7 @@
       }
     }
 
-    // 【方法三】：系統自動定位餐廳地點 (我在現場)
+    // 方法三：現場定位
     function autoLocateCurrentSpot() {
       if (!navigator.geolocation) return alert("您的手機不支援 GPS 定位！");
       const statusText = document.getElementById("geoStatusText");
@@ -543,7 +541,6 @@
             radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
           }).addTo(map);
 
-          // 自動反查地址與城市填入表單
           try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=zh-TW`);
             const data = await res.json();
@@ -564,7 +561,7 @@
       );
     }
 
-    // ========== 匯入 Google Maps 收藏 (免 API) ==========
+    // 匯入 Google Maps 收藏 (JSON)
     async function importGoogleMapsData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -577,9 +574,7 @@
           const json = JSON.parse(text);
           const features = json.features || (Array.isArray(json) ? json : []);
 
-          if (!features.length) {
-            return alert("檔案內無地點資料，請確認是 Google Maps 匯出的 JSON 檔案！");
-          }
+          if (!features.length) return alert("檔案內無地點資料，請確認是 Google Maps 匯出的 JSON 檔案！");
 
           for (const f of features) {
             const coords = f.geometry?.coordinates;
@@ -685,7 +680,7 @@
       `).join('');
     }
 
-    // 儲存邏輯
+    // 儲存紀錄
     async function confirmSaveRecord() {
       const name = document.getElementById("inputStoreName").value.trim();
       const country = document.getElementById("inputCountry").value.trim() || "台灣";
@@ -776,6 +771,67 @@
       closeModal();
       refreshViews();
       map.flyTo([finalCoords.lat, finalCoords.lng], 16);
+    }
+
+    // ========== 【關鍵修復】：完整刪除邏輯 ==========
+
+    // 1. 編輯彈窗內的刪除處理函數
+    async function deleteCurrentEditingVisit() {
+      if (!editingStoreId) return;
+
+      const store = appData.find(s => s.id === editingStoreId);
+      if (!store) return;
+
+      // 如果這家店只有 1 筆紀錄，刪除它就等於刪除整家店
+      if (store.visits.length <= 1) {
+        if (confirm(`這是「${store.name}」唯一的紀錄，刪除此筆記將一併移除該店家與地圖標記。確定要刪除嗎？`)) {
+          await dbDelete(editingStoreId);
+          appData = appData.filter(s => s.id !== editingStoreId);
+          closeModal();
+          refreshViews();
+          alert("✅ 已成功刪除該店家與紀錄！");
+        }
+        return;
+      }
+
+      // 若有多次紀錄，只刪除當前這一次
+      if (confirm(`確定要刪除「${store.name}」的這一次拜訪筆記嗎？其他次紀錄將會保留。`)) {
+        store.visits = store.visits.filter(v => v.visitId !== editingVisitId);
+        await dbPut(store);
+        closeModal();
+        refreshViews();
+        alert("✅ 已成功刪除該次筆記！");
+      }
+    }
+
+    // 2. 列表卡片上刪除整間店
+    async function deleteRestaurant(storeId) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      if (confirm(`確定要徹底刪除「${store.name}」及其所有拜訪紀錄與照片嗎？此動作無法復原。`)) {
+        await dbDelete(storeId);
+        appData = appData.filter(s => s.id !== storeId);
+        refreshViews();
+        alert("✅ 已成功刪除該店家！");
+      }
+    }
+
+    // 3. 列表卡片上單獨刪除某一次拜訪
+    async function deleteSingleVisit(storeId, visitId) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+
+      if (store.visits.length <= 1) {
+        await deleteRestaurant(storeId);
+        return;
+      }
+
+      if (confirm(`確定要刪除這一次的拜訪筆記嗎？`)) {
+        store.visits = store.visits.filter(v => v.visitId !== visitId);
+        await dbPut(store);
+        refreshViews();
+        alert("✅ 已成功刪除該次筆記！");
+      }
     }
 
     // 畫面更新
@@ -920,31 +976,48 @@
                 <h3 class="font-bold text-gray-900 text-sm mt-0.5">${item.name}</h3>
                 <p class="text-[11px] text-gray-400">${item.address || '無詳細地址'}</p>
               </div>
-              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="text-theme-dark bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
-                ✏️ 編輯
-              </button>
+              <div class="flex items-center space-x-1.5">
+                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="text-theme-dark bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
+                  ✏️ 編輯
+                </button>
+              </div>
             </div>
 
+            <!-- 照片展示區 -->
             ${photosRenderHtml}
 
-            <div class="bg-gray-50 p-3 rounded-xl text-xs text-gray-600 border border-gray-100">
-              <div class="flex items-center space-x-1 mb-1">
-                <span class="font-black text-amber-500">★ ${latest.rating.toFixed(1)}</span>
-                <span class="text-gray-400 text-[10px]">(${latest.date})</span>
-                ${latest.revisit ? '<span class="text-red-500 font-bold text-[10px] ml-1">· 推薦再訪 👍</span>' : ''}
+            <!-- 評論區塊 (附帶單獨刪除垃圾桶) -->
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1.5">
+              <div class="flex justify-between items-center text-xs border-b border-gray-200/60 pb-1">
+                <div class="flex items-center space-x-1">
+                  <span class="font-black text-amber-500">★ ${latest.rating.toFixed(1)}</span>
+                  <span class="text-gray-400 text-[10px]">(${latest.date})</span>
+                  ${latest.revisit ? '<span class="text-red-500 font-bold text-[10px] ml-1">· 推薦再訪 👍</span>' : ''}
+                </div>
+                <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="text-gray-400 hover:text-red-500 p-1 text-xs">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
-              <p class="leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
+              <p class="text-xs text-gray-600 leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
             </div>
 
             <div class="flex flex-wrap gap-1">
               ${(item.tags || []).map(t => `<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">#${t}</span>`).join('')}
+            </div>
+
+            <!-- 卡片底部動作 -->
+            <div class="flex justify-between items-center text-[11px] text-gray-400 pt-1 border-t border-gray-150">
+              <button onclick="deleteRestaurant('${item.id}')" class="text-gray-400 hover:text-red-500 flex items-center space-x-1 font-bold">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>刪除整間店</span>
+              </button>
+              <span>均消 ${latest.cost ? `$${latest.cost}` : '未記'}</span>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // 彈窗與模式
     function openManualAddModal() {
       currentModalMode = 'CREATE';
       pendingLocation = null;
@@ -990,6 +1063,8 @@
       document.getElementById("inputCost").value = visit.cost || "";
       document.getElementById("inputDate").value = visit.date;
       document.getElementById("inputTags").value = (store.tags || []).join(', ');
+      
+      // 編輯時顯示紅色刪除按鈕
       document.getElementById("modalDeleteBtn").classList.remove("hidden");
 
       renderPhotosThumbnails();
@@ -1035,13 +1110,22 @@
     }
 
     function switchTab(tab) {
+      const mapView = document.getElementById("mapView");
+      const listView = document.getElementById("listView");
+      const tabMapBtn = document.getElementById("tabMapBtn");
+      const tabListBtn = document.getElementById("tabListBtn");
+
       if (tab === 'map') {
-        document.getElementById("mapView").classList.remove("hidden");
-        document.getElementById("listView").classList.add("hidden");
+        mapView.classList.remove("hidden");
+        listView.classList.add("hidden");
+        tabMapBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
+        tabListBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
         setTimeout(() => map.invalidateSize(), 150);
       } else {
-        document.getElementById("mapView").classList.add("hidden");
-        document.getElementById("listView").classList.remove("hidden");
+        mapView.classList.add("hidden");
+        listView.classList.remove("hidden");
+        tabListBtn.className = "flex flex-col items-center text-theme font-bold text-xs";
+        tabMapBtn.className = "flex flex-col items-center text-gray-400 font-bold text-xs";
         renderListView();
       }
     }
