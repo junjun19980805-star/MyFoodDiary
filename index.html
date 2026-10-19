@@ -31,13 +31,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 預設：字體黑色、UI 薰衣草紫、圖釘波爾多酒紅 */
+    /* 預設：字體墨黑、UI 薰衣草紫、圖釘 紅224 綠74 藍74 (#E04A4A) */
     :root {
-      --ui-text: #18181B;          /* 乾淨墨黑色字體 */
-      --ui-text-muted: #71717A;    /* 次要提示文字灰 */
-      --ui-theme: #9C95DB;         /* 預設 UI 主題：薰衣草紫 */
+      --ui-text: #18181B;          /* 墨黑色字體 */
+      --ui-text-muted: #71717A;    /* 次要提示灰 */
+      --ui-theme: #9C95DB;         /* 薰衣草紫 UI 主色 */
       --ui-theme-light: #F2F0FB;   /* 薰衣草紫柔和底色 */
-      --marker-color: #8E283B;     /* 預設地圖圖釘：波爾多酒紅 (與紫絕配) */
+      --marker-color: #E04A4A;     /* 圖釘：紅224 綠74 藍74 */
     }
 
     body {
@@ -70,7 +70,7 @@
       cursor: pointer;
     }
 
-    /* 地圖圖釘樣式 */
+    /* 地圖圖釘樣式 (預設 #E04A4A) */
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -80,7 +80,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 4px 12px rgba(224, 74, 74, 0.35);
       border: 2px solid #FFFFFF !important;
       transition: background 0.3s ease;
     }
@@ -108,7 +108,7 @@
     </div>
     
     <div class="flex items-center space-x-2">
-      <!-- 🎨 10 色自訂調色盤 -->
+      <!-- 🎨 調色盤按鈕 -->
       <button onclick="toggleColorPickerMenu()" title="調整圖釘與配色" class="touch-btn bg-theme-light hover:bg-[#EAE3D9] text-theme p-1.5 rounded-full text-xs font-bold active:scale-95 transition">
         🎨
       </button>
@@ -123,30 +123,34 @@
     </div>
   </header>
 
-  <!-- 🎨 全功能自由調色盤彈窗 (含 10 大薰衣草紫絕配圖釘色) -->
+  <!-- 🎨 調色盤彈窗 -->
   <div id="colorPickerModal" class="hidden fixed inset-0 bg-black/50 z-[1700] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-[#EAE3D9] space-y-4 max-h-[88dvh] overflow-y-auto pb-8">
       <div class="flex justify-between items-center border-b border-[#F0EBE3] pb-2">
         <div>
           <h3 class="font-bold text-main text-sm">風格調色盤 🎨</h3>
-          <p class="text-[10px] text-sub">自訂專屬於你的字體、UI 與圖釘配色</p>
+          <p class="text-[10px] text-sub">自訂字體、UI 配色與地圖圖釘顏色</p>
         </div>
         <button onclick="toggleColorPickerMenu()" class="text-sub text-xl">&times;</button>
       </div>
 
-      <!-- 1. 地圖圖釘顏色 (精選 10 款薰衣草紫絕配顏色) -->
+      <!-- 地圖圖釘顏色 (預設包含 #E04A4A) -->
       <div class="space-y-2">
         <div class="flex justify-between items-center text-xs">
-          <label class="font-bold text-main">📍 10 款薰衣草紫絕配圖釘色</label>
+          <label class="font-bold text-main">📍 地圖圖釘顏色 (目前預設：紅224 綠74 藍74)</label>
           <div class="flex items-center space-x-1">
-            <span class="text-[10px] text-sub">自選取色：</span>
+            <span class="text-[10px] text-sub">自選色：</span>
             <input type="color" id="pickerMarkerColor" onchange="applyCustomColor('marker', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+          <button onclick="applyPresetColor('marker', '#E04A4A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
+            <span class="w-4 h-4 rounded-full bg-[#E04A4A] flex-shrink-0 shadow-xs"></span>
+            <span class="truncate">珊瑚赤紅 (預設)</span>
+          </button>
           <button onclick="applyPresetColor('marker', '#8E283B')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
             <span class="w-4 h-4 rounded-full bg-[#8E283B] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">波爾多酒紅 (首選)</span>
+            <span class="truncate">波爾多酒紅</span>
           </button>
           <button onclick="applyPresetColor('marker', '#E67E22')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
             <span class="w-4 h-4 rounded-full bg-[#E67E22] flex-shrink-0 shadow-xs"></span>
@@ -176,10 +180,6 @@
             <span class="w-4 h-4 rounded-full bg-[#D49B28] flex-shrink-0 shadow-xs"></span>
             <span class="truncate">日光暖桔黃</span>
           </button>
-          <button onclick="applyPresetColor('marker', '#4B2C82')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#4B2C82] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">深紫羅蘭</span>
-          </button>
           <button onclick="applyPresetColor('marker', '#27272A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
             <span class="w-4 h-4 rounded-full bg-[#27272A] flex-shrink-0 shadow-xs"></span>
             <span class="truncate">煙燻極簡黑</span>
@@ -187,7 +187,7 @@
         </div>
       </div>
 
-      <!-- 2. 字體顏色 (預設黑色) -->
+      <!-- 字體顏色 -->
       <div class="space-y-2 border-t border-[#F0EBE3] pt-3">
         <div class="flex justify-between items-center text-xs">
           <label class="font-bold text-main">✏️ 主要文字顏色</label>
@@ -209,7 +209,7 @@
         </div>
       </div>
 
-      <!-- 3. UI 主題配色 (預設薰衣草紫) -->
+      <!-- UI 主題配色 -->
       <div class="space-y-2 border-t border-[#F0EBE3] pt-3">
         <div class="flex justify-between items-center text-xs">
           <label class="font-bold text-main">✨ UI 主題配色</label>
@@ -254,20 +254,39 @@
     </label>
   </div>
 
-  <!-- 📷 全螢幕照片時光燈箱 (新增：點擊任何照片展開高清檢視) -->
-  <div id="photoLightboxModal" class="hidden fixed inset-0 bg-black/90 z-[3000] flex flex-col items-center justify-between p-4">
-    <div class="w-full flex justify-between items-center text-white py-2">
+  <!-- 📷 全螢幕照片時光燈箱 (【核心修復】：多圖左右切換、滑動手勢、黃金比例不變形) -->
+  <div id="photoLightboxModal" class="hidden fixed inset-0 bg-black/95 z-[3000] flex flex-col items-center justify-between p-4 select-none">
+    <!-- 燈箱頂部資訊 -->
+    <div class="w-full flex justify-between items-center text-white py-2 px-1">
       <div>
-        <h4 id="lightboxTitle" class="font-bold text-sm"></h4>
-        <p id="lightboxDate" class="text-xs text-gray-300"></p>
+        <div class="flex items-center space-x-2">
+          <h4 id="lightboxTitle" class="font-bold text-sm tracking-wide"></h4>
+          <span id="lightboxCounter" class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
+        </div>
+        <p id="lightboxDate" class="text-xs text-gray-400 mt-0.5"></p>
       </div>
-      <button onclick="closeLightbox()" class="text-white text-2xl p-2 touch-btn">&times;</button>
+      <button onclick="closeLightbox()" class="text-white hover:text-gray-300 text-3xl p-2 touch-btn leading-none">&times;</button>
     </div>
-    <div class="flex-1 w-full flex items-center justify-center overflow-hidden my-auto">
-      <img id="lightboxImg" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl transition" />
+
+    <!-- 圖片顯示區與左右切換箭頭 -->
+    <div class="flex-1 w-full relative flex items-center justify-center overflow-hidden my-auto">
+      <!-- 左切換按鈕 -->
+      <button onclick="lightboxPrev()" class="lightbox-nav-btn touch-btn absolute left-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- 照片容器 (object-contain 保持自然比例不變形) -->
+      <img id="lightboxImg" class="max-w-[92vw] max-h-[68vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
+
+      <!-- 右切換按鈕 -->
+      <button onclick="lightboxNext()" class="lightbox-nav-btn touch-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
+
+    <!-- 燈箱底部心得文字 -->
     <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-3 text-white text-xs mb-2">
-      <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic"></p>
+      <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic text-gray-200"></p>
     </div>
   </div>
 
@@ -276,8 +295,6 @@
     
     <!-- 頁面 1：【點點滴滴・首頁足跡總覽 ＋ 探索回憶統計】 -->
     <div id="dashboardView" class="w-full h-full overflow-y-auto px-4 py-4 pb-32 space-y-4">
-      
-      <!-- 溫暖手帳風格問候區 -->
       <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-theme bg-theme-light px-2.5 py-1 rounded-full flex items-center">
@@ -335,7 +352,6 @@
         </div>
       </div>
 
-      <!-- 快捷記一篇入口 -->
       <div class="bg-theme-light p-3 rounded-2xl border border-[#E2D8CC] flex items-center justify-between">
         <div class="flex items-center space-x-2 text-xs text-main">
           <span class="w-2 h-2 rounded-full bg-theme animate-pulse"></span>
@@ -355,7 +371,6 @@
           <span class="text-[10px] text-sub">真實日記統計</span>
         </div>
 
-        <!-- 1. 縣市足跡排行 -->
         <div>
           <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
             <i class="fa-solid fa-city mr-1 text-theme"></i> 城市足跡分佈
@@ -363,7 +378,6 @@
           <div id="statCityBars" class="space-y-1.5 text-xs"></div>
         </div>
 
-        <!-- 2. 最常回訪好地方 -->
         <div class="pt-1">
           <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
             <i class="fa-solid fa-crown mr-1 text-amber-500"></i> 最愛回訪的好地方 (Top 3)
@@ -371,7 +385,6 @@
           <div id="statTopRevisitList" class="space-y-1 text-xs"></div>
         </div>
 
-        <!-- 3. 類型標籤分佈 -->
         <div class="pt-1">
           <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
             <i class="fa-solid fa-tags mr-1 text-theme"></i> 探索類型標籤
@@ -379,7 +392,6 @@
           <div id="statTagsList" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <!-- 4. 年度趨勢 -->
         <div class="pt-1">
           <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
             <i class="fa-solid fa-timeline mr-1 text-theme"></i> 年度回憶累積
@@ -423,17 +435,15 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：【日記列表】 (新增：年度時光回顧膠囊) -->
+    <!-- 頁面 3：【日記列表】 (年度時光回顧膠囊) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32 absolute inset-0 z-10">
       
-      <!-- 【下一步新功能】：年度時光膠囊回顧橫向滑動列 -->
+      <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
         <label class="text-[11px] font-bold text-sub flex items-center">
           <i class="fa-solid fa-hourglass-half mr-1 text-theme"></i> 年度時光回顧膠囊
         </label>
-        <div id="yearTimelinePills" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1">
-          <!-- 動態載入年份標籤膠囊 -->
-        </div>
+        <div id="yearTimelinePills" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1"></div>
       </div>
 
       <div class="bg-white p-3.5 rounded-2xl shadow-xs mb-3 space-y-2.5 border border-[#EAE3D9]">
@@ -502,7 +512,7 @@
     </div>
   </nav>
 
-  <!-- 彈跳表單視窗 (方法一與方法三顏色全面連動 UI 主題色) -->
+  <!-- 彈跳表單視窗 (【核心修復】：方法一與強制鎖定按鈕樣式與方法三完全一致) -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -536,13 +546,13 @@
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、地址或備註位置" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 【顏色連動修復】：方法一按鈕改為 bg-theme 跟隨主題 -->
-          <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme text-white py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
+          <!-- 【按鈕樣式一致】：方法一配色完全同方法三 (bg-theme-light text-theme border border-theme) -->
+          <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：地圖自動查找此地點</span>
           </button>
 
-          <!-- 方法二：輸入座標 -->
+          <!-- 方法二：輸入座標 (【按鈕樣式一致】：強制鎖定按鈕配色同方法三) -->
           <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="font-bold text-main text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
@@ -552,14 +562,14 @@
             </div>
             <div class="flex items-center space-x-1.5">
               <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleManualCoordsInput(this.value)" class="flex-1 bg-[#FAF8F5] border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
-              <button type="button" onclick="applyManualCoordsNow()" class="touch-btn bg-theme text-white px-3 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
+              <button type="button" onclick="applyManualCoordsNow()" class="touch-btn bg-theme-light text-theme border border-theme px-3 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
                 強制鎖定此座標
               </button>
             </div>
             <p class="text-[9px] text-sub">💡 Google 地圖長按店家 ➔ 複製上方座標數字 ➔ 貼到此處點強制鎖定</p>
           </div>
 
-          <!-- 【顏色連動修復】：方法三按鈕改為 bg-theme 與主題連動 -->
+          <!-- 方法三：現場定位 -->
           <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位目前位置 (我在現場)</span>
@@ -704,13 +714,22 @@
     let currentRatingValue = 4.5;
     let uploadedPhotosList = [];
     let pendingLocation = null;
-    let selectedYearFilter = "all"; // 當前選擇回顧的年份
+    let selectedYearFilter = "all";
 
-    // 自訂顏色管理 (預設：黑字、薰衣草紫UI、波爾多酒紅圖釘)
+    // 【修改 2】：圖釘預設改為 紅224 綠74 藍74 (#E04A4A)
     let currentColors = {
       text: localStorage.getItem("my_diary_text_color") || "#18181B",
       theme: localStorage.getItem("my_diary_theme_color") || "#9C95DB",
-      marker: localStorage.getItem("my_diary_marker_color") || "#8E283B"
+      marker: localStorage.getItem("my_diary_marker_color") || "#E04A4A"
+    };
+
+    // 全螢幕燈箱輪播狀態
+    let currentLightboxState = {
+      photos: [],
+      index: 0,
+      title: "",
+      date: "",
+      review: ""
     };
 
     async function initApp() {
@@ -748,6 +767,7 @@
       buildStarsUI();
       refreshViews();
       updateDashboardStats();
+      initLightboxSwipe();
 
       const now = new Date();
       document.getElementById("dashTodayDate").innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
@@ -788,12 +808,11 @@
       document.documentElement.style.setProperty('--ui-text', currentColors.text);
       document.documentElement.style.setProperty('--ui-theme', currentColors.theme);
       document.documentElement.style.setProperty('--marker-color', currentColors.marker);
-      // 動態柔和底色 (透明度處理)
       document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
     }
 
     function resetThemeDefaults() {
-      currentColors = { text: "#18181B", theme: "#9C95DB", marker: "#8E283B" };
+      currentColors = { text: "#18181B", theme: "#9C95DB", marker: "#E04A4A" };
       localStorage.removeItem("my_diary_text_color");
       localStorage.removeItem("my_diary_theme_color");
       localStorage.removeItem("my_diary_marker_color");
@@ -802,17 +821,73 @@
       toggleColorPickerMenu();
     }
 
-    // ========== 📷 全螢幕照片燈箱控制 ==========
-    function openLightbox(imgSrc, title, date, review) {
-      document.getElementById("lightboxImg").src = imgSrc;
+    // ========== 【核心修復 3】：全螢幕多圖燈箱 (支援每一則評論、左右切換與滑動) ==========
+
+    // 透過資料 ID 索引開啟燈箱，徹底避開字串截斷與語法錯誤
+    function openLightboxByData(storeId, visitId, initialIndex = 0) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      const visit = store.visits.find(v => v.visitId === visitId) || store.visits[0];
+      if (!visit) return;
+      const photos = getVisitPhotos(visit);
+      if (!photos.length) return;
+
+      currentLightboxState = {
+        photos: photos,
+        index: initialIndex,
+        title: store.name,
+        date: visit.date,
+        review: visit.review || ""
+      };
+
+      updateLightboxDisplay();
+      document.getElementById("photoLightboxModal").classList.remove("hidden");
+    }
+
+    function updateLightboxDisplay() {
+      const { photos, index, title, date, review } = currentLightboxState;
+      document.getElementById("lightboxImg").src = photos[index];
       document.getElementById("lightboxTitle").innerText = title;
       document.getElementById("lightboxDate").innerText = date ? `造訪於 ${date}` : '';
       document.getElementById("lightboxReview").innerText = review ? `"${review}"` : '留下一段美好的生活足跡。';
-      document.getElementById("photoLightboxModal").classList.remove("hidden");
+      document.getElementById("lightboxCounter").innerText = `${index + 1} / ${photos.length}`;
+
+      // 只有 1 張照片時隱藏左右按鈕
+      const navBtns = document.querySelectorAll(".lightbox-nav-btn");
+      navBtns.forEach(btn => {
+        btn.style.display = photos.length > 1 ? "flex" : "none";
+      });
+    }
+
+    function lightboxPrev() {
+      if (currentLightboxState.photos.length <= 1) return;
+      currentLightboxState.index = (currentLightboxState.index - 1 + currentLightboxState.photos.length) % currentLightboxState.photos.length;
+      updateLightboxDisplay();
+    }
+
+    function lightboxNext() {
+      if (currentLightboxState.photos.length <= 1) return;
+      currentLightboxState.index = (currentLightboxState.index + 1) % currentLightboxState.photos.length;
+      updateLightboxDisplay();
     }
 
     function closeLightbox() {
       document.getElementById("photoLightboxModal").classList.add("hidden");
+    }
+
+    // 支援手機左右滑動手勢
+    function initLightboxSwipe() {
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const modal = document.getElementById("photoLightboxModal");
+      modal.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      modal.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) lightboxNext();
+        if (touchEndX > touchStartX + 50) lightboxPrev();
+      }, { passive: true });
     }
 
     // ========== 點點滴滴儀表板數據 ==========
@@ -876,7 +951,6 @@
       renderRecentMemories(allMemories.slice(0, 4));
     }
 
-    // 渲染年度時光膠囊標籤
     function renderYearTimelinePills(years) {
       const container = document.getElementById("yearTimelinePills");
       if (!years.length) {
@@ -901,14 +975,12 @@
 
     function setYearFilter(year) {
       selectedYearFilter = year;
-      // 重新渲染年份膠囊狀態
       const allYears = Array.from(new Set(appData.flatMap(s => (s.visits || []).map(v => v.date?.substring(0, 4)).filter(Boolean)))).sort((a,b)=>b.localeCompare(a));
       renderYearTimelinePills(allYears);
       renderListView();
     }
 
     function renderExplorationStats(cityMap, revisitList, tagMap, yearMap) {
-      // 1. 城市足跡比例條
       const cityContainer = document.getElementById("statCityBars");
       const sortedCities = Object.entries(cityMap).sort((a, b) => b[1] - a[1]);
       if (sortedCities.length === 0) {
@@ -928,7 +1000,6 @@
         `).join('');
       }
 
-      // 2. 回訪排行榜
       const revisitContainer = document.getElementById("statTopRevisitList");
       revisitList.sort((a, b) => b.count - a.count);
       if (revisitList.length === 0) {
@@ -942,7 +1013,6 @@
         `).join('');
       }
 
-      // 3. 類型標籤
       const tagsContainer = document.getElementById("statTagsList");
       const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
       if (sortedTags.length === 0) {
@@ -955,7 +1025,6 @@
         `).join('');
       }
 
-      // 4. 年度趨勢
       const yearContainer = document.getElementById("statYearlyTrend");
       const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
       if (sortedYears.length === 0) {
@@ -993,7 +1062,7 @@
             </div>
 
             ${hasPhoto ? `
-              <div onclick="openLightbox('${item.photos[0]}', '${item.storeName}', '${item.date}', '${item.review.replace(/'/g, "\\'")}')" class="touch-btn relative rounded-xl overflow-hidden h-36 border border-[#F0EBE3] cursor-pointer">
+              <div onclick="openLightboxByData('${item.storeId}', '${item.visitId}', 0)" class="touch-btn relative rounded-xl overflow-hidden h-36 border border-[#F0EBE3] cursor-pointer">
                 <img src="${item.photos[0]}" class="w-full h-full object-cover" />
                 ${item.photos.length > 1 ? `<span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-2 py-0.5 rounded-full">共 ${item.photos.length} 張</span>` : ''}
               </div>
@@ -1301,6 +1370,7 @@
       toggleBackupMenu();
     }
 
+    // 多圖壓縮與處理 (【修復不變形】：維持原始長寬比計算，避免拉伸)
     async function handlePhotosSelect(event) {
       const files = Array.from(event.target.files);
       if (!files.length) return;
@@ -1319,18 +1389,24 @@
           const img = new Image();
           img.src = e.target.result;
           img.onload = () => {
-            const canvas = document.createElement("canvas");
-            let w = img.width, h = img.height;
-            const maxDim = 850;
-            if (w > maxDim) {
-              h = Math.round((maxDim / w) * h);
-              w = maxDim;
+            let w = img.width;
+            let h = img.height;
+            const maxDim = 1200; // 提升清晰度至 1200px
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((maxDim / w) * h);
+                w = maxDim;
+              } else {
+                w = Math.round((maxDim / h) * w);
+                h = maxDim;
+              }
             }
+            const canvas = document.createElement("canvas");
             canvas.width = w;
             canvas.height = h;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL("image/jpeg", 0.72));
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
           };
         };
         reader.readAsDataURL(file);
@@ -1562,7 +1638,7 @@
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
       appData.forEach(item => {
-        if (!item.lat || !item.lng) return; // 無座標地點跳過在地圖上畫點
+        if (!item.lat || !item.lng) return;
         const latest = item.visits[0];
         if (!latest) return;
         const photos = getVisitPhotos(latest);
@@ -1580,7 +1656,7 @@
           : `<span style="color:#71717A; font-weight:bold; background:#F4F4F5; padding:2px 6px; border-radius:6px;">探訪留念</span>`;
 
         const photoHtml = photos.length > 0 
-          ? `<div onclick="openLightbox('${photos[0]}', '${item.name}', '${latest.date}', '${(latest.review||'').replace(/'/g, "\\'")}')" class="touch-btn relative mb-1.5 cursor-pointer rounded-xl overflow-hidden">
+          ? `<div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn relative mb-1.5 cursor-pointer rounded-xl overflow-hidden">
                <img src="${photos[0]}" style="width:100%; height:95px; object-fit:cover;" />
                ${photos.length > 1 ? `<span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.6); color:white; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">📷 ${photos.length}張</span>` : ''}
              </div>` 
@@ -1604,6 +1680,7 @@
       });
     }
 
+    // 清單渲染 (【核心修復】：每一則評論、每一張照片都能直接點開大圖與多圖切換)
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -1613,7 +1690,6 @@
 
       let list = [...appData];
 
-      // 1. 年度時光膠囊過濾
       if (selectedYearFilter !== 'all') {
         list = list.filter(store => (store.visits || []).some(v => v.date?.startsWith(selectedYearFilter)));
       }
@@ -1649,10 +1725,11 @@
         const photos = getVisitPhotos(latest);
         const hasCoords = item.lat && item.lng;
 
+        // 【多圖滑動相簿】：每張圖都綁定對應的 openLightboxByData 索引
         let photosRenderHtml = "";
         if (photos.length === 1) {
           photosRenderHtml = `
-            <div onclick="openLightbox('${photos[0]}', '${item.name}', '${latest.date}', '${(latest.review||'').replace(/'/g, "\\'")}')" class="touch-btn cursor-pointer">
+            <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn cursor-pointer">
               <img src="${photos[0]}" class="w-full h-44 object-cover rounded-2xl border border-[#F0EBE3]" />
             </div>
           `;
@@ -1661,7 +1738,7 @@
             <div class="relative">
               <div class="flex space-x-2 overflow-x-auto no-scrollbar snap-x py-1">
                 ${photos.map((p, pIdx) => `
-                  <div onclick="openLightbox('${p}', '${item.name}', '${latest.date}', '${(latest.review||'').replace(/'/g, "\\'")}')" class="touch-btn flex-shrink-0 w-[78%] h-44 snap-center rounded-2xl overflow-hidden border border-[#F0EBE3] relative cursor-pointer">
+                  <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', ${pIdx})" class="touch-btn flex-shrink-0 w-[78%] h-44 snap-center rounded-2xl overflow-hidden border border-[#F0EBE3] relative cursor-pointer">
                     <img src="${p}" class="w-full h-full object-cover" />
                     <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
                       ${pIdx + 1} / ${photos.length}
@@ -1690,7 +1767,7 @@
               </button>
             </div>
 
-            <!-- 照片展示區 (支援點擊燈箱放大) -->
+            <!-- 照片展示區 (支援燈箱放大與多圖切換) -->
             ${photosRenderHtml}
 
             <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
@@ -1833,7 +1910,6 @@
       setRating(Math.round(num * 2) / 2);
     }
 
-    // 分頁切換
     function switchTab(tab) {
       const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
