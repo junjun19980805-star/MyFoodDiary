@@ -31,7 +31,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 預設：字體墨黑、UI 薰衣草紫、圖釘 紅224 綠74 藍74 (#E04A4A) */
+    /* 預設配色：字體墨黑、UI 薰衣草紫、圖釘 珊瑚赤紅 (#E04A4A) */
     :root {
       --ui-text: #18181B;          /* 墨黑色字體 */
       --ui-text-muted: #71717A;    /* 次要提示灰 */
@@ -70,7 +70,7 @@
       cursor: pointer;
     }
 
-    /* 地圖圖釘樣式 (預設 #E04A4A) */
+    /* 地圖圖釘樣式 */
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -134,10 +134,10 @@
         <button onclick="toggleColorPickerMenu()" class="text-sub text-xl">&times;</button>
       </div>
 
-      <!-- 地圖圖釘顏色 (預設包含 #E04A4A) -->
+      <!-- 地圖圖釘顏色 -->
       <div class="space-y-2">
         <div class="flex justify-between items-center text-xs">
-          <label class="font-bold text-main">📍 地圖圖釘顏色 (目前預設：紅224 綠74 藍74)</label>
+          <label class="font-bold text-main">📍 10 款精選圖釘顏色 (目前預設：珊瑚赤紅)</label>
           <div class="flex items-center space-x-1">
             <span class="text-[10px] text-sub">自選色：</span>
             <input type="color" id="pickerMarkerColor" onchange="applyCustomColor('marker', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
@@ -254,9 +254,8 @@
     </label>
   </div>
 
-  <!-- 📷 全螢幕照片時光燈箱 (【核心修復】：多圖左右切換、滑動手勢、黃金比例不變形) -->
+  <!-- 📷 全螢幕照片時光燈箱 -->
   <div id="photoLightboxModal" class="hidden fixed inset-0 bg-black/95 z-[3000] flex flex-col items-center justify-between p-4 select-none">
-    <!-- 燈箱頂部資訊 -->
     <div class="w-full flex justify-between items-center text-white py-2 px-1">
       <div>
         <div class="flex items-center space-x-2">
@@ -268,23 +267,18 @@
       <button onclick="closeLightbox()" class="text-white hover:text-gray-300 text-3xl p-2 touch-btn leading-none">&times;</button>
     </div>
 
-    <!-- 圖片顯示區與左右切換箭頭 -->
     <div class="flex-1 w-full relative flex items-center justify-center overflow-hidden my-auto">
-      <!-- 左切換按鈕 -->
       <button onclick="lightboxPrev()" class="lightbox-nav-btn touch-btn absolute left-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <!-- 照片容器 (object-contain 保持自然比例不變形) -->
-      <img id="lightboxImg" class="max-w-[92vw] max-h-[68vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
+      <img id="lightboxImg" class="max-w-[94vw] max-h-[70vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
 
-      <!-- 右切換按鈕 -->
       <button onclick="lightboxNext()" class="lightbox-nav-btn touch-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
 
-    <!-- 燈箱底部心得文字 -->
     <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-3 text-white text-xs mb-2">
       <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic text-gray-200"></p>
     </div>
@@ -400,7 +394,7 @@
         </div>
       </div>
 
-      <!-- 最近造訪的回憶 (照片日記卡片) -->
+      <!-- 最近造訪的回憶 (照片完整顯示・絕不裁切) -->
       <div class="space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -415,9 +409,10 @@
       </div>
     </div>
 
-    <!-- 頁面 2：【足跡地圖】 -->
+    <!-- 頁面 2：【足跡地圖】 (新增：即時類別膠囊篩選 ＋ 無座標溫柔提示) -->
     <div id="mapView" class="hidden w-full h-full relative">
-      <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto">
+      <!-- 頂部浮動搜尋列與類別標籤 -->
+      <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto space-y-1.5">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
           <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
           <input type="text" id="homeSearchInput" placeholder="搜尋想念的店名、景點、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-main" />
@@ -425,7 +420,19 @@
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
-        <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
+        
+        <!-- 【下一步新功能】：地圖專屬即時類別標籤膠囊 -->
+        <div id="mapCategoryChips" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <!-- 動態載入類別膠囊 -->
+        </div>
+
+        <div id="searchResultsCard" class="hidden mt-1 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
+      </div>
+
+      <!-- 無座標地點貼心小條 -->
+      <div id="unmappedNoticeBar" class="hidden absolute top-28 left-4 right-4 z-[900] bg-white/95 backdrop-blur border border-[#EAE3D9] rounded-2xl p-2.5 shadow-md flex items-center justify-between text-xs">
+        <span class="text-sub flex items-center"><i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i> <span id="unmappedCountText">0 個地點尚無座標</span></span>
+        <button onclick="switchTab('list')" class="text-theme font-bold underline text-[11px]">去清單查看 →</button>
       </div>
 
       <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-24 right-4 z-[900] bg-white text-main hover:text-theme w-11 h-11 rounded-full shadow-lg flex items-center justify-center border border-[#EAE3D9] active:scale-90 transition">
@@ -512,7 +519,7 @@
     </div>
   </nav>
 
-  <!-- 彈跳表單視窗 (【核心修復】：方法一與強制鎖定按鈕樣式與方法三完全一致) -->
+  <!-- 彈跳表單視窗 -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -546,13 +553,13 @@
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、地址或備註位置" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 【按鈕樣式一致】：方法一配色完全同方法三 (bg-theme-light text-theme border border-theme) -->
+          <!-- 方法一按鈕：bg-theme-light text-theme border border-theme -->
           <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：地圖自動查找此地點</span>
           </button>
 
-          <!-- 方法二：輸入座標 (【按鈕樣式一致】：強制鎖定按鈕配色同方法三) -->
+          <!-- 方法二按鈕：強制鎖定按鈕樣式完全同方法三 -->
           <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="font-bold text-main text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
@@ -569,7 +576,7 @@
             <p class="text-[9px] text-sub">💡 Google 地圖長按店家 ➔ 複製上方座標數字 ➔ 貼到此處點強制鎖定</p>
           </div>
 
-          <!-- 方法三：現場定位 -->
+          <!-- 方法三按鈕 -->
           <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位目前位置 (我在現場)</span>
@@ -715,15 +722,14 @@
     let uploadedPhotosList = [];
     let pendingLocation = null;
     let selectedYearFilter = "all";
+    let selectedMapCategory = "all"; // 【新功能】：地圖專屬類別過濾
 
-    // 【修改 2】：圖釘預設改為 紅224 綠74 藍74 (#E04A4A)
     let currentColors = {
       text: localStorage.getItem("my_diary_text_color") || "#18181B",
       theme: localStorage.getItem("my_diary_theme_color") || "#9C95DB",
       marker: localStorage.getItem("my_diary_marker_color") || "#E04A4A"
     };
 
-    // 全螢幕燈箱輪播狀態
     let currentLightboxState = {
       photos: [],
       index: 0,
@@ -783,7 +789,7 @@
       }
     }
 
-    // ========== 🎨 顏色調色盤核心邏輯 ==========
+    // 調色盤
     function toggleColorPickerMenu() {
       document.getElementById("colorPickerModal").classList.toggle("hidden");
       document.getElementById("pickerTextColor").value = currentColors.text;
@@ -821,9 +827,7 @@
       toggleColorPickerMenu();
     }
 
-    // ========== 【核心修復 3】：全螢幕多圖燈箱 (支援每一則評論、左右切換與滑動) ==========
-
-    // 透過資料 ID 索引開啟燈箱，徹底避開字串截斷與語法錯誤
+    // 燈箱控制
     function openLightboxByData(storeId, visitId, initialIndex = 0) {
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
@@ -852,7 +856,6 @@
       document.getElementById("lightboxReview").innerText = review ? `"${review}"` : '留下一段美好的生活足跡。';
       document.getElementById("lightboxCounter").innerText = `${index + 1} / ${photos.length}`;
 
-      // 只有 1 張照片時隱藏左右按鈕
       const navBtns = document.querySelectorAll(".lightbox-nav-btn");
       navBtns.forEach(btn => {
         btn.style.display = photos.length > 1 ? "flex" : "none";
@@ -875,7 +878,6 @@
       document.getElementById("photoLightboxModal").classList.add("hidden");
     }
 
-    // 支援手機左右滑動手勢
     function initLightboxSwipe() {
       let touchStartX = 0;
       let touchEndX = 0;
@@ -890,7 +892,7 @@
       }, { passive: true });
     }
 
-    // ========== 點點滴滴儀表板數據 ==========
+    // 儀表板統計
     function updateDashboardStats() {
       document.getElementById("statUniquePlaces").innerText = appData.length;
 
@@ -1039,6 +1041,7 @@
       }
     }
 
+    // 【核心修復 2】：點點滴滴預覽圖片「完整等比顯示，絕不裁切」
     function renderRecentMemories(recentList) {
       const container = document.getElementById("recentMemoriesCards");
       if (!recentList.length) {
@@ -1062,9 +1065,10 @@
             </div>
 
             ${hasPhoto ? `
-              <div onclick="openLightboxByData('${item.storeId}', '${item.visitId}', 0)" class="touch-btn relative rounded-xl overflow-hidden h-36 border border-[#F0EBE3] cursor-pointer">
-                <img src="${item.photos[0]}" class="w-full h-full object-cover" />
-                ${item.photos.length > 1 ? `<span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-2 py-0.5 rounded-full">共 ${item.photos.length} 張</span>` : ''}
+              <!-- 完整圖片展示容器：object-contain 搭配溫暖柔底，直式橫式完整呈現 -->
+              <div onclick="openLightboxByData('${item.storeId}', '${item.visitId}', 0)" class="touch-btn relative rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] cursor-pointer flex items-center justify-center p-1 min-h-[140px] max-h-64">
+                <img src="${item.photos[0]}" class="max-h-60 max-w-full object-contain rounded-xl shadow-xs" />
+                ${item.photos.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-xs">共 ${item.photos.length} 張</span>` : ''}
               </div>
             ` : ''}
 
@@ -1370,7 +1374,6 @@
       toggleBackupMenu();
     }
 
-    // 多圖壓縮與處理 (【修復不變形】：維持原始長寬比計算，避免拉伸)
     async function handlePhotosSelect(event) {
       const files = Array.from(event.target.files);
       if (!files.length) return;
@@ -1391,7 +1394,7 @@
           img.onload = () => {
             let w = img.width;
             let h = img.height;
-            const maxDim = 1200; // 提升清晰度至 1200px
+            const maxDim = 1200;
             if (w > maxDim || h > maxDim) {
               if (w > h) {
                 h = Math.round((maxDim / w) * h);
@@ -1594,6 +1597,7 @@
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
+      renderMapCategoryChips(); // 更新地圖類別膠囊
       renderMarkers();
       renderListView();
     }
@@ -1628,17 +1632,66 @@
         [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
+    // 【下一步新功能】：渲染足跡地圖專屬的類別快速篩選膠囊
+    function renderMapCategoryChips() {
+      const container = document.getElementById("mapCategoryChips");
+      if (!container) return;
+
+      const tagCount = {};
+      appData.forEach(store => {
+        (store.tags || []).forEach(t => {
+          const clean = t.trim();
+          if (clean) tagCount[clean] = (tagCount[clean] || 0) + 1;
+        });
+      });
+
+      const topTags = Object.entries(tagCount).sort((a,b) => b[1] - a[1]).slice(0, 8).map(e => e[0]);
+
+      let html = `
+        <button onclick="filterMapCategory('all')" class="touch-btn text-[11px] px-3 py-1 rounded-full font-bold whitespace-nowrap transition shadow-xs ${selectedMapCategory === 'all' ? 'bg-theme text-white' : 'bg-white/95 text-sub border border-[#EAE3D9]'}">
+          全部地點
+        </button>
+      `;
+
+      html += topTags.map(tag => `
+        <button onclick="filterMapCategory('${tag}')" class="touch-btn text-[11px] px-3 py-1 rounded-full font-bold whitespace-nowrap transition shadow-xs ${selectedMapCategory === tag ? 'bg-theme text-white' : 'bg-white/95 text-sub border border-[#EAE3D9]'}">
+          #${tag}
+        </button>
+      `).join('');
+
+      container.innerHTML = html;
+    }
+
+    function filterMapCategory(cat) {
+      selectedMapCategory = cat;
+      renderMapCategoryChips();
+      renderMarkers();
+    }
+
     function getVisitPhotos(visit) {
       if (visit.photos && Array.isArray(visit.photos) && visit.photos.length) return visit.photos;
       if (visit.photo) return [visit.photo];
       return [];
     }
 
+    // 渲染地圖圖釘 (支援依類別篩選 ＋ 無座標提示)
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
+
+      let unmappedCount = 0;
+
       appData.forEach(item => {
-        if (!item.lat || !item.lng) return;
+        if (!item.lat || !item.lng) {
+          unmappedCount++;
+          return;
+        }
+
+        // 檢查地圖類別篩選
+        if (selectedMapCategory !== 'all' && (!item.tags || !item.tags.includes(selectedMapCategory))) {
+          return;
+        }
+
         const latest = item.visits[0];
         if (!latest) return;
         const photos = getVisitPhotos(latest);
@@ -1656,8 +1709,8 @@
           : `<span style="color:#71717A; font-weight:bold; background:#F4F4F5; padding:2px 6px; border-radius:6px;">探訪留念</span>`;
 
         const photoHtml = photos.length > 0 
-          ? `<div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn relative mb-1.5 cursor-pointer rounded-xl overflow-hidden">
-               <img src="${photos[0]}" style="width:100%; height:95px; object-fit:cover;" />
+          ? `<div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn relative mb-1.5 cursor-pointer rounded-xl overflow-hidden bg-[#F5F0E8] flex items-center justify-center max-h-32 p-1">
+               <img src="${photos[0]}" style="max-height:120px; max-width:100%; object-contain:contain; border-radius:8px;" />
                ${photos.length > 1 ? `<span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.6); color:white; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">📷 ${photos.length}張</span>` : ''}
              </div>` 
           : '';
@@ -1678,9 +1731,20 @@
 
         L.marker([item.lat, item.lng], { icon: icon, recordId: item.id }).bindPopup(content).addTo(markersLayer);
       });
+
+      // 更新無座標地點提示條
+      const unmappedBar = document.getElementById("unmappedNoticeBar");
+      if (unmappedBar) {
+        if (unmappedCount > 0) {
+          document.getElementById("unmappedCountText").innerText = `${unmappedCount} 個地點尚未標註座標`;
+          unmappedBar.classList.remove("hidden");
+        } else {
+          unmappedBar.classList.add("hidden");
+        }
+      }
     }
 
-    // 清單渲染 (【核心修復】：每一則評論、每一張照片都能直接點開大圖與多圖切換)
+    // 清單渲染 (【核心修復 2】：卡片相簿完整比例顯示，直橫皆不裁切)
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -1725,22 +1789,22 @@
         const photos = getVisitPhotos(latest);
         const hasCoords = item.lat && item.lng;
 
-        // 【多圖滑動相簿】：每張圖都綁定對應的 openLightboxByData 索引
+        // 【完整不裁切照片相簿】：長寬比完整呈現
         let photosRenderHtml = "";
         if (photos.length === 1) {
           photosRenderHtml = `
-            <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn cursor-pointer">
-              <img src="${photos[0]}" class="w-full h-44 object-cover rounded-2xl border border-[#F0EBE3]" />
+            <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn cursor-pointer rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] flex items-center justify-center p-1.5 max-h-72">
+              <img src="${photos[0]}" class="max-h-68 max-w-full object-contain rounded-xl shadow-xs" />
             </div>
           `;
         } else if (photos.length > 1) {
           photosRenderHtml = `
             <div class="relative">
-              <div class="flex space-x-2 overflow-x-auto no-scrollbar snap-x py-1">
+              <div class="flex space-x-2.5 overflow-x-auto no-scrollbar snap-x py-1">
                 ${photos.map((p, pIdx) => `
-                  <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', ${pIdx})" class="touch-btn flex-shrink-0 w-[78%] h-44 snap-center rounded-2xl overflow-hidden border border-[#F0EBE3] relative cursor-pointer">
-                    <img src="${p}" class="w-full h-full object-cover" />
-                    <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', ${pIdx})" class="touch-btn flex-shrink-0 w-[82%] h-52 snap-center rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] relative cursor-pointer flex items-center justify-center p-1.5">
+                    <img src="${p}" class="max-h-full max-w-full object-contain rounded-xl" />
+                    <span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
                       ${pIdx + 1} / ${photos.length}
                     </span>
                   </div>
@@ -1767,7 +1831,7 @@
               </button>
             </div>
 
-            <!-- 照片展示區 (支援燈箱放大與多圖切換) -->
+            <!-- 照片展示區 (完整比例) -->
             ${photosRenderHtml}
 
             <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
@@ -1910,6 +1974,7 @@
       setRating(Math.round(num * 2) / 2);
     }
 
+    // 分頁切換
     function switchTab(tab) {
       const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
@@ -1933,6 +1998,7 @@
       } else if (tab === 'map') {
         mapView.classList.remove("hidden");
         tabMapBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        renderMapCategoryChips();
         setTimeout(() => { if (map) map.invalidateSize(); }, 150);
       } else {
         listView.classList.remove("hidden");
