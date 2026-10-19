@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>我的美食與足跡日記</title>
+  <title>我的點點滴滴</title>
 
   <!-- PWA 設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -31,7 +31,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 預設配色：字體墨黑、UI 薰衣草紫、圖釘 珊瑚赤紅 (#E04A4A) */
+    /* 專屬美學配置：墨黑文字、薰衣草紫 UI、珊瑚赤紅圖釘 (#E04A4A) */
     :root {
       --ui-text: #18181B;          /* 墨黑色字體 */
       --ui-text-muted: #71717A;    /* 次要提示灰 */
@@ -70,7 +70,7 @@
       cursor: pointer;
     }
 
-    /* 地圖圖釘樣式 */
+    /* 珊瑚赤紅地圖圖釘 */
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -102,16 +102,12 @@
         <i class="fa-solid fa-mug-hot text-sm"></i>
       </div>
       <div>
-        <h1 class="text-base font-bold text-main leading-tight">我的美食日記</h1>
+        <h1 class="text-base font-bold text-main leading-tight">我的點點滴滴</h1>
         <p class="text-[10px] text-sub">生活足跡與時光回憶手帳</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <!-- 🎨 調色盤按鈕 -->
-      <button onclick="toggleColorPickerMenu()" title="調整圖釘與配色" class="touch-btn bg-theme-light hover:bg-[#EAE3D9] text-theme p-1.5 rounded-full text-xs font-bold active:scale-95 transition">
-        🎨
-      </button>
       <!-- 備份選單 -->
       <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-sub hover:bg-[#F2ECE4] p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
@@ -122,121 +118,6 @@
       </button>
     </div>
   </header>
-
-  <!-- 🎨 調色盤彈窗 -->
-  <div id="colorPickerModal" class="hidden fixed inset-0 bg-black/50 z-[1700] flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-[#EAE3D9] space-y-4 max-h-[88dvh] overflow-y-auto pb-8">
-      <div class="flex justify-between items-center border-b border-[#F0EBE3] pb-2">
-        <div>
-          <h3 class="font-bold text-main text-sm">風格調色盤 🎨</h3>
-          <p class="text-[10px] text-sub">自訂字體、UI 配色與地圖圖釘顏色</p>
-        </div>
-        <button onclick="toggleColorPickerMenu()" class="text-sub text-xl">&times;</button>
-      </div>
-
-      <!-- 地圖圖釘顏色 -->
-      <div class="space-y-2">
-        <div class="flex justify-between items-center text-xs">
-          <label class="font-bold text-main">📍 10 款精選圖釘顏色 (目前預設：珊瑚赤紅)</label>
-          <div class="flex items-center space-x-1">
-            <span class="text-[10px] text-sub">自選色：</span>
-            <input type="color" id="pickerMarkerColor" onchange="applyCustomColor('marker', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-          <button onclick="applyPresetColor('marker', '#E04A4A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#E04A4A] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">珊瑚赤紅 (預設)</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#8E283B')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#8E283B] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">波爾多酒紅</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#E67E22')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#E67E22] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">琥珀蜜糖橘</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#3E2723')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#3E2723] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">深焙黑茶棕</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#1E3A8A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#1E3A8A] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">夜幕藏青藍</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#2E6B3A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#2E6B3A] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">森林苔蘚綠</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#3D7878')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#3D7878] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">復古灰松綠</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#B85B73')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#B85B73] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">乾燥玫瑰粉</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#D49B28')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#D49B28] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">日光暖桔黃</span>
-          </button>
-          <button onclick="applyPresetColor('marker', '#27272A')" class="border border-[#EAE3D9] rounded-xl p-2 text-left font-bold active:scale-95 flex items-center space-x-2">
-            <span class="w-4 h-4 rounded-full bg-[#27272A] flex-shrink-0 shadow-xs"></span>
-            <span class="truncate">煙燻極簡黑</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 字體顏色 -->
-      <div class="space-y-2 border-t border-[#F0EBE3] pt-3">
-        <div class="flex justify-between items-center text-xs">
-          <label class="font-bold text-main">✏️ 主要文字顏色</label>
-          <div class="flex items-center space-x-1">
-            <span class="text-[10px] text-sub">自選色：</span>
-            <input type="color" id="pickerTextColor" onchange="applyCustomColor('text', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-          <button onclick="applyPresetColor('text', '#18181B')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#18181B] inline-block"></span><span>純粹黑 (預設)</span>
-          </button>
-          <button onclick="applyPresetColor('text', '#3F3F46')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#3F3F46] inline-block"></span><span>炭焙深灰</span>
-          </button>
-          <button onclick="applyPresetColor('text', '#2E282A')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#2E282A] inline-block"></span><span>暖黑深褐</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- UI 主題配色 -->
-      <div class="space-y-2 border-t border-[#F0EBE3] pt-3">
-        <div class="flex justify-between items-center text-xs">
-          <label class="font-bold text-main">✨ UI 主題配色</label>
-          <div class="flex items-center space-x-1">
-            <span class="text-[10px] text-sub">自選色：</span>
-            <input type="color" id="pickerThemeColor" onchange="applyCustomColor('theme', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-          <button onclick="applyPresetColor('theme', '#9C95DB')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#9C95DB] inline-block"></span><span>薰衣草紫 (預設)</span>
-          </button>
-          <button onclick="applyPresetColor('theme', '#C86D51')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#C86D51] inline-block"></span><span>落日焦糖橘</span>
-          </button>
-          <button onclick="applyPresetColor('theme', '#5E7A4A')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
-            <span class="w-3.5 h-3.5 rounded-full bg-[#5E7A4A] inline-block"></span><span>日系抹茶綠</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="pt-3 flex space-x-2">
-        <button onclick="resetThemeDefaults()" class="touch-btn w-1/3 py-2 bg-gray-100 text-sub rounded-xl text-xs font-bold active:scale-95">恢復預設</button>
-        <button onclick="toggleColorPickerMenu()" class="touch-btn w-2/3 py-2 bg-theme text-white rounded-xl text-xs font-bold active:scale-95">完成並保存</button>
-      </div>
-    </div>
-  </div>
 
   <!-- 備份選單 -->
   <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-2.5 z-[1600] w-56 text-xs space-y-1.5">
@@ -272,7 +153,7 @@
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <img id="lightboxImg" class="max-w-[94vw] max-h-[70vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
+      <img id="lightboxImg" class="max-w-[94vw] max-h-[68vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
 
       <button onclick="lightboxNext()" class="lightbox-nav-btn touch-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
         <i class="fa-solid fa-chevron-right"></i>
@@ -346,6 +227,7 @@
         </div>
       </div>
 
+      <!-- 快捷記一篇入口 -->
       <div class="bg-theme-light p-3 rounded-2xl border border-[#E2D8CC] flex items-center justify-between">
         <div class="flex items-center space-x-2 text-xs text-main">
           <span class="w-2 h-2 rounded-full bg-theme animate-pulse"></span>
@@ -354,6 +236,22 @@
         <button onclick="openManualAddModal()" class="touch-btn bg-theme text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition">
           立刻記錄
         </button>
+      </div>
+
+      <!-- 🎲【新增優化】：隨機時光回憶抽屜 -->
+      <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
+            <i class="fa-solid fa-dice text-theme mr-1.5"></i> 翻開一張時光回憶
+          </h3>
+          <button onclick="pickRandomMemory()" class="touch-btn text-[11px] text-theme font-bold flex items-center space-x-1 hover:underline">
+            <i class="fa-solid fa-rotate-right text-[10px]"></i>
+            <span>換一張抽屜</span>
+          </button>
+        </div>
+        <div id="randomMemoryBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]">
+          <!-- 動態載入隨機回憶 -->
+        </div>
       </div>
 
       <!-- 探索回憶統計 -->
@@ -409,9 +307,8 @@
       </div>
     </div>
 
-    <!-- 頁面 2：【足跡地圖】 (新增：即時類別膠囊篩選 ＋ 無座標溫柔提示) -->
+    <!-- 頁面 2：【足跡地圖】 -->
     <div id="mapView" class="hidden w-full h-full relative">
-      <!-- 頂部浮動搜尋列與類別標籤 -->
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto space-y-1.5">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
           <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
@@ -421,15 +318,11 @@
           </button>
         </div>
         
-        <!-- 【下一步新功能】：地圖專屬即時類別標籤膠囊 -->
-        <div id="mapCategoryChips" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <!-- 動態載入類別膠囊 -->
-        </div>
-
+        <div id="mapCategoryChips" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-0.5"></div>
         <div id="searchResultsCard" class="hidden mt-1 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <!-- 無座標地點貼心小條 -->
+      <!-- 無座標地點提示 -->
       <div id="unmappedNoticeBar" class="hidden absolute top-28 left-4 right-4 z-[900] bg-white/95 backdrop-blur border border-[#EAE3D9] rounded-2xl p-2.5 shadow-md flex items-center justify-between text-xs">
         <span class="text-sub flex items-center"><i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i> <span id="unmappedCountText">0 個地點尚無座標</span></span>
         <button onclick="switchTab('list')" class="text-theme font-bold underline text-[11px]">去清單查看 →</button>
@@ -442,7 +335,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：【日記列表】 (年度時光回顧膠囊) -->
+    <!-- 頁面 3：【日記列表】 -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32 absolute inset-0 z-10">
       
       <!-- 年度時光膠囊回顧橫向滑動列 -->
@@ -553,13 +446,13 @@
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、地址或備註位置" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 方法一按鈕：bg-theme-light text-theme border border-theme -->
+          <!-- 方法一按鈕 -->
           <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：地圖自動查找此地點</span>
           </button>
 
-          <!-- 方法二按鈕：強制鎖定按鈕樣式完全同方法三 -->
+          <!-- 方法二按鈕 -->
           <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
             <div class="flex justify-between items-center">
               <label class="font-bold text-main text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
@@ -722,13 +615,7 @@
     let uploadedPhotosList = [];
     let pendingLocation = null;
     let selectedYearFilter = "all";
-    let selectedMapCategory = "all"; // 【新功能】：地圖專屬類別過濾
-
-    let currentColors = {
-      text: localStorage.getItem("my_diary_text_color") || "#18181B",
-      theme: localStorage.getItem("my_diary_theme_color") || "#9C95DB",
-      marker: localStorage.getItem("my_diary_marker_color") || "#E04A4A"
-    };
+    let selectedMapCategory = "all";
 
     let currentLightboxState = {
       photos: [],
@@ -739,7 +626,6 @@
     };
 
     async function initApp() {
-      applyAllColors();
       initMap();
       await initDB();
       appData = await dbGetAll();
@@ -773,6 +659,7 @@
       buildStarsUI();
       refreshViews();
       updateDashboardStats();
+      pickRandomMemory(); // 隨機挑選一張舊回憶
       initLightboxSwipe();
 
       const now = new Date();
@@ -789,42 +676,59 @@
       }
     }
 
-    // 調色盤
-    function toggleColorPickerMenu() {
-      document.getElementById("colorPickerModal").classList.toggle("hidden");
-      document.getElementById("pickerTextColor").value = currentColors.text;
-      document.getElementById("pickerThemeColor").value = currentColors.theme;
-      document.getElementById("pickerMarkerColor").value = currentColors.marker;
-    }
+    // ========== 🎲 隨機翻開一張時光回憶抽屜 ==========
+    function pickRandomMemory() {
+      const container = document.getElementById("randomMemoryBox");
+      const allMemories = [];
 
-    function applyPresetColor(type, hex) {
-      applyCustomColor(type, hex);
-    }
+      appData.forEach(store => {
+        (store.visits || []).forEach(v => {
+          allMemories.push({
+            storeId: store.id,
+            storeName: store.name,
+            country: store.country,
+            city: store.city,
+            visitId: v.visitId,
+            date: v.date,
+            rating: v.rating,
+            review: v.review,
+            photos: getVisitPhotos(v)
+          });
+        });
+      });
 
-    function applyCustomColor(type, hex) {
-      currentColors[type] = hex;
-      if (type === 'text') localStorage.setItem("my_diary_text_color", hex);
-      if (type === 'theme') localStorage.setItem("my_diary_theme_color", hex);
-      if (type === 'marker') localStorage.setItem("my_diary_marker_color", hex);
-      applyAllColors();
-      renderMarkers();
-    }
+      if (!allMemories.length) {
+        container.innerHTML = `<p class="text-xs text-sub text-center py-2">寫下第一篇日記後，這裡會為您隨機重溫回憶！</p>`;
+        return;
+      }
 
-    function applyAllColors() {
-      document.documentElement.style.setProperty('--ui-text', currentColors.text);
-      document.documentElement.style.setProperty('--ui-theme', currentColors.theme);
-      document.documentElement.style.setProperty('--marker-color', currentColors.marker);
-      document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
-    }
+      const randomItem = allMemories[Math.floor(Math.random() * allMemories.length)];
+      const hasPhoto = randomItem.photos && randomItem.photos.length > 0;
 
-    function resetThemeDefaults() {
-      currentColors = { text: "#18181B", theme: "#9C95DB", marker: "#E04A4A" };
-      localStorage.removeItem("my_diary_text_color");
-      localStorage.removeItem("my_diary_theme_color");
-      localStorage.removeItem("my_diary_marker_color");
-      applyAllColors();
-      renderMarkers();
-      toggleColorPickerMenu();
+      container.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="bg-theme-light text-theme text-[9px] px-2 py-0.5 rounded-full font-bold">${randomItem.city || randomItem.country || '私房角落'}</span>
+              <h4 class="font-bold text-main text-xs mt-1">${randomItem.storeName}</h4>
+            </div>
+            <div class="text-right">
+              <span class="text-amber-500 font-black text-xs">★ ${Number(randomItem.rating).toFixed(1)}</span>
+              <span class="text-[9px] text-sub block">${randomItem.date}</span>
+            </div>
+          </div>
+
+          ${hasPhoto ? `
+            <div onclick="openLightboxByData('${randomItem.storeId}', '${randomItem.visitId}', 0)" class="touch-btn rounded-xl overflow-hidden bg-[#F2ECE4]/70 border border-[#EAE3D9] flex items-center justify-center p-1 max-h-48 cursor-pointer">
+              <img src="${randomItem.photos[0]}" class="max-h-44 max-w-full object-contain rounded-lg" />
+            </div>
+          ` : ''}
+
+          <p class="text-[11px] text-main leading-relaxed font-serif italic line-clamp-2">
+            "${randomItem.review || '美好的一天，在此留下足跡。'}"
+          </p>
+        </div>
+      `;
     }
 
     // 燈箱控制
@@ -1041,7 +945,6 @@
       }
     }
 
-    // 【核心修復 2】：點點滴滴預覽圖片「完整等比顯示，絕不裁切」
     function renderRecentMemories(recentList) {
       const container = document.getElementById("recentMemoriesCards");
       if (!recentList.length) {
@@ -1065,7 +968,6 @@
             </div>
 
             ${hasPhoto ? `
-              <!-- 完整圖片展示容器：object-contain 搭配溫暖柔底，直式橫式完整呈現 -->
               <div onclick="openLightboxByData('${item.storeId}', '${item.visitId}', 0)" class="touch-btn relative rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] cursor-pointer flex items-center justify-center p-1 min-h-[140px] max-h-64">
                 <img src="${item.photos[0]}" class="max-h-60 max-w-full object-contain rounded-xl shadow-xs" />
                 ${item.photos.length > 1 ? `<span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-xs">共 ${item.photos.length} 張</span>` : ''}
@@ -1597,7 +1499,7 @@
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
-      renderMapCategoryChips(); // 更新地圖類別膠囊
+      renderMapCategoryChips();
       renderMarkers();
       renderListView();
     }
@@ -1632,7 +1534,6 @@
         [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
     }
 
-    // 【下一步新功能】：渲染足跡地圖專屬的類別快速篩選膠囊
     function renderMapCategoryChips() {
       const container = document.getElementById("mapCategoryChips");
       if (!container) return;
@@ -1674,7 +1575,6 @@
       return [];
     }
 
-    // 渲染地圖圖釘 (支援依類別篩選 ＋ 無座標提示)
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
@@ -1687,7 +1587,6 @@
           return;
         }
 
-        // 檢查地圖類別篩選
         if (selectedMapCategory !== 'all' && (!item.tags || !item.tags.includes(selectedMapCategory))) {
           return;
         }
@@ -1710,7 +1609,7 @@
 
         const photoHtml = photos.length > 0 
           ? `<div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn relative mb-1.5 cursor-pointer rounded-xl overflow-hidden bg-[#F5F0E8] flex items-center justify-center max-h-32 p-1">
-               <img src="${photos[0]}" style="max-height:120px; max-width:100%; object-contain:contain; border-radius:8px;" />
+               <img src="${photos[0]}" style="max-height:120px; max-width:100%; object-fit:contain; border-radius:8px;" />
                ${photos.length > 1 ? `<span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.6); color:white; font-size:9px; font-weight:bold; padding:1px 5px; border-radius:4px;">📷 ${photos.length}張</span>` : ''}
              </div>` 
           : '';
@@ -1732,7 +1631,6 @@
         L.marker([item.lat, item.lng], { icon: icon, recordId: item.id }).bindPopup(content).addTo(markersLayer);
       });
 
-      // 更新無座標地點提示條
       const unmappedBar = document.getElementById("unmappedNoticeBar");
       if (unmappedBar) {
         if (unmappedCount > 0) {
@@ -1744,7 +1642,6 @@
       }
     }
 
-    // 清單渲染 (【核心修復 2】：卡片相簿完整比例顯示，直橫皆不裁切)
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -1789,7 +1686,6 @@
         const photos = getVisitPhotos(latest);
         const hasCoords = item.lat && item.lng;
 
-        // 【完整不裁切照片相簿】：長寬比完整呈現
         let photosRenderHtml = "";
         if (photos.length === 1) {
           photosRenderHtml = `
@@ -1831,7 +1727,6 @@
               </button>
             </div>
 
-            <!-- 照片展示區 (完整比例) -->
             ${photosRenderHtml}
 
             <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
@@ -2021,7 +1916,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `點點滴滴_生活回憶手帳備份_${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `我的點點滴滴_生活回憶手帳備份_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       toggleBackupMenu();
     }
@@ -2038,6 +1933,7 @@
             appData = await dbGetAll();
             refreshViews();
             updateDashboardStats();
+            pickRandomMemory();
             alert(`✅ 還原成功！已載入 ${list.length} 筆回憶紀錄。`);
           }
         } catch { alert("匯入失敗，請確認檔案格式是否正確。"); }
