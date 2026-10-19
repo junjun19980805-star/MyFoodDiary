@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>我的美食日記</title>
+  <title>我的美食與足跡日記</title>
 
   <!-- PWA 設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#9C95DB" />
+  <meta name="theme-color" content="#F7F5F0" />
 
   <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,27 +22,30 @@
   <style>
     body { 
       -webkit-tap-highlight-color: transparent;
+      background-color: #FAF8F5; /* 溫暖奶油白底色 */
+      color: #4A3E3D;            /* 溫暖深棕文字 */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
     }
 
+    /* 溫暖生活手帳風調色盤 */
     :root {
-      --theme-color: #9C95DB;
-      --theme-hover: #887FCB;
-      --theme-light: #F2F0FB;
-      --theme-text-light: #52479B;
+      --bg-cream: #FAF8F5;
+      --card-cream: #FFFFFF;
+      --accent-warm: #8C7A6B;      /* 溫潤木棕 */
+      --accent-light: #F2ECE4;     /* 燕麥米色 */
+      --theme-lavender: #9C95DB;   /* 保留經典薰衣草紫作為地圖記號 */
+      --tag-bg: #EFE9E2;
     }
 
-    .bg-theme { background-color: var(--theme-color) !important; }
-    .bg-theme-hover:hover { background-color: var(--theme-hover) !important; }
-    .bg-theme-light { background-color: var(--theme-light) !important; }
-    .text-theme { color: var(--theme-color) !important; }
-    .text-theme-dark { color: var(--theme-text-light) !important; }
-    .border-theme { border-color: var(--theme-color) !important; }
-    .accent-theme { accent-color: var(--theme-color) !important; }
+    .bg-cream { background-color: var(--bg-cream); }
+    .bg-card { background-color: var(--card-cream); }
+    .bg-warm-light { background-color: var(--accent-light); }
+    .text-warm { color: var(--accent-warm); }
+    .border-warm { border-color: #EAE3D9; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* 防止地圖容器遮擋下方按鈕 */
     #mapView, #map {
       width: 100% !important;
       height: 100% !important;
@@ -54,14 +57,13 @@
       bottom: 0;
     }
 
-    /* 確保觸控按鈕在 Android 與三星瀏覽器能被精準感應 */
     .touch-btn {
       touch-action: manipulation;
       cursor: pointer;
     }
 
     .custom-marker {
-      background: var(--theme-color);
+      background: var(--theme-lavender);
       width: 38px;
       height: 48px;
       border-radius: 50% 50% 50% 0;
@@ -69,99 +71,189 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       border: 2px solid #FFFFFF !important;
       transition: all 0.2s ease;
     }
-    .custom-marker.low-score { background: #64748B !important; }
+    .custom-marker.low-score { background: #8C827A !important; }
     .custom-marker-text {
       transform: rotate(45deg);
       color: white;
       font-weight: 800;
       font-size: 12px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col h-screen overflow-hidden">
+<body class="flex flex-col h-screen overflow-hidden">
 
-  <!-- 頂部導覽列 -->
-  <header class="bg-white border-b border-gray-150 px-4 py-2.5 flex items-center justify-between z-20 shadow-sm relative flex-shrink-0">
+  <!-- 頂部導覽列 (溫暖紙材質感) -->
+  <header class="bg-[#FFFFFF]/90 backdrop-blur border-b border-[#EAE3D9] px-4 py-2.5 flex items-center justify-between z-20 shadow-xs relative flex-shrink-0">
     <div class="flex items-center space-x-2.5">
-      <div class="w-8 h-8 rounded-full bg-theme-light flex items-center justify-center">
-        <i class="fa-solid fa-book-bookmark text-theme text-base"></i>
+      <div class="w-8 h-8 rounded-full bg-[#F2ECE4] flex items-center justify-center text-[#8C7A6B]">
+        <i class="fa-solid fa-mug-hot text-sm"></i>
       </div>
       <div>
-        <h1 class="text-base font-bold text-gray-900 leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-gray-400">私人專屬 · 跨裝置隨行</p>
+        <h1 class="text-base font-bold text-[#3D3231] tracking-wide">點點滴滴</h1>
+        <p class="text-[10px] text-[#9E8E81]" id="headerSubText">私人足跡與回憶日記</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-gray-400 hover:text-theme p-1.5 rounded-full active:scale-95 transition">
+      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-[#8C7A6B] hover:bg-[#F2ECE4] p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
       </button>
-      <button onclick="openManualAddModal()" class="touch-btn bg-theme bg-theme-hover text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-md active:scale-95 transition">
-        <i class="fa-solid fa-plus mr-1"></i> 寫一篇
+      <button onclick="openManualAddModal()" class="touch-btn bg-[#8C7A6B] hover:bg-[#786759] text-white px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center shadow-xs active:scale-95 transition">
+        <i class="fa-solid fa-feather-pointed mr-1.5"></i> 寫篇日記
       </button>
     </div>
   </header>
 
   <!-- 備份與匯入選單 -->
-  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-gray-150 p-2.5 z-[1500] w-56 text-xs space-y-1.5">
-    <label class="touch-btn w-full text-left py-2 px-2.5 bg-purple-50 hover:bg-theme-light text-theme-dark rounded-xl flex items-center font-bold cursor-pointer transition">
-      <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
+  <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-2.5 z-[1500] w-56 text-xs space-y-1.5">
+    <label class="touch-btn w-full text-left py-2 px-2.5 bg-[#FAF6F0] hover:bg-[#F2ECE4] text-[#5C4F44] rounded-xl flex items-center font-bold cursor-pointer transition">
+      <i class="fa-solid fa-map-location-dot mr-2 text-[#8C7A6B]"></i> 匯入 Google Maps 收藏檔
       <input type="file" id="importGoogleMapsInput" accept=".json,.geojson" onchange="importGoogleMapsData(event)" class="hidden" />
     </label>
-    
-    <div class="border-t border-gray-100 my-1"></div>
-
-    <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700">
-      <i class="fa-solid fa-download mr-2 text-gray-400"></i> 匯出本機備份檔
+    <div class="border-t border-[#F0EBE3] my-1"></div>
+    <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-[#5C4F44]">
+      <i class="fa-solid fa-download mr-2 text-[#8C7A6B]"></i> 匯出本機備份檔 (JSON)
     </button>
-    <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-gray-50 rounded-xl flex items-center font-medium text-gray-700 cursor-pointer">
-      <i class="fa-solid fa-upload mr-2 text-gray-400"></i> 還原備份檔
+    <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-[#5C4F44] cursor-pointer">
+      <i class="fa-solid fa-upload mr-2 text-[#8C7A6B]"></i> 還原日記備份檔
       <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden" />
     </label>
   </div>
 
-  <!-- 主要畫面區域 -->
+  <!-- 主要內容區域 -->
   <main class="flex-1 relative w-full h-full overflow-hidden">
-    <!-- 地圖 View -->
-    <div id="mapView" class="w-full h-full relative">
-      <!-- 懸浮搜尋列 (層級提升至 z-[900]) -->
+    
+    <!-- 頁面 1：【點點滴滴・首頁足跡總覽】 (新增專區) -->
+    <div id="dashboardView" class="w-full h-full overflow-y-auto px-4 py-4 pb-28 space-y-4">
+      
+      <!-- 溫暖手帳風格問候區 -->
+      <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-[#8C7A6B] bg-[#F2ECE4] px-2.5 py-1 rounded-full flex items-center">
+            <i class="fa-solid fa-heart mr-1.5 text-xs text-[#C27878]"></i> 生活足跡手帳
+          </span>
+          <span class="text-[11px] text-[#A6998E]" id="dashTodayDate"></span>
+        </div>
+        <h2 class="text-lg font-bold text-[#3D3231] leading-snug">那些走過的路，<br>都成了有滋有味的回憶。</h2>
+      </div>
+
+      <!-- 四大真實數據卡片 -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
+          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-location-dot mr-1.5"></i> 去過的地點
+          </div>
+          <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-[#3D3231]" id="statUniquePlaces">0</span>
+            <span class="text-[11px] text-[#9E8E81]">個地方</span>
+          </div>
+          <p class="text-[10px] text-[#B0A499] mt-0.5">不重複足跡地點</p>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
+          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-shoe-prints mr-1.5"></i> 造訪總次數
+          </div>
+          <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-[#3D3231]" id="statTotalVisits">0</span>
+            <span class="text-[11px] text-[#9E8E81]">次造訪</span>
+          </div>
+          <p class="text-[10px] text-[#B0A499] mt-0.5">累計所有生活巡禮</p>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
+          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-images mr-1.5"></i> 保存照片數
+          </div>
+          <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-[#3D3231]" id="statTotalPhotos">0</span>
+            <span class="text-[11px] text-[#9E8E81]">張回憶</span>
+          </div>
+          <p class="text-[10px] text-[#B0A499] mt-0.5">珍貴光影瞬間</p>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
+          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-calendar-days mr-1.5"></i> 紀錄月份數
+          </div>
+          <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-[#3D3231]" id="statTotalMonths">0</span>
+            <span class="text-[11px] text-[#9E8E81]">個月份</span>
+          </div>
+          <p class="text-[10px] text-[#B0A499] mt-0.5">點滴時光累積</p>
+        </div>
+      </div>
+
+      <!-- 快速記一篇捷徑 -->
+      <div class="bg-[#F2ECE4] p-3 rounded-2xl border border-[#E2D8CC] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-xs text-[#5C4F44]">
+          <span class="w-2 h-2 rounded-full bg-[#8C7A6B] animate-pulse"></span>
+          <span>今天又發現了什麼好地方嗎？</span>
+        </div>
+        <button onclick="openManualAddModal()" class="touch-btn bg-[#8C7A6B] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition">
+          立刻記錄
+        </button>
+      </div>
+
+      <!-- 最近造訪的回憶 (照片日記卡片) -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-[#5C4F44] tracking-wide flex items-center">
+            <i class="fa-solid fa-clock-rotate-left mr-1.5 text-[#8C7A6B]"></i> 最近造訪的回憶
+          </h3>
+          <button onclick="switchTab('list')" class="text-[11px] text-[#8C7A6B] font-semibold hover:underline">
+            查看全部紀錄 →
+          </button>
+        </div>
+
+        <div id="recentMemoriesCards" class="space-y-3">
+          <!-- 動態載入最近幾次回憶 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 頁面 2：【足跡地圖】 -->
+    <div id="mapView" class="hidden w-full h-full relative">
+      <!-- 懸浮搜尋列 -->
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-150 p-2 flex items-center space-x-2">
-          <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
-          <input type="text" id="homeSearchInput" placeholder="搜尋日記店名、路名、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-gray-700" />
+        <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
+          <i class="fa-solid fa-magnifying-glass text-[#8C7A6B] ml-2"></i>
+          <input type="text" id="homeSearchInput" placeholder="搜尋想念的店名、景點、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-[#4A3E3D]" />
           <button onclick="clearSearch()" id="clearSearchBtn" class="touch-btn hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
         </div>
-        <!-- 搜尋結果下拉清單 -->
-        <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-2xl border border-gray-150 max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
+        <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <!-- GPS 定位按鈕 -->
-      <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-6 right-4 z-[900] bg-white text-gray-700 hover:text-theme w-11 h-11 rounded-full shadow-xl flex items-center justify-center border border-gray-200 active:scale-90 transition">
+      <div id="mapPickHint" class="hidden absolute top-16 left-4 right-4 z-[900] bg-[#8C7A6B] text-white text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl flex items-center justify-between animate-bounce">
+        <span>📍 請滑動地圖，直接點選店家的位置</span>
+        <button onclick="cancelMapPick()" class="text-white underline text-[11px] ml-2">取消</button>
+      </div>
+
+      <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-6 right-4 z-[900] bg-white text-[#5C4F44] hover:text-[#8C7A6B] w-11 h-11 rounded-full shadow-lg flex items-center justify-center border border-[#EAE3D9] active:scale-90 transition">
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
 
       <div id="map"></div>
     </div>
 
-    <!-- 列表 View -->
-    <div id="listView" class="hidden w-full h-full bg-gray-50 overflow-y-auto px-4 py-3 pb-28 absolute inset-0 z-10">
-      <div class="bg-white p-3.5 rounded-2xl shadow-sm mb-3 space-y-2.5 border border-gray-150">
+    <!-- 頁面 3：【日記列表】 (原有的清單模式完整保留) -->
+    <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-28 absolute inset-0 z-10">
+      <div class="bg-white p-3.5 rounded-2xl shadow-xs mb-3 space-y-2.5 border border-[#EAE3D9]">
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="font-bold text-gray-700">1. 選擇國家</label>
-            <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg p-2 font-medium focus:border-theme outline-none">
+            <label class="font-bold text-[#5C4F44]">1. 選擇國家</label>
+            <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D] outline-none">
             </select>
           </div>
           <div>
-            <label class="font-bold text-gray-700">2. 選擇城市</label>
-            <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-gray-200 rounded-lg p-2 font-medium outline-none transition cursor-not-allowed">
+            <label class="font-bold text-[#5C4F44]">2. 選擇城市</label>
+            <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-[#EAE3D9] rounded-lg p-2 font-medium outline-none cursor-not-allowed">
               <option value="">請先選擇國家</option>
             </select>
           </div>
@@ -169,13 +261,13 @@
 
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="font-bold text-gray-500">🏷️ 標籤分類</label>
-            <select id="filterTag" onchange="renderListView()" class="w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg p-2 font-medium">
+            <label class="font-bold text-[#5C4F44]">🏷️ 標籤分類</label>
+            <select id="filterTag" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
             </select>
           </div>
           <div>
-            <label class="font-bold text-gray-500">⭐ 評分篩選</label>
-            <select id="filterRating" onchange="renderListView()" class="w-full mt-1 bg-gray-50 border border-gray-200 rounded-lg p-2 font-medium">
+            <label class="font-bold text-[#5C4F44]">⭐ 評分篩選</label>
+            <select id="filterRating" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
               <option value="all">不限分數</option>
               <option value="gte_4.5">4.5 星以上</option>
               <option value="gte_4.0">4.0 星以上</option>
@@ -184,147 +276,157 @@
             </select>
           </div>
         </div>
+
+        <div class="text-xs">
+          <label class="font-bold text-[#5C4F44]">🔄 排序方式</label>
+          <select id="sortOrder" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
+            <option value="date_desc">造訪日期：最新到最舊</option>
+            <option value="date_asc">造訪日期：最舊到最新</option>
+            <option value="rating_desc">評分：高到低</option>
+            <option value="visits_desc">造訪次數：多到少</option>
+          </select>
+        </div>
       </div>
 
-      <!-- 餐廳清單 -->
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
   </main>
 
-  <!-- 底部 Tab 列：關鍵修復！層級提升至 z-[950]，加入 pointer-events-auto 與安全邊距 -->
-  <nav class="bg-white border-t border-gray-200 px-8 py-2.5 flex justify-around items-center z-[950] shadow-lg relative flex-shrink-0 pointer-events-auto pb-[max(0.6rem,env(safe-area-inset-bottom))]">
-    <button onclick="switchTab('map')" id="tabMapBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4">
-      <i class="fa-solid fa-map-location-dot text-lg mb-0.5"></i>
-      地圖模式
+  <!-- 底部 Tab 列 (三頁簽：點點滴滴、足跡地圖、日記列表) -->
+  <nav class="bg-[#FFFFFF] border-t border-[#EAE3D9] px-6 py-2 flex justify-around items-center z-[950] shadow-sm relative flex-shrink-0 pointer-events-auto pb-[max(0.6rem,env(safe-area-inset-bottom))]">
+    <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-[#8C7A6B] font-bold text-xs py-1 px-3 transition">
+      <i class="fa-solid fa-sparkles text-lg mb-0.5"></i>
+      點點滴滴
     </button>
-    <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4">
-      <i class="fa-solid fa-book text-lg mb-0.5"></i>
+    <button onclick="switchTab('map')" id="tabMapBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-xs py-1 px-3 transition">
+      <i class="fa-solid fa-map-location-dot text-lg mb-0.5"></i>
+      足跡地圖
+    </button>
+    <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-xs py-1 px-3 transition">
+      <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>
       日記列表 (<span id="totalCount">0</span>)
     </button>
   </nav>
 
-  <!-- 彈跳表單視窗 -->
+  <!-- 彈跳表單視窗 (完整保留既有欄位與照片功能) -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[92vh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
-      <div class="px-5 py-3.5 border-b border-gray-150 flex justify-between items-center bg-gray-50">
+      <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
         <div>
-          <h3 class="font-bold text-gray-800 text-sm" id="modalMainTitle">記錄美食日記</h3>
-          <p class="text-[10px] text-gray-400">智慧查找 · 支援座標修正</p>
+          <h3 class="font-bold text-[#3D3231] text-sm" id="modalMainTitle">記錄回憶足跡</h3>
+          <p class="text-[10px] text-[#8C7A6B]">記下此時此刻的感動</p>
         </div>
         <button onclick="closeModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
 
       <div class="p-5 overflow-y-auto space-y-3.5 text-xs">
-        <div class="bg-theme-light p-3 rounded-2xl border border-purple-100 space-y-2.5">
+        <div class="bg-[#F5F0E8] p-3 rounded-2xl border border-[#EAE3D9] space-y-2.5">
           <div>
-            <label class="block font-bold text-theme-dark text-[11px] mb-1">店家名稱 *</label>
-            <input type="text" id="inputStoreName" placeholder="輸入店名 (例如: 鴨肉許、CJSJ)" class="w-full bg-white font-bold text-gray-900 text-sm rounded-xl p-2 outline-none border border-purple-200" />
+            <label class="block font-bold text-[#5C4F44] text-[11px] mb-1">地點 / 店家名稱 *</label>
+            <input type="text" id="inputStoreName" placeholder="輸入地點名稱 (例: 隱家拉麵、司馬庫斯)" class="w-full bg-white font-bold text-gray-900 text-sm rounded-xl p-2 outline-none border border-[#E0D7CC]" />
           </div>
           
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-gray-600 font-medium text-[10px] mb-0.5">國家</label>
-              <input type="text" id="inputCountry" placeholder="國家" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+              <input type="text" id="inputCountry" placeholder="國家" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
             </div>
             <div>
               <label class="block text-gray-600 font-medium text-[10px] mb-0.5">城市 / 縣市</label>
-              <input type="text" id="inputCity" placeholder="城市 (例: 新竹市)" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+              <input type="text" id="inputCity" placeholder="縣市 (例: 新竹市)" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
             </div>
           </div>
           
           <div>
             <label class="block text-gray-600 font-medium text-[10px] mb-0.5">詳細地址 (選填)</label>
-            <input type="text" id="inputStoreAddress" placeholder="輸入路名或門牌" class="w-full bg-white border border-purple-150 rounded-lg p-1.5 text-xs outline-none" />
+            <input type="text" id="inputStoreAddress" placeholder="輸入路名、地址或備註位置" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 方法一：系統查找 -->
-          <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme hover:bg-theme-hover text-white py-2 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-center space-x-1.5 active:scale-95">
+          <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-[#8C7A6B] hover:bg-[#786759] text-white py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
-            <span>方法一：系統直接在地圖查找此餐廳</span>
+            <span>方法一：地圖自動查找此地點</span>
           </button>
 
-          <!-- 方法二：輸入座標 -->
-          <div class="bg-white/90 p-2.5 rounded-xl border border-purple-200 space-y-1.5">
+          <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
             <div class="flex justify-between items-center">
-              <label class="font-bold text-theme-dark text-[11px]">📍 方法二：位置錯誤？輸入座標修正</label>
-              <button type="button" onclick="pasteFromClipboard()" class="touch-btn text-theme font-bold text-[10px] underline">
+              <label class="font-bold text-[#5C4F44] text-[11px]">📍 方法二：貼上 Google 座標</label>
+              <button type="button" onclick="pasteFromClipboard()" class="text-[#8C7A6B] font-bold text-[10px] underline">
                 貼上剪貼簿
               </button>
             </div>
             <div class="flex items-center space-x-1.5">
-              <input type="text" id="inputCoords" placeholder="輸入經緯度，例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
+              <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleCoordsInput(this.value)" class="flex-1 bg-[#FAF8F5] border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
               <button type="button" onclick="applyManualCoords()" class="touch-btn bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
                 定位
               </button>
             </div>
           </div>
 
-          <!-- 方法三：現場定位 -->
-          <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center space-x-1.5 active:scale-95">
+          <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-gradient-to-r from-[#8C7A6B] to-[#A39281] text-white py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
-            <span>方法三：系統自動定位餐廳地點 (我在現場)</span>
+            <span>方法三：系統自動定位目前位置 (我在現場)</span>
           </button>
           
           <p id="geoStatusText" class="text-[10px] text-center font-bold text-gray-500 pt-0.5"></p>
         </div>
 
-        <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200">
+        <div class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#EAE3D9]">
           <div class="flex justify-between items-center mb-2">
-            <span class="font-bold text-gray-700">評分 (0.5 級距)</span>
-            <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-theme bg-white border border-gray-300 rounded-lg py-1 text-sm outline-none" />
+            <span class="font-bold text-[#5C4F44]">喜愛評分 (0.5 級距)</span>
+            <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-[#8C7A6B] bg-white border border-[#E0D7CC] rounded-lg py-1 text-sm outline-none" />
           </div>
-          <div class="flex items-center justify-center space-x-2 py-1 bg-white rounded-xl border border-gray-150">
-            <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer space-x-1"></div>
+          <div class="flex items-center justify-center space-x-2 py-1 bg-white rounded-xl border border-[#EAE3D9]">
+            <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer select-none space-x-1"></div>
             <span id="starScoreLabel" class="text-sm font-black text-amber-600 ml-2">4.5 分</span>
           </div>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label class="block font-bold text-gray-700">用餐照片 (支援多張)</label>
-            <span id="photoCountBadge" class="text-[11px] text-theme-dark font-bold">已選 0 張</span>
+            <label class="block font-bold text-[#5C4F44]">造訪回憶照片 (可複選)</label>
+            <span id="photoCountBadge" class="text-[11px] text-[#8C7A6B] font-bold">已選 0 張</span>
           </div>
           <div id="photosThumbnailGrid" class="grid grid-cols-3 gap-2 mb-2"></div>
-          <label class="touch-btn border-2 border-dashed border-gray-300 hover:border-theme bg-gray-50 hover:bg-theme-light rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
-            <i class="fa-solid fa-camera text-theme text-sm"></i>
-            <span class="font-bold text-gray-700 text-xs">拍照或選取照片（可複選）</span>
+          <label class="touch-btn border-2 border-dashed border-[#D6CCC2] hover:border-[#8C7A6B] bg-[#FAF8F5] rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
+            <i class="fa-solid fa-camera text-[#8C7A6B] text-sm"></i>
+            <span class="font-bold text-[#5C4F44] text-xs">拍照或選取多張照片</span>
             <input type="file" id="inputPhotos" accept="image/*" multiple onchange="handlePhotosSelect(event)" class="hidden" />
           </label>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-bold text-gray-700 mb-1">用餐日期</label>
-            <input type="date" id="inputDate" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-2 py-1.5 text-xs" />
+            <label class="block font-bold text-[#5C4F44] mb-1">造訪日期</label>
+            <input type="date" id="inputDate" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-2 py-1.5 text-xs text-[#3D3231]" />
           </div>
           <div>
-            <label class="block font-bold text-gray-700 mb-1">人均消費</label>
-            <input type="number" id="inputCost" placeholder="例: 350" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-2 py-1.5 text-xs" />
+            <label class="block font-bold text-[#5C4F44] mb-1">消費預算 / 門票 (選填)</label>
+            <input type="number" id="inputCost" placeholder="例如: 350" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-2 py-1.5 text-xs" />
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1">標籤 (逗號分隔)</label>
-          <input type="text" id="inputTags" placeholder="小吃, 甜點, 拉麵" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-xs" />
+          <label class="block font-bold text-[#5C4F44] mb-1">分類標籤 (以逗號分隔)</label>
+          <input type="text" id="inputTags" placeholder="景點, 咖啡廳, 拉麵, 散步" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-3 py-2 text-xs" />
         </div>
 
         <div>
-          <label class="block font-bold text-gray-700 mb-1">用餐感受心得</label>
-          <textarea id="inputReview" rows="3" placeholder="記錄必點料理或踩雷筆記..." class="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 text-xs leading-relaxed"></textarea>
+          <label class="block font-bold text-[#5C4F44] mb-1">心情隨筆與旅行回憶</label>
+          <textarea id="inputReview" rows="3" placeholder="記下那天的微風、好吃的美食，或是難忘的心情..." class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 text-xs leading-relaxed"></textarea>
         </div>
 
         <div class="flex items-center space-x-2">
-          <input type="checkbox" id="inputRevisit" checked class="w-4 h-4 rounded border-gray-300 accent-theme" />
-          <label for="inputRevisit" class="font-bold text-gray-700 text-xs">推薦再訪 👍</label>
+          <input type="checkbox" id="inputRevisit" checked class="w-4 h-4 rounded border-gray-300 accent-[#8C7A6B]" />
+          <label for="inputRevisit" class="font-bold text-[#5C4F44] text-xs">推薦好地方 / 期待再訪 👍</label>
         </div>
       </div>
 
-      <div class="p-3.5 border-t border-gray-150 bg-gray-50 flex items-center justify-between space-x-2">
+      <div class="p-3.5 border-t border-[#EAE3D9] bg-[#FAF8F5] flex items-center justify-between space-x-2">
         <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="touch-btn hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition">
           刪除
         </button>
-        <button onclick="closeModal()" class="touch-btn py-2 px-4 bg-gray-200 text-gray-700 font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
-        <button onclick="confirmSaveRecord()" class="touch-btn flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-md active:scale-95 transition" id="submitBtnText">存入美食日記</button>
+        <button onclick="closeModal()" class="touch-btn py-2 px-4 bg-[#EAE3D9] text-[#5C4F44] font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
+        <button onclick="confirmSaveRecord()" class="touch-btn flex-1 py-2 bg-[#8C7A6B] hover:bg-[#786759] text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition" id="submitBtnText">存入回憶手帳</button>
       </div>
     </div>
   </div>
@@ -352,28 +454,34 @@
     function dbGetAll() {
       return new Promise((resolve) => {
         if (!db) return resolve([]);
-        const tx = db.transaction([STORE_NAME], "readonly");
-        const req = tx.objectStore(STORE_NAME).getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => resolve([]);
+        try {
+          const tx = db.transaction([STORE_NAME], "readonly");
+          const req = tx.objectStore(STORE_NAME).getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch(e) { resolve([]); }
       });
     }
 
     function dbPut(item) {
       return new Promise((resolve) => {
         if (!db) return resolve();
-        const tx = db.transaction([STORE_NAME], "readwrite");
-        tx.objectStore(STORE_NAME).put(item);
-        tx.oncomplete = () => resolve();
+        try {
+          const tx = db.transaction([STORE_NAME], "readwrite");
+          tx.objectStore(STORE_NAME).put(item);
+          tx.oncomplete = () => resolve();
+        } catch(e) { resolve(); }
       });
     }
 
     function dbDelete(id) {
       return new Promise((resolve) => {
         if (!db) return resolve();
-        const tx = db.transaction([STORE_NAME], "readwrite");
-        tx.objectStore(STORE_NAME).delete(id);
-        tx.oncomplete = () => resolve();
+        try {
+          const tx = db.transaction([STORE_NAME], "readwrite");
+          tx.objectStore(STORE_NAME).delete(id);
+          tx.oncomplete = () => resolve();
+        } catch(e) { resolve(); }
       });
     }
   </script>
@@ -414,14 +522,14 @@
           address: "台北市大同區南京西路25巷28號",
           lat: 25.0537,
           lng: 121.5208,
-          tags: ["拉麵"],
+          tags: ["拉麵", "美食"],
           visits: [{
             visitId: "v_sample",
             date: new Date().toISOString().split("T")[0],
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "範例筆記：點擊旁邊編輯，可以自由修改內容或點擊刪除！",
+            review: "歡迎開始使用你的回憶日記！點點滴滴記錄去過的地方、吃過的美食與照片。",
             photos: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"]
           }]
         };
@@ -432,16 +540,122 @@
 
       buildStarsUI();
       refreshViews();
-      setTimeout(() => { if (map) map.invalidateSize(); }, 200);
+      updateDashboardStats(); // 渲染點點滴滴儀表板
+
+      // 設定手帳今日日期
+      const now = new Date();
+      document.getElementById("dashTodayDate").innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
     }
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 12);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-      markersLayer = L.layerGroup().addTo(map);
+      try {
+        map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+      } catch(e) {
+        console.warn("地圖載入略過，不影響其他功能", e);
+      }
     }
 
-    // ========== 【關鍵修復 1】：首頁搜尋處理函數 (支援日記店家、路名、景點) ==========
+    // ========== 【核心：點點滴滴儀表板真實數據計算】 ==========
+    function updateDashboardStats() {
+      // 1. 不重複造訪地點數
+      const uniquePlaces = appData.length;
+      document.getElementById("statUniquePlaces").innerText = uniquePlaces;
+
+      // 2. 造訪總次數 (累加所有地點的 visits)
+      let totalVisits = 0;
+      let totalPhotos = 0;
+      const monthSet = new Set();
+      const allMemories = [];
+
+      appData.forEach(store => {
+        const visits = store.visits || [];
+        totalVisits += visits.length;
+
+        visits.forEach(v => {
+          // 照片計算
+          const photos = getVisitPhotos(v);
+          totalPhotos += photos.length;
+
+          // 月份計算 (YYYY-MM)
+          if (v.date) {
+            monthSet.add(v.date.substring(0, 7));
+          }
+
+          // 扁平化所有回憶，用來展示最近卡片
+          allMemories.push({
+            storeId: store.id,
+            storeName: store.name,
+            country: store.country,
+            city: store.city,
+            visitId: v.visitId,
+            date: v.date,
+            rating: v.rating,
+            review: v.review,
+            revisit: v.revisit,
+            photos: photos
+          });
+        });
+      });
+
+      // 3. 已保存照片數量
+      document.getElementById("statTotalPhotos").innerText = totalPhotos;
+
+      // 4. 曾留下紀錄的月份數
+      document.getElementById("statTotalMonths").innerText = monthSet.size;
+
+      // 5. 最近造訪的回憶照片卡片 (排序最新 4 筆)
+      allMemories.sort((a, b) => new Date(b.date) - new Date(a.date));
+      renderRecentMemories(allMemories.slice(0, 4));
+    }
+
+    // 渲染最近回憶卡片
+    function renderRecentMemories(recentList) {
+      const container = document.getElementById("recentMemoriesCards");
+      if (!recentList.length) {
+        container.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-xs text-[#9E8E81] border border-[#EAE3D9]">尚無任何回憶日記，點擊上方按鈕記錄你的第一筆足跡吧！</div>`;
+        return;
+      }
+
+      container.innerHTML = recentList.map(item => {
+        const hasPhoto = item.photos && item.photos.length > 0;
+        return `
+          <div class="bg-white rounded-2xl p-3.5 border border-[#EAE3D9] shadow-xs flex flex-col space-y-2.5">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="bg-[#F2ECE4] text-[#8C7A6B] text-[10px] px-2 py-0.5 rounded-full font-bold">${item.city || item.country || '私房地點'}</span>
+                <h4 class="font-bold text-[#3D3231] text-sm mt-0.5">${item.storeName}</h4>
+              </div>
+              <div class="text-right">
+                <span class="text-amber-500 font-black text-xs">★ ${Number(item.rating).toFixed(1)}</span>
+                <span class="text-[10px] text-[#A6998E] block">${item.date}</span>
+              </div>
+            </div>
+
+            ${hasPhoto ? `
+              <div class="relative rounded-xl overflow-hidden h-36 border border-[#F0EBE3]">
+                <img src="${item.photos[0]}" class="w-full h-full object-cover" />
+                ${item.photos.length > 1 ? `<span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] px-2 py-0.5 rounded-full">共 ${item.photos.length} 張</span>` : ''}
+              </div>
+            ` : ''}
+
+            <p class="text-xs text-[#5C4F44] leading-relaxed line-clamp-2 italic font-serif">
+              "${item.review || '美好的一天，在此留下足跡。'}"
+            </p>
+
+            <div class="flex justify-between items-center text-[11px] pt-1 border-t border-[#F5F0E8]">
+              <span class="text-[#8C7A6B] font-medium">${item.revisit ? '值得回味 👍' : '探訪留念'}</span>
+              <button onclick="openEditModal('${item.storeId}', '${item.visitId}')" class="text-[#8C7A6B] hover:text-[#5C4F44] font-bold">
+                回味並編輯筆記 →
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 搜尋功能
     let searchTimeout = null;
     function handleSearch(val) {
       clearTimeout(searchTimeout);
@@ -457,7 +671,6 @@
       clearBtn.classList.remove("hidden");
       const v = val.trim().toLowerCase();
 
-      // 1. 優先搜尋本機日記內已記錄的店家
       const localMatches = appData.filter(s => 
         (s.name && s.name.toLowerCase().includes(v)) || 
         (s.address && s.address.toLowerCase().includes(v)) ||
@@ -468,21 +681,20 @@
       searchTimeout = setTimeout(() => {
         let html = "";
         if (localMatches.length > 0) {
-          html += `<div class="text-[10px] font-bold text-theme-dark px-2 py-0.5">我的日記中已有記錄：</div>`;
+          html += `<div class="text-[10px] font-bold text-[#8C7A6B] px-2 py-0.5">我的日記中已有記錄：</div>`;
           localMatches.forEach(item => {
             html += `
-              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="touch-btn flex items-center justify-between p-2 hover:bg-purple-50/50 rounded-xl cursor-pointer">
+              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="touch-btn flex items-center justify-between p-2 hover:bg-[#F2ECE4] rounded-xl cursor-pointer">
                 <div>
-                  <h4 class="font-bold text-gray-800 text-xs">${item.name}</h4>
-                  <p class="text-[10px] text-gray-400 truncate">${item.city} · ${item.address || ''}</p>
+                  <h4 class="font-bold text-[#3D3231] text-xs">${item.name}</h4>
+                  <p class="text-[10px] text-[#9E8E81] truncate">${item.city} · ${item.address || ''}</p>
                 </div>
-                <span class="text-[10px] bg-theme-light text-theme-dark px-2 py-0.5 rounded-full font-bold whitespace-nowrap">前往</span>
+                <span class="text-[10px] bg-[#F2ECE4] text-[#8C7A6B] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">前往</span>
               </div>
             `;
           });
         }
 
-        // 2. 線上搜尋外部景點與地址 (限制台灣與日本)
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&countrycodes=tw,jp&limit=4&accept-language=zh-TW`)
           .then(res => res.json())
           .then(results => {
@@ -498,7 +710,7 @@
                       <h4 class="font-bold text-gray-800 text-xs truncate">${title}</h4>
                       <p class="text-[10px] text-gray-400 truncate">${cleanAddress}</p>
                     </div>
-                    <button onclick="selectAndAddFromSearch('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="touch-btn bg-theme text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
+                    <button onclick="selectAndAddFromSearch('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="touch-btn bg-[#8C7A6B] text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
                       記這家
                     </button>
                   </div>
@@ -507,7 +719,7 @@
             }
 
             if (!html) {
-              html = `<div class="p-3 text-center text-xs text-gray-400">查無結果，可直接點右上角「寫一篇」手動記錄</div>`;
+              html = `<div class="p-3 text-center text-xs text-gray-400">查無結果，可直接點「寫篇日記」記錄</div>`;
             }
             card.innerHTML = html;
             card.classList.remove("hidden");
@@ -527,14 +739,16 @@
       document.getElementById("homeSearchInput").value = storeName;
       document.getElementById("searchResultsCard").classList.add("hidden");
       switchTab('map');
-      map.flyTo([lat, lng], 16, { duration: 1.2 });
-      setTimeout(() => {
-        markersLayer.eachLayer(layer => {
-          if (Math.abs(layer.getLatLng().lat - lat) < 0.001 && Math.abs(layer.getLatLng().lng - lng) < 0.001) {
-            layer.openPopup();
-          }
-        });
-      }, 1300);
+      if (map) {
+        map.flyTo([lat, lng], 16, { duration: 1.2 });
+        setTimeout(() => {
+          markersLayer.eachLayer(layer => {
+            if (Math.abs(layer.getLatLng().lat - lat) < 0.001 && Math.abs(layer.getLatLng().lng - lng) < 0.001) {
+              layer.openPopup();
+            }
+          });
+        }, 1300);
+      }
     }
 
     function selectAndAddFromSearch(name, address, lat, lon) {
@@ -542,16 +756,15 @@
       pendingLocation = { lat: parseFloat(lat), lng: parseFloat(lon) };
       uploadedPhotosList = [];
       
-      document.getElementById("modalMainTitle").innerText = "記錄新店家";
+      document.getElementById("modalMainTitle").innerText = "記錄新地點";
       document.getElementById("inputStoreName").value = name;
       document.getElementById("inputStoreAddress").value = address;
       document.getElementById("inputCountry").value = "台灣";
       document.getElementById("inputCity").value = "";
       document.getElementById("inputCoords").value = `${parseFloat(lat).toFixed(5)}, ${parseFloat(lon).toFixed(5)}`;
       document.getElementById("geoStatusText").innerText = `✅ 已帶入座標 (${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)})`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
-      document.getElementById("inputTags").value = "美食";
+      document.getElementById("inputTags").value = "景點";
       document.getElementById("inputReview").value = "";
       document.getElementById("inputCost").value = "";
       document.getElementById("modalDeleteBtn").classList.add("hidden");
@@ -562,27 +775,23 @@
       document.getElementById("entryModal").classList.remove("hidden");
     }
 
-    // 方法一：系統查找
+    // 定位相關
     async function autoSearchRestaurantLocation() {
       const name = document.getElementById("inputStoreName").value.trim();
       const city = document.getElementById("inputCity").value.trim();
       const address = document.getElementById("inputStoreAddress").value.trim();
       const statusText = document.getElementById("geoStatusText");
 
-      if (!name) return alert("請先填寫「店家名稱」！");
+      if (!name) return alert("請先填寫「地點名稱」！");
 
-      statusText.innerText = "🔍 正在地圖搜尋該餐廳位置...";
-      statusText.className = "text-[10px] text-center font-bold text-amber-600 animate-pulse";
-
+      statusText.innerText = "🔍 正在地圖搜尋該地點...";
       const queryList = [
         `${city} ${name} ${address}`.trim(),
         `${city} ${name}`.trim(),
-        `${name}`.trim(),
-        `${city} ${address}`.trim()
+        `${name}`.trim()
       ];
 
       let foundCoords = null;
-
       for (const q of queryList) {
         if (!q) continue;
         try {
@@ -599,22 +808,14 @@
         pendingLocation = foundCoords;
         document.getElementById("inputCoords").value = `${foundCoords.lat.toFixed(5)}, ${foundCoords.lng.toFixed(5)}`;
         statusText.innerText = `✅ 系統已成功定位！(${foundCoords.lat.toFixed(4)}, ${foundCoords.lng.toFixed(4)})`;
-        statusText.className = "text-[10px] text-center font-bold text-green-600";
-
-        map.flyTo([foundCoords.lat, foundCoords.lng], 16);
-        if (tempPinMarker) map.removeLayer(tempPinMarker);
-        tempPinMarker = L.circleMarker([foundCoords.lat, foundCoords.lng], {
-          radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
-        }).addTo(map);
+        if (map) map.flyTo([foundCoords.lat, foundCoords.lng], 16);
       } else {
         let cityFallback = TAIWAN_CITIES[city] || [24.8138, 120.9675];
         pendingLocation = { lat: cityFallback[0], lng: cityFallback[1] };
-        statusText.innerText = `⚠️ 查無此店名，已先設在 ${city || '當地'} 中心，請用【方法二輸入座標】或【方法三】修正！`;
-        statusText.className = "text-[10px] text-center font-bold text-amber-600";
+        statusText.innerText = `⚠️ 查無此地點，已暫設在 ${city || '當地'} 中心，可用方法二/三修正。`;
       }
     }
 
-    // 方法二：輸入座標
     function handleCoordsInput(val) {
       const match = val.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
       if (match) {
@@ -622,19 +823,12 @@
         const lng = parseFloat(match[2]);
         pendingLocation = { lat, lng };
         document.getElementById("geoStatusText").innerText = `✅ 已設定座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-        document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-green-600";
-
-        map.flyTo([lat, lng], 16);
-        if (tempPinMarker) map.removeLayer(tempPinMarker);
-        tempPinMarker = L.circleMarker([lat, lng], {
-          radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
-        }).addTo(map);
+        if (map) map.flyTo([lat, lng], 16);
       }
     }
 
     function applyManualCoords() {
-      const val = document.getElementById("inputCoords").value.trim();
-      handleCoordsInput(val);
+      handleCoordsInput(document.getElementById("inputCoords").value.trim());
     }
 
     async function pasteFromClipboard() {
@@ -643,32 +837,23 @@
         document.getElementById("inputCoords").value = text;
         handleCoordsInput(text);
       } catch(e) {
-        alert("請長按輸入框手動貼上座標！");
+        alert("請長按輸入框貼上座標！");
       }
     }
 
-    // 方法三：現場定位
     function autoLocateCurrentSpot() {
-      if (!navigator.geolocation) return alert("您的手機不支援 GPS 定位！");
+      if (!navigator.geolocation) return alert("手機不支援 GPS 定位！");
       const statusText = document.getElementById("geoStatusText");
       statusText.innerText = "🛰️ 正在讀取手機現場真實 GPS 座標...";
-      statusText.className = "text-[10px] text-center font-bold text-indigo-600 animate-pulse";
 
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           pendingLocation = { lat, lng };
-
           document.getElementById("inputCoords").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
           statusText.innerText = `✅ 現場定位成功！(${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-          statusText.className = "text-[10px] text-center font-bold text-green-600";
-
-          map.flyTo([lat, lng], 16);
-          if (tempPinMarker) map.removeLayer(tempPinMarker);
-          tempPinMarker = L.circleMarker([lat, lng], {
-            radius: 9, fillColor: "#10B981", color: "#FFFFFF", weight: 3, opacity: 1, fillOpacity: 0.95
-          }).addTo(map);
+          if (map) map.flyTo([lat, lng], 16);
 
           try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=zh-TW`);
@@ -682,15 +867,12 @@
             }
           } catch(e) {}
         },
-        () => {
-          statusText.innerText = "❌ 定位失敗，請確認已允許手機開啟定位權限！";
-          statusText.className = "text-[10px] text-center font-bold text-red-500";
-        },
+        () => { statusText.innerText = "❌ 定位失敗，請確認手機已開啟定位權限！"; },
         { enableHighAccuracy: true, timeout: 8000 }
       );
     }
 
-    // 匯入 Google Maps 收藏 (JSON)
+    // Google Maps 匯入
     async function importGoogleMapsData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -699,8 +881,7 @@
       reader.onload = async (e) => {
         try {
           let count = 0;
-          const text = e.target.result;
-          const json = JSON.parse(text);
+          const json = JSON.parse(e.target.result);
           const features = json.features || (Array.isArray(json) ? json : []);
 
           if (!features.length) return alert("檔案內無地點資料，請確認是 Google Maps 匯出的 JSON 檔案！");
@@ -725,14 +906,14 @@
                 address: address,
                 lat: coords[1],
                 lng: coords[0],
-                tags: ["Google收藏"],
+                tags: ["回憶收藏"],
                 visits: [{
                   visitId: "v_" + Date.now(),
                   date: new Date().toISOString().split("T")[0],
                   rating: 5.0,
                   cost: null,
                   revisit: true,
-                  review: props.Comment || props.Note || "從 Google Maps 匯入的收藏地點",
+                  review: props.Comment || props.Note || "Google Maps 收藏紀錄",
                   photos: []
                 }]
               };
@@ -743,7 +924,8 @@
 
           appData = await dbGetAll();
           refreshViews();
-          alert(`🎉 成功從 Google Maps 匯入了 ${count} 間餐廳與景點！已全數在地圖標記。`);
+          updateDashboardStats();
+          alert(`🎉 成功匯入了 ${count} 個足跡地點！已全數同步至日記。`);
         } catch(err) {
           alert("匯入失敗，請確認檔案格式是否正確。");
         }
@@ -752,7 +934,7 @@
       toggleBackupMenu();
     }
 
-    // 多圖壓縮與處理
+    // 照片壓縮
     async function handlePhotosSelect(event) {
       const files = Array.from(event.target.files);
       if (!files.length) return;
@@ -800,7 +982,7 @@
       badge.innerText = `已選 ${uploadedPhotosList.length} 張`;
       if (!uploadedPhotosList.length) { grid.innerHTML = ""; return; }
       grid.innerHTML = uploadedPhotosList.map((imgSrc, idx) => `
-        <div class="relative rounded-xl overflow-hidden border border-gray-200 h-20">
+        <div class="relative rounded-xl overflow-hidden border border-[#EAE3D9] h-20">
           <img src="${imgSrc}" class="w-full h-full object-cover" />
           <button type="button" onclick="removePhotoAtIndex(${idx})" class="touch-btn absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
             <i class="fa-solid fa-xmark"></i>
@@ -821,7 +1003,7 @@
       const revisit = document.getElementById("inputRevisit").checked;
       const tags = document.getElementById("inputTags").value.split(/[,，\s]+/).filter(Boolean);
 
-      if (!name) return alert("請輸入店家名稱！");
+      if (!name) return alert("請輸入地點名稱！");
 
       let finalCoords = pendingLocation;
       if (!finalCoords) {
@@ -882,7 +1064,7 @@
           address: address,
           lat: finalCoords.lat,
           lng: finalCoords.lng,
-          tags: tags.length ? tags : ["美食"],
+          tags: tags.length ? tags : ["回憶"],
           visits: [{
             visitId: "v_" + Date.now(),
             date: date,
@@ -899,31 +1081,33 @@
 
       closeModal();
       refreshViews();
-      map.flyTo([finalCoords.lat, finalCoords.lng], 16);
+      updateDashboardStats();
     }
 
-    // 刪除處理函數
+    // 刪除處理
     async function deleteCurrentEditingVisit() {
       if (!editingStoreId) return;
       const store = appData.find(s => s.id === editingStoreId);
       if (!store) return;
 
       if (store.visits.length <= 1) {
-        if (confirm(`這是「${store.name}」唯一的紀錄，刪除此筆記將一併移除該店家與地圖標記。確定要刪除嗎？`)) {
+        if (confirm(`這是「${store.name}」唯一的紀錄，刪除將一併移除該地點與標記。確定要刪除嗎？`)) {
           await dbDelete(editingStoreId);
           appData = appData.filter(s => s.id !== editingStoreId);
           closeModal();
           refreshViews();
-          alert("✅ 已成功刪除該店家與紀錄！");
+          updateDashboardStats();
+          alert("✅ 已成功刪除！");
         }
         return;
       }
 
-      if (confirm(`確定要刪除「${store.name}」的這一次拜訪筆記嗎？其他次紀錄將會保留。`)) {
+      if (confirm(`確定要刪除「${store.name}」這一次的拜訪筆記嗎？其他次紀錄將會保留。`)) {
         store.visits = store.visits.filter(v => v.visitId !== editingVisitId);
         await dbPut(store);
         closeModal();
         refreshViews();
+        updateDashboardStats();
         alert("✅ 已成功刪除該次筆記！");
       }
     }
@@ -931,11 +1115,12 @@
     async function deleteRestaurant(storeId) {
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
-      if (confirm(`確定要徹底刪除「${store.name}」及其所有拜訪紀錄與照片嗎？此動作無法復原。`)) {
+      if (confirm(`確定要徹底刪除「${store.name}」及其所有拜訪紀錄與照片嗎？`)) {
         await dbDelete(storeId);
         appData = appData.filter(s => s.id !== storeId);
         refreshViews();
-        alert("✅ 已成功刪除該店家！");
+        updateDashboardStats();
+        alert("✅ 已成功刪除！");
       }
     }
 
@@ -948,14 +1133,16 @@
         return;
       }
 
-      if (confirm(`確定要刪除這一次的拜訪筆記嗎？`)) {
+      if (confirm(`確定要刪除這一次的筆記嗎？`)) {
         store.visits = store.visits.filter(v => v.visitId !== visitId);
         await dbPut(store);
         refreshViews();
+        updateDashboardStats();
         alert("✅ 已成功刪除該次筆記！");
       }
     }
 
+    // 畫面更新
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
@@ -1000,8 +1187,10 @@
     }
 
     function renderMarkers() {
+      if (!map || !markersLayer) return;
       markersLayer.clearLayers();
       appData.forEach(item => {
+        if (!item.lat || !item.lng) return;
         const latest = item.visits[0];
         if (!latest) return;
         const photos = getVisitPhotos(latest);
@@ -1014,10 +1203,6 @@
           popupAnchor: [0, -42]
         });
 
-        const revisitBadge = latest.revisit
-          ? `<span style="color:#DC2626; font-weight:900; background:#FEE2E2; padding:2px 6px; border-radius:6px;">推薦再訪 👍</span>`
-          : `<span style="color:#6B7280; font-weight:bold; background:#F3F4F6; padding:2px 6px; border-radius:6px;">不再訪 ❌</span>`;
-
         const photoHtml = photos.length > 0 
           ? `<div style="position:relative; margin-bottom:6px;">
                <img src="${photos[0]}" style="width:100%; height:95px; object-fit:cover; border-radius:10px;" />
@@ -1028,14 +1213,14 @@
         const content = `
           <div style="font-family: system-ui; width: 220px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-              <span style="font-size:10px; background:#F2F0FB; color:#52479B; padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country} · ${item.city}</span>
-              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FEF3C7; color:#D97706; padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
+              <span style="font-size:10px; background:#F2ECE4; color:#8C7A6B; padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
+              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:#8C7A6B; padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
             </div>
             ${photoHtml}
-            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px;">${item.name}</h4>
-            <div style="font-size:11px; margin-bottom:4px;"><b style="color:#9C95DB; font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
-            <p style="font-size:11px; color:#555; margin:0 0 6px;">${latest.review || '無心得'}</p>
-            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="width:100%; background:#F3F4F6; color:#4B5563; border:1px solid #E5E7EB; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯或改座標</button>
+            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:#3D3231;">${item.name}</h4>
+            <div style="font-size:11px; margin-bottom:4px;"><b style="color:#8C7A6B; font-size:13px;">★ ${latest.rating.toFixed(1)}</b></div>
+            <p style="font-size:11px; color:#6B5F54; margin:0 0 6px;">${latest.review || '無心得'}</p>
+            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="width:100%; background:#FAF8F5; color:#5C4F44; border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯回憶筆記</button>
           </div>
         `;
 
@@ -1048,6 +1233,7 @@
       const cityFilter = document.getElementById("filterCity").value;
       const tagFilter = document.getElementById("filterTag").value;
       const ratingFilter = document.getElementById("filterRating").value;
+      const sortOrder = document.getElementById("sortOrder").value;
 
       let list = [...appData];
       if (countryFilter) list = list.filter(i => i.country === countryFilter);
@@ -1056,11 +1242,24 @@
       if (ratingFilter === "gte_4.5") list = list.filter(i => i.visits[0]?.rating >= 4.5);
       else if (ratingFilter === "lt_3.0") list = list.filter(i => i.visits[0]?.rating < 3.0);
 
+      list.sort((a, b) => {
+        const da = a.visits[0]?.date || "";
+        const db = b.visits[0]?.date || "";
+        const ra = a.visits[0]?.rating || 0;
+        const rb = b.visits[0]?.rating || 0;
+
+        if (sortOrder === "date_desc") return new Date(db) - new Date(da);
+        if (sortOrder === "date_asc") return new Date(da) - new Date(db);
+        if (sortOrder === "rating_desc") return rb - ra;
+        if (sortOrder === "visits_desc") return b.visits.length - a.visits.length;
+        return 0;
+      });
+
       document.getElementById("totalCount").innerText = list.length;
       const container = document.getElementById("restaurantCards");
 
       if (!list.length) {
-        container.innerHTML = `<div class="text-center text-gray-400 py-12 text-xs">查無美食日記</div>`;
+        container.innerHTML = `<div class="text-center text-[#9E8E81] py-12 text-xs">查無符合的回憶日記</div>`;
         return;
       }
 
@@ -1070,13 +1269,13 @@
 
         let photosRenderHtml = "";
         if (photos.length === 1) {
-          photosRenderHtml = `<img src="${photos[0]}" class="w-full h-44 object-cover rounded-2xl border border-gray-100" />`;
+          photosRenderHtml = `<img src="${photos[0]}" class="w-full h-44 object-cover rounded-2xl border border-[#F0EBE3]" />`;
         } else if (photos.length > 1) {
           photosRenderHtml = `
             <div class="relative">
               <div class="flex space-x-2 overflow-x-auto no-scrollbar snap-x py-1">
                 ${photos.map((p, pIdx) => `
-                  <div class="flex-shrink-0 w-[78%] h-44 snap-center rounded-2xl overflow-hidden border border-gray-100 relative">
+                  <div class="flex-shrink-0 w-[78%] h-44 snap-center rounded-2xl overflow-hidden border border-[#F0EBE3] relative">
                     <img src="${p}" class="w-full h-full object-cover" />
                     <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
                       ${pIdx + 1} / ${photos.length}
@@ -1084,52 +1283,48 @@
                   </div>
                 `).join('')}
               </div>
-              <span class="text-[9px] text-gray-400 block text-right mt-0.5 font-medium">👈 左右滑動查看 ${photos.length} 張照片</span>
+              <span class="text-[9px] text-[#A6998E] block text-right mt-0.5 font-medium">👈 左右滑動查看 ${photos.length} 張照片</span>
             </div>
           `;
         }
 
         return `
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-150 flex flex-col space-y-3">
+          <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
             <div class="flex justify-between items-start">
               <div>
-                <span class="bg-theme-light text-theme-dark text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country} · ${item.city}</span>
-                <h3 class="font-bold text-gray-900 text-sm mt-0.5">${item.name}</h3>
-                <p class="text-[11px] text-gray-400">${item.address || '無詳細地址'}</p>
+                <span class="bg-[#F2ECE4] text-[#8C7A6B] text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country || ''} · ${item.city || ''}</span>
+                <h3 class="font-bold text-[#3D3231] text-sm mt-0.5">${item.name}</h3>
+                <p class="text-[11px] text-[#A6998E]">${item.address || '無詳細地址'}</p>
               </div>
-              <div class="flex items-center space-x-1.5">
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-theme-dark bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
-                  ✏️ 編輯
-                </button>
-              </div>
+              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-[#8C7A6B] bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
+                ✏️ 編輯
+              </button>
             </div>
 
             ${photosRenderHtml}
 
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 space-y-1.5">
-              <div class="flex justify-between items-center text-xs border-b border-gray-200/60 pb-1">
+            <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
+              <div class="flex justify-between items-center text-xs border-b border-[#F0EBE3] pb-1">
                 <div class="flex items-center space-x-1">
                   <span class="font-black text-amber-500">★ ${latest.rating.toFixed(1)}</span>
-                  <span class="text-gray-400 text-[10px]">(${latest.date})</span>
-                  ${latest.revisit ? '<span class="text-red-500 font-bold text-[10px] ml-1">· 推薦再訪 👍</span>' : ''}
+                  <span class="text-[#A6998E] text-[10px]">(${latest.date})</span>
+                  ${latest.revisit ? '<span class="text-[#C27878] font-bold text-[10px] ml-1">· 值得再訪 👍</span>' : ''}
                 </div>
                 <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="touch-btn text-gray-400 hover:text-red-500 p-1 text-xs">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
-              <p class="text-xs text-gray-600 leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
+              <p class="text-xs text-[#5C4F44] leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
             </div>
 
-            <div class="flex flex-wrap gap-1">
-              ${(item.tags || []).map(t => `<span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium">#${t}</span>`).join('')}
-            </div>
-
-            <div class="flex justify-between items-center text-[11px] text-gray-400 pt-1 border-t border-gray-150">
-              <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-gray-400 hover:text-red-500 flex items-center space-x-1 font-bold">
+            <div class="flex justify-between items-center text-[11px] text-[#A6998E] pt-1 border-t border-[#F5F0E8]">
+              <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-[#A6998E] hover:text-red-500 flex items-center space-x-1 font-medium">
                 <i class="fa-solid fa-trash-can"></i>
-                <span>刪除整間店</span>
+                <span>刪除地點</span>
               </button>
-              <span>均消 ${latest.cost ? `$${latest.cost}` : '未記'}</span>
+              <button onclick="openRevisitModal('${item.id}')" class="touch-btn bg-[#F2ECE4] text-[#8C7A6B] hover:bg-[#8C7A6B] hover:text-white px-3 py-1 rounded-full font-bold transition flex items-center active:scale-95">
+                <i class="fa-solid fa-pen-nib mr-1"></i> ＋ 記新一次造訪
+              </button>
             </div>
           </div>
         `;
@@ -1140,14 +1335,13 @@
       currentModalMode = 'CREATE';
       pendingLocation = null;
       uploadedPhotosList = [];
-      document.getElementById("modalMainTitle").innerText = "記錄新店家";
+      document.getElementById("modalMainTitle").innerText = "記錄新地點";
       document.getElementById("inputStoreName").value = "";
       document.getElementById("inputCountry").value = "台灣";
       document.getElementById("inputCity").value = "新竹市";
       document.getElementById("inputStoreAddress").value = "";
       document.getElementById("inputCoords").value = "";
-      document.getElementById("geoStatusText").innerText = "點擊「方法一」自動查找，或依需求選擇方法二/三";
-      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-gray-400";
+      document.getElementById("geoStatusText").innerText = "可選擇方法一、二或三進行定位";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
       document.getElementById("inputTags").value = "";
       document.getElementById("inputReview").value = "";
@@ -1155,6 +1349,30 @@
       document.getElementById("modalDeleteBtn").classList.add("hidden");
       renderPhotosThumbnails();
       setRating(4.5);
+      document.getElementById("entryModal").classList.remove("hidden");
+    }
+
+    function openRevisitModal(storeId) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      currentModalMode = 'REVISIT';
+      editingStoreId = storeId;
+      pendingLocation = { lat: store.lat, lng: store.lng };
+      const nextVisitNum = store.visits.length + 1;
+
+      document.getElementById("modalMainTitle").innerText = `第 ${nextVisitNum} 次造訪回憶 ✍️`;
+      document.getElementById("inputStoreName").value = store.name;
+      document.getElementById("inputCountry").value = store.country || "台灣";
+      document.getElementById("inputCity").value = store.city || "";
+      document.getElementById("inputStoreAddress").value = store.address || "";
+      document.getElementById("inputCoords").value = `${store.lat.toFixed(5)}, ${store.lng.toFixed(5)}`;
+      document.getElementById("inputReview").value = "";
+      document.getElementById("inputCost").value = store.visits[0]?.cost || "";
+      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("modalDeleteBtn").classList.add("hidden");
+      uploadedPhotosList = [];
+      renderPhotosThumbnails();
+      setRating(5.0);
       document.getElementById("entryModal").classList.remove("hidden");
     }
 
@@ -1169,14 +1387,12 @@
       pendingLocation = { lat: store.lat, lng: store.lng };
       uploadedPhotosList = [...getVisitPhotos(visit)];
 
-      document.getElementById("modalMainTitle").innerText = `編輯美食筆記 ✏️`;
+      document.getElementById("modalMainTitle").innerText = `編輯回憶筆記 ✏️`;
       document.getElementById("inputStoreName").value = store.name;
       document.getElementById("inputCountry").value = store.country || "台灣";
       document.getElementById("inputCity").value = store.city || "新竹市";
       document.getElementById("inputStoreAddress").value = store.address || "";
       document.getElementById("inputCoords").value = `${store.lat.toFixed(5)}, ${store.lng.toFixed(5)}`;
-      document.getElementById("geoStatusText").innerText = `目前位置：${store.lat.toFixed(4)}, ${store.lng.toFixed(4)}`;
-      document.getElementById("geoStatusText").className = "text-[10px] text-center font-bold text-theme-dark";
       document.getElementById("inputReview").value = visit.review || "";
       document.getElementById("inputCost").value = visit.cost || "";
       document.getElementById("inputDate").value = visit.date;
@@ -1225,31 +1441,42 @@
       setRating(Math.round(num * 2) / 2);
     }
 
-    // 【關鍵修復 2】：切換 Tab 邏輯增強，配合三星瀏覽器
+    // ========== 【分頁切換邏輯：三頁簽】 ==========
     function switchTab(tab) {
+      const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
       const listView = document.getElementById("listView");
+      const tabDashBtn = document.getElementById("tabDashBtn");
       const tabMapBtn = document.getElementById("tabMapBtn");
       const tabListBtn = document.getElementById("tabListBtn");
 
-      if (tab === 'map') {
+      dashView.classList.add("hidden");
+      mapView.classList.add("hidden");
+      listView.classList.add("hidden");
+
+      tabDashBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs py-1 px-3 transition";
+      tabMapBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs py-1 px-3 transition";
+      tabListBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs py-1 px-3 transition";
+
+      if (tab === 'dashboard') {
+        dashView.classList.remove("hidden");
+        tabDashBtn.className = "touch-btn flex flex-col items-center text-[#8C7A6B] font-bold text-xs py-1 px-3 transition";
+        updateDashboardStats();
+      } else if (tab === 'map') {
         mapView.classList.remove("hidden");
-        listView.classList.add("hidden");
-        tabMapBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4";
-        tabListBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4";
+        tabMapBtn.className = "touch-btn flex flex-col items-center text-[#8C7A6B] font-bold text-xs py-1 px-3 transition";
         setTimeout(() => { if (map) map.invalidateSize(); }, 150);
       } else {
-        mapView.classList.add("hidden");
         listView.classList.remove("hidden");
-        tabListBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-xs active:scale-95 transition py-1 px-4";
-        tabMapBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-xs active:scale-95 transition py-1 px-4";
+        tabListBtn.className = "touch-btn flex flex-col items-center text-[#8C7A6B] font-bold text-xs py-1 px-3 transition";
         renderListView();
       }
     }
 
     function locateUser() {
+      if (!navigator.geolocation) return alert("手機不支援 GPS 定位");
       navigator.geolocation.getCurrentPosition((pos) => {
-        map.flyTo([pos.coords.latitude, pos.coords.longitude], 15);
+        if (map) map.flyTo([pos.coords.latitude, pos.coords.longitude], 15);
       });
     }
 
@@ -1260,7 +1487,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `美食日記備份_${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `點點滴滴_生活回憶手帳備份_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       toggleBackupMenu();
     }
@@ -1276,7 +1503,8 @@
             for (const item of list) await dbPut(item);
             appData = await dbGetAll();
             refreshViews();
-            alert(`✅ 還原成功！已匯入 ${list.length} 間餐廳紀錄。`);
+            updateDashboardStats();
+            alert(`✅ 還原成功！已載入 ${list.length} 筆回憶紀錄。`);
           }
         } catch { alert("匯入失敗，請確認檔案格式是否正確。"); }
       };
@@ -1287,4 +1515,4 @@
     window.onload = initApp;
   </script>
 </body>
-</html>
+  </html>
