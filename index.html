@@ -27,18 +27,30 @@
       padding: 0;
       overflow: hidden;
       background-color: #FAF8F5;
-      color: #4A3E3D;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* 支援自訂文字顏色、UI配色與圖釘色 */
     :root {
-      --bg-cream: #FAF8F5;
-      --card-cream: #FFFFFF;
-      --accent-warm: #8C7A6B;      /* 暖木棕 */
-      --accent-light: #F2ECE4;     /* 燕麥米色 */
-      --marker-color: #C86D51;     /* 預設圖標：落日焦糖橘 */
+      --ui-text: #3D3231;          /* 預設主要字體顏色 */
+      --ui-text-muted: #8C7E74;    /* 預設次要字體顏色 */
+      --ui-theme: #C86D51;         /* 預設UI主題色 (落日焦糖橘) */
+      --ui-theme-light: #FDF2EC;   /* 預設主題淺底色 */
+      --marker-color: #C86D51;     /* 預設地圖圖釘顏色 */
     }
+
+    body {
+      color: var(--ui-text);
+    }
+
+    /* 動態顏色綁定類別 */
+    .text-main { color: var(--ui-text) !important; }
+    .text-sub { color: var(--ui-text-muted) !important; }
+    .text-theme { color: var(--ui-theme) !important; }
+    .bg-theme { background-color: var(--ui-theme) !important; }
+    .bg-theme-light { background-color: var(--ui-theme-light) !important; }
+    .border-theme { border-color: var(--ui-theme) !important; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -59,7 +71,7 @@
       cursor: pointer;
     }
 
-    /* 地圖圖標樣式 (預設為焦糖橘) */
+    /* 地圖圖釘樣式 */
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -69,7 +81,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(200, 109, 81, 0.35);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
       border: 2px solid #FFFFFF !important;
       transition: background 0.3s ease;
     }
@@ -87,56 +99,136 @@
   <!-- 頂部導覽列 -->
   <header class="bg-[#FFFFFF]/95 backdrop-blur border-b border-[#EAE3D9] px-4 py-2.5 flex items-center justify-between z-30 shadow-xs relative flex-shrink-0">
     <div class="flex items-center space-x-2.5">
-      <div class="w-8 h-8 rounded-full bg-[#F2ECE4] flex items-center justify-center text-[#8C7A6B]">
+      <div class="w-8 h-8 rounded-full bg-theme-light flex items-center justify-center text-theme">
         <i class="fa-solid fa-mug-hot text-sm"></i>
       </div>
       <div>
-        <h1 class="text-base font-bold text-[#3D3231] leading-tight">我的美食日記</h1>
-        <p class="text-[10px] text-[#9E8E81]">生活足跡與回憶手帳</p>
+        <h1 class="text-base font-bold text-main leading-tight">我的美食日記</h1>
+        <p class="text-[10px] text-sub">生活足跡與回憶手帳</p>
       </div>
     </div>
     
     <div class="flex items-center space-x-2">
-      <!-- 🎨 地圖圖標調色盤 -->
-      <button onclick="toggleColorPickerMenu()" title="切換圖標顏色" class="touch-btn bg-[#F2ECE4] hover:bg-[#EAE3D9] text-[#8C7A6B] p-1.5 rounded-full text-xs font-bold active:scale-95 transition">
+      <!-- 🎨 自由自訂調色盤按鈕 -->
+      <button onclick="toggleColorPickerMenu()" title="調整字體與UI配色" class="touch-btn bg-theme-light hover:bg-[#EAE3D9] text-theme p-1.5 rounded-full text-xs font-bold active:scale-95 transition">
         🎨
       </button>
       <!-- 資料備份 -->
-      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-[#8C7A6B] hover:bg-[#F2ECE4] p-1.5 rounded-full active:scale-95 transition">
+      <button onclick="toggleBackupMenu()" title="資料備份與匯入" class="touch-btn text-sub hover:bg-[#F2ECE4] p-1.5 rounded-full active:scale-95 transition">
         <i class="fa-solid fa-box-archive text-base"></i>
       </button>
       <!-- 寫篇日記 -->
-      <button onclick="openManualAddModal()" class="touch-btn bg-[#C86D51] hover:bg-[#B35C42] text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-xs active:scale-95 transition">
+      <button onclick="openManualAddModal()" class="touch-btn bg-theme text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center shadow-xs active:scale-95 transition">
         <i class="fa-solid fa-feather-pointed mr-1"></i> 寫一篇
       </button>
     </div>
   </header>
 
-  <!-- 🎨 圖標調色盤選單 -->
-  <div id="colorPickerMenu" class="hidden absolute top-14 right-16 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-3 z-[1600] w-52 text-xs space-y-2">
-    <div class="font-bold text-[#5C4F44] text-[11px] mb-1">選擇地圖圖標配色：</div>
-    <div class="grid grid-cols-5 gap-2">
-      <button onclick="setMarkerTheme('#C86D51', '焦糖橘')" title="落日焦糖橘 (預設)" class="w-7 h-7 rounded-full bg-[#C86D51] border-2 border-white shadow-xs active:scale-90 transition"></button>
-      <button onclick="setMarkerTheme('#8C7A6B', '暖木棕')" title="暖木核桃棕" class="w-7 h-7 rounded-full bg-[#8C7A6B] border-2 border-white shadow-xs active:scale-90 transition"></button>
-      <button onclick="setMarkerTheme('#6B8E23', '抹茶綠')" title="日系抹茶綠" class="w-7 h-7 rounded-full bg-[#6B8E23] border-2 border-white shadow-xs active:scale-90 transition"></button>
-      <button onclick="setMarkerTheme('#9C95DB', '薰衣草紫')" title="典雅薰衣草紫" class="w-7 h-7 rounded-full bg-[#9C95DB] border-2 border-white shadow-xs active:scale-90 transition"></button>
-      <button onclick="setMarkerTheme('#5B8296', '霧霾藍')" title="低飽和霧霾藍" class="w-7 h-7 rounded-full bg-[#5B8296] border-2 border-white shadow-xs active:scale-90 transition"></button>
+  <!-- 🎨 全功能自由調色盤彈窗 (支援字體、主題色、圖釘色) -->
+  <div id="colorPickerModal" class="hidden fixed inset-0 bg-black/50 z-[1700] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-[#EAE3D9] space-y-4 max-h-[85dvh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-[#F0EBE3] pb-2">
+        <div>
+          <h3 class="font-bold text-main text-sm">風格美學調色盤 🎨</h3>
+          <p class="text-[10px] text-sub">自訂專屬於你的手帳字體與地圖顏色</p>
+        </div>
+        <button onclick="toggleColorPickerMenu()" class="text-sub text-xl">&times;</button>
+      </div>
+
+      <!-- 1. 字體顏色調整 (Font Color) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <label class="font-bold text-main">✏️ 主要文字顏色 (字體)</label>
+          <div class="flex items-center space-x-1">
+            <span class="text-[10px] text-sub">自選色：</span>
+            <input type="color" id="pickerTextColor" onchange="applyCustomColor('text', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="applyPresetColor('text', '#3D3231')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#3D3231] inline-block"></span><span>深焙黑茶</span>
+          </button>
+          <button onclick="applyPresetColor('text', '#1E1E1E')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#1E1E1E] inline-block"></span><span>墨黑俐落</span>
+          </button>
+          <button onclick="applyPresetColor('text', '#4A3E3D')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#4A3E3D] inline-block"></span><span>暖木褐棕</span>
+          </button>
+          <button onclick="applyPresetColor('text', '#374151')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#374151] inline-block"></span><span>石板鉛灰</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. UI 配色調整 (Theme Accent) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <label class="font-bold text-main">✨ UI 主題配色 (按鈕 / 高亮)</label>
+          <div class="flex items-center space-x-1">
+            <span class="text-[10px] text-sub">自選色：</span>
+            <input type="color" id="pickerThemeColor" onchange="applyCustomColor('theme', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="applyPresetColor('theme', '#C86D51')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#C86D51] inline-block"></span><span>焦糖橘</span>
+          </button>
+          <button onclick="applyPresetColor('theme', '#8C7A6B')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#8C7A6B] inline-block"></span><span>核桃棕</span>
+          </button>
+          <button onclick="applyPresetColor('theme', '#5E7A4A')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#5E7A4A] inline-block"></span><span>抹茶綠</span>
+          </button>
+          <button onclick="applyPresetColor('theme', '#8F86D1')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#8F86D1] inline-block"></span><span>薰衣草紫</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. 地圖圖釘顏色 (Marker Pin Color) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <label class="font-bold text-main">📍 地圖圖釘顏色 (Pin Marker)</label>
+          <div class="flex items-center space-x-1">
+            <span class="text-[10px] text-sub">自選色：</span>
+            <input type="color" id="pickerMarkerColor" onchange="applyCustomColor('marker', this.value)" class="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent p-0" />
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="applyPresetColor('marker', '#C86D51')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#C86D51] inline-block"></span><span>焦糖橘</span>
+          </button>
+          <button onclick="applyPresetColor('marker', '#5E7A4A')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#5E7A4A] inline-block"></span><span>抹茶綠</span>
+          </button>
+          <button onclick="applyPresetColor('marker', '#B8533E')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#B8533E] inline-block"></span><span>秋日朱紅</span>
+          </button>
+          <button onclick="applyPresetColor('marker', '#4B6B94')" class="border border-[#EAE3D9] rounded-xl p-2 text-center text-[10px] font-bold active:scale-95 flex items-center justify-center space-x-1">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#4B6B94] inline-block"></span><span>深靛藍</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-2 flex space-x-2">
+        <button onclick="resetThemeDefaults()" class="touch-btn w-1/3 py-2 bg-gray-100 text-sub rounded-xl text-xs font-bold active:scale-95">恢復預設</button>
+        <button onclick="toggleColorPickerMenu()" class="touch-btn w-2/3 py-2 bg-theme text-white rounded-xl text-xs font-bold active:scale-95">完成並保存</button>
+      </div>
     </div>
-    <p id="currentThemeNameText" class="text-[10px] text-[#9E8E81] text-center pt-1 border-t border-[#F2ECE4]">目前色調：焦糖橘</p>
   </div>
 
   <!-- 備份選單 -->
   <div id="backupMenu" class="hidden absolute top-14 right-4 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-2.5 z-[1600] w-56 text-xs space-y-1.5">
-    <label class="touch-btn w-full text-left py-2 px-2.5 bg-[#FAF6F0] hover:bg-[#F2ECE4] text-[#5C4F44] rounded-xl flex items-center font-bold cursor-pointer transition">
-      <i class="fa-solid fa-map-location-dot mr-2 text-[#C86D51]"></i> 匯入 Google Maps 收藏檔
+    <label class="touch-btn w-full text-left py-2 px-2.5 bg-theme-light text-theme rounded-xl flex items-center font-bold cursor-pointer transition">
+      <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
       <input type="file" id="importGoogleMapsInput" accept=".json,.geojson" onchange="importGoogleMapsData(event)" class="hidden" />
     </label>
     <div class="border-t border-[#F0EBE3] my-1"></div>
-    <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-[#5C4F44]">
-      <i class="fa-solid fa-download mr-2 text-[#8C7A6B]"></i> 匯出本機備份檔 (JSON)
+    <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-main">
+      <i class="fa-solid fa-download mr-2 text-sub"></i> 匯出本機備份檔 (JSON)
     </button>
-    <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-[#5C4F44] cursor-pointer">
-      <i class="fa-solid fa-upload mr-2 text-[#8C7A6B]"></i> 還原日記備份檔
+    <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-main cursor-pointer">
+      <i class="fa-solid fa-upload mr-2 text-sub"></i> 還原日記備份檔
       <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden" />
     </label>
   </div>
@@ -144,85 +236,127 @@
   <!-- 主要內容區域 -->
   <main class="flex-1 relative w-full h-full overflow-hidden">
     
-    <!-- 頁面 1：【點點滴滴・首頁足跡總覽】 -->
+    <!-- 頁面 1：【點點滴滴・首頁足跡總覽 ＋ 探索回憶統計】 -->
     <div id="dashboardView" class="w-full h-full overflow-y-auto px-4 py-4 pb-32 space-y-4">
       
       <!-- 溫暖手帳風格問候區 -->
       <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-[#C86D51] bg-[#FDF2EC] px-2.5 py-1 rounded-full flex items-center">
-            <i class="fa-solid fa-heart mr-1.5 text-xs text-[#C86D51]"></i> 生活回憶手帳
+          <span class="text-xs font-bold text-theme bg-theme-light px-2.5 py-1 rounded-full flex items-center">
+            <i class="fa-solid fa-heart mr-1.5 text-xs text-theme"></i> 生活回憶手帳
           </span>
-          <span class="text-[11px] text-[#A6998E]" id="dashTodayDate"></span>
+          <span class="text-[11px] text-sub" id="dashTodayDate"></span>
         </div>
-        <h2 class="text-lg font-bold text-[#3D3231] leading-snug">那些走過的路，<br>都成了有滋有味的回憶。</h2>
+        <h2 class="text-lg font-bold text-main leading-snug">那些走過的路，<br>都成了有滋有味的回憶。</h2>
       </div>
 
       <!-- 四大真實數據卡片 -->
       <div class="grid grid-cols-2 gap-2.5">
         <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
-          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
-            <i class="fa-solid fa-location-dot mr-1.5 text-[#C86D51]"></i> 去過的地點
+          <div class="text-sub text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-location-dot mr-1.5 text-theme"></i> 去過的地點
           </div>
           <div class="mt-2 flex items-baseline space-x-1">
-            <span class="text-2xl font-black text-[#3D3231]" id="statUniquePlaces">0</span>
-            <span class="text-[11px] text-[#9E8E81]">個地方</span>
+            <span class="text-2xl font-black text-main" id="statUniquePlaces">0</span>
+            <span class="text-[11px] text-sub">個地方</span>
           </div>
-          <p class="text-[10px] text-[#B0A499] mt-0.5">不重複足跡地點</p>
+          <p class="text-[10px] text-sub mt-0.5">不重複足跡地點</p>
         </div>
 
         <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
-          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
-            <i class="fa-solid fa-map mr-1.5 text-[#C86D51]"></i> 走過的縣市
+          <div class="text-sub text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-map mr-1.5 text-theme"></i> 走過的縣市
           </div>
           <div class="mt-2 flex items-baseline space-x-1">
-            <span class="text-2xl font-black text-[#3D3231]" id="statUniqueCities">0</span>
-            <span class="text-[11px] text-[#9E8E81]">個縣市/城市</span>
+            <span class="text-2xl font-black text-main" id="statUniqueCities">0</span>
+            <span class="text-[11px] text-sub">個縣市/城市</span>
           </div>
-          <p class="text-[10px] text-[#B0A499] mt-0.5">足跡遍佈的城市</p>
+          <p class="text-[10px] text-sub mt-0.5">足跡遍佈的城市</p>
         </div>
 
         <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
-          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
-            <i class="fa-solid fa-images mr-1.5 text-[#C86D51]"></i> 保存照片數
+          <div class="text-sub text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-images mr-1.5 text-theme"></i> 保存照片數
           </div>
           <div class="mt-2 flex items-baseline space-x-1">
-            <span class="text-2xl font-black text-[#3D3231]" id="statTotalPhotos">0</span>
-            <span class="text-[11px] text-[#9E8E81]">張回憶</span>
+            <span class="text-2xl font-black text-main" id="statTotalPhotos">0</span>
+            <span class="text-[11px] text-sub">張回憶</span>
           </div>
-          <p class="text-[10px] text-[#B0A499] mt-0.5">珍貴光影瞬間</p>
+          <p class="text-[10px] text-sub mt-0.5">珍貴光影瞬間</p>
         </div>
 
         <div class="bg-white p-3.5 rounded-2xl border border-[#EAE3D9] shadow-xs flex flex-col justify-between">
-          <div class="text-[#8C7A6B] text-xs font-semibold flex items-center">
-            <i class="fa-solid fa-calendar-days mr-1.5 text-[#C86D51]"></i> 紀錄月份數
+          <div class="text-sub text-xs font-semibold flex items-center">
+            <i class="fa-solid fa-calendar-days mr-1.5 text-theme"></i> 紀錄月份數
           </div>
           <div class="mt-2 flex items-baseline space-x-1">
-            <span class="text-2xl font-black text-[#3D3231]" id="statTotalMonths">0</span>
-            <span class="text-[11px] text-[#9E8E81]">個月份</span>
+            <span class="text-2xl font-black text-main" id="statTotalMonths">0</span>
+            <span class="text-[11px] text-sub">個月份</span>
           </div>
-          <p class="text-[10px] text-[#B0A499] mt-0.5">點滴時光累積</p>
+          <p class="text-[10px] text-sub mt-0.5">點滴時光累積</p>
         </div>
       </div>
 
-      <!-- 快速記一篇捷徑 -->
-      <div class="bg-[#F2ECE4] p-3 rounded-2xl border border-[#E2D8CC] flex items-center justify-between">
-        <div class="flex items-center space-x-2 text-xs text-[#5C4F44]">
-          <span class="w-2 h-2 rounded-full bg-[#C86D51] animate-pulse"></span>
+      <!-- 快捷記一篇入口 -->
+      <div class="bg-theme-light p-3 rounded-2xl border border-[#E2D8CC] flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-xs text-main">
+          <span class="w-2 h-2 rounded-full bg-theme animate-pulse"></span>
           <span>今天又發現了什麼好地方嗎？</span>
         </div>
-        <button onclick="openManualAddModal()" class="touch-btn bg-[#C86D51] hover:bg-[#B35C42] text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition">
+        <button onclick="openManualAddModal()" class="touch-btn bg-theme text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition">
           立刻記錄
         </button>
+      </div>
+
+      <!-- 【全新功能：探索回憶統計】 (非商業BI，溫暖生活手帳風圖表) -->
+      <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-3.5">
+        <div class="flex items-center justify-between border-b border-[#F5F0E8] pb-2">
+          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
+            <i class="fa-solid fa-compass mr-1.5 text-theme"></i> 探索生活足跡統計
+          </h3>
+          <span class="text-[10px] text-sub">依真實日記計算</span>
+        </div>
+
+        <!-- 1. 縣市足跡排行 -->
+        <div>
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-city mr-1 text-theme"></i> 城市足跡分佈
+          </h4>
+          <div id="statCityBars" class="space-y-1.5 text-xs"></div>
+        </div>
+
+        <!-- 2. 最常回訪的好地方 -->
+        <div class="pt-1">
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-crown mr-1 text-amber-500"></i> 最愛回訪的好地方 (Top 3)
+          </h4>
+          <div id="statTopRevisitList" class="space-y-1 text-xs"></div>
+        </div>
+
+        <!-- 3. 類型標籤分佈 -->
+        <div class="pt-1">
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-tags mr-1 text-theme"></i> 探索類型標籤
+          </h4>
+          <div id="statTagsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- 4. 年度與時光足跡統計 -->
+        <div class="pt-1">
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-timeline mr-1 text-theme"></i> 年度回憶累積
+          </h4>
+          <div id="statYearlyTrend" class="space-y-1.5 text-xs"></div>
+        </div>
       </div>
 
       <!-- 最近造訪的回憶 (照片日記卡片) -->
       <div class="space-y-2.5">
         <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold text-[#5C4F44] tracking-wide flex items-center">
-            <i class="fa-solid fa-clock-rotate-left mr-1.5 text-[#C86D51]"></i> 最近造訪的回憶
+          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
+            <i class="fa-solid fa-clock-rotate-left mr-1.5 text-theme"></i> 最近造訪的回憶
           </h3>
-          <button onclick="switchTab('list')" class="text-[11px] text-[#C86D51] font-semibold hover:underline">
+          <button onclick="switchTab('list')" class="text-[11px] text-theme font-semibold hover:underline">
             查看全部紀錄 →
           </button>
         </div>
@@ -235,8 +369,8 @@
     <div id="mapView" class="hidden w-full h-full relative">
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
-          <i class="fa-solid fa-magnifying-glass text-[#C86D51] ml-2"></i>
-          <input type="text" id="homeSearchInput" placeholder="搜尋想念的店名、景點、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-[#4A3E3D]" />
+          <i class="fa-solid fa-magnifying-glass text-theme ml-2"></i>
+          <input type="text" id="homeSearchInput" placeholder="搜尋想念的店名、景點、地址..." oninput="handleSearch(this.value)" class="w-full text-xs outline-none bg-transparent py-1 font-medium text-main" />
           <button onclick="clearSearch()" id="clearSearchBtn" class="touch-btn hidden text-gray-400 hover:text-gray-600 p-1 text-xs">
             <i class="fa-solid fa-circle-xmark"></i>
           </button>
@@ -244,8 +378,7 @@
         <div id="searchResultsCard" class="hidden mt-2 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <!-- GPS 定位按鈕 (微調高度避免與懸浮列重疊) -->
-      <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-24 right-4 z-[900] bg-white text-[#5C4F44] hover:text-[#C86D51] w-11 h-11 rounded-full shadow-lg flex items-center justify-center border border-[#EAE3D9] active:scale-90 transition">
+      <button onclick="locateUser()" title="定位我的位置" class="touch-btn absolute bottom-24 right-4 z-[900] bg-white text-main hover:text-theme w-11 h-11 rounded-full shadow-lg flex items-center justify-center border border-[#EAE3D9] active:scale-90 transition">
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
 
@@ -257,13 +390,13 @@
       <div class="bg-white p-3.5 rounded-2xl shadow-xs mb-3 space-y-2.5 border border-[#EAE3D9]">
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="font-bold text-[#5C4F44]">1. 選擇國家</label>
-            <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D] outline-none">
+            <label class="font-bold text-main">1. 選擇國家</label>
+            <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main outline-none">
             </select>
           </div>
           <div>
-            <label class="font-bold text-[#5C4F44]">2. 選擇城市</label>
-            <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-[#EAE3D9] rounded-lg p-2 font-medium outline-none transition cursor-not-allowed">
+            <label class="font-bold text-main">2. 選擇城市</label>
+            <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-[#EAE3D9] rounded-lg p-2 font-medium outline-none cursor-not-allowed">
               <option value="">請先選擇國家</option>
             </select>
           </div>
@@ -271,13 +404,13 @@
 
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <label class="font-bold text-[#5C4F44]">🏷️ 標籤分類</label>
-            <select id="filterTag" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
+            <label class="font-bold text-main">🏷️ 標籤分類</label>
+            <select id="filterTag" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main">
             </select>
           </div>
           <div>
-            <label class="font-bold text-[#5C4F44]">⭐ 評分篩選</label>
-            <select id="filterRating" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
+            <label class="font-bold text-main">⭐ 評分篩選</label>
+            <select id="filterRating" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main">
               <option value="all">不限分數</option>
               <option value="gte_4.5">4.5 星以上</option>
               <option value="gte_4.0">4.0 星以上</option>
@@ -288,8 +421,8 @@
         </div>
 
         <div class="text-xs">
-          <label class="font-bold text-[#5C4F44]">🔄 排序方式</label>
-          <select id="sortOrder" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-[#4A3E3D]">
+          <label class="font-bold text-main">🔄 排序方式</label>
+          <select id="sortOrder" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main">
             <option value="date_desc">造訪日期：最新到最舊</option>
             <option value="date_asc">造訪日期：最舊到最新</option>
             <option value="rating_desc">評分：高到低</option>
@@ -302,10 +435,10 @@
     </div>
   </main>
 
-  <!-- 【全新亮點 2】：現代感膠囊「懸浮導覽列」 (去除大片白邊、不換行、純粹文字) -->
+  <!-- 膠囊懸浮導覽列 -->
   <nav class="fixed bottom-4 left-4 right-4 max-w-xs mx-auto z-[1000] pointer-events-auto mb-[env(safe-area-inset-bottom,0px)]">
     <div class="bg-white/95 backdrop-blur-md border border-[#EAE3D9] rounded-full shadow-2xl px-2 py-1.5 flex justify-around items-center">
-      <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-[#C86D51] font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
+      <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
         <i class="fa-solid fa-sparkles text-base mb-0.5"></i>
         點點滴滴
       </button>
@@ -313,7 +446,6 @@
         <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
         足跡地圖
       </button>
-      <!-- 日記列表不再顯示括號數字，徹底解決折行問題 -->
       <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
         <i class="fa-solid fa-book-bookmark text-base mb-0.5"></i>
         日記列表
@@ -326,8 +458,8 @@
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
         <div>
-          <h3 class="font-bold text-[#3D3231] text-sm" id="modalMainTitle">記錄回憶足跡</h3>
-          <p class="text-[10px] text-[#C86D51]">記下此時此刻的感動</p>
+          <h3 class="font-bold text-main text-sm" id="modalMainTitle">記錄回憶足跡</h3>
+          <p class="text-[10px] text-theme">記下此時此刻的感動</p>
         </div>
         <button onclick="closeModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
@@ -335,23 +467,23 @@
       <div class="p-5 overflow-y-auto space-y-3.5 text-xs pb-10">
         <div class="bg-[#F5F0E8] p-3 rounded-2xl border border-[#EAE3D9] space-y-2.5">
           <div>
-            <label class="block font-bold text-[#5C4F44] text-[11px] mb-1">地點 / 店家名稱 *</label>
-            <input type="text" id="inputStoreName" placeholder="輸入地點名稱 (例: 鴨肉許、司馬庫斯)" class="w-full bg-white font-bold text-gray-900 text-sm rounded-xl p-2 outline-none border border-[#E0D7CC]" />
+            <label class="block font-bold text-main text-[11px] mb-1">地點 / 店家名稱 *</label>
+            <input type="text" id="inputStoreName" placeholder="輸入地點名稱 (例: 鴨肉許、司馬庫斯)" class="w-full bg-white font-bold text-main text-sm rounded-xl p-2 outline-none border border-[#E0D7CC]" />
           </div>
           
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-gray-600 font-medium text-[10px] mb-0.5">國家</label>
+              <label class="block text-sub font-medium text-[10px] mb-0.5">國家</label>
               <input type="text" id="inputCountry" placeholder="國家" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
             </div>
             <div>
-              <label class="block text-gray-600 font-medium text-[10px] mb-0.5">城市 / 縣市</label>
+              <label class="block text-sub font-medium text-[10px] mb-0.5">城市 / 縣市</label>
               <input type="text" id="inputCity" placeholder="縣市 (例: 新竹市)" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
             </div>
           </div>
           
           <div>
-            <label class="block text-gray-600 font-medium text-[10px] mb-0.5">詳細地址 (選填)</label>
+            <label class="block text-sub font-medium text-[10px] mb-0.5">詳細地址 (選填)</label>
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、地址或備註位置" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
@@ -364,33 +496,33 @@
           <!-- 方法二：輸入座標 -->
           <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
             <div class="flex justify-between items-center">
-              <label class="font-bold text-[#5C4F44] text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
-              <button type="button" onclick="pasteFromClipboard()" class="text-[#C86D51] font-bold text-[10px] underline">
+              <label class="font-bold text-main text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
+              <button type="button" onclick="pasteFromClipboard()" class="text-theme font-bold text-[10px] underline">
                 貼上剪貼簿
               </button>
             </div>
             <div class="flex items-center space-x-1.5">
               <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleManualCoordsInput(this.value)" class="flex-1 bg-[#FAF8F5] border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
-              <button type="button" onclick="applyManualCoordsNow()" class="touch-btn bg-[#C86D51] text-white px-3 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
+              <button type="button" onclick="applyManualCoordsNow()" class="touch-btn bg-theme text-white px-3 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
                 強制鎖定此座標
               </button>
             </div>
-            <p class="text-[9px] text-[#A6998E]">💡 Google 地圖長按店家 ➔ 複製上方座標數字 ➔ 貼到此處點強制鎖定</p>
+            <p class="text-[9px] text-sub">💡 Google 地圖長按店家 ➔ 複製上方座標數字 ➔ 貼到此處點強制鎖定</p>
           </div>
 
           <!-- 方法三：現場定位 -->
-          <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-gradient-to-r from-[#8C7A6B] to-[#A39281] text-white py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
+          <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-gradient-to-r from-theme to-[#B35C42] text-white py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位目前位置 (我在現場)</span>
           </button>
           
-          <p id="geoStatusText" class="text-[10px] text-center font-bold text-gray-500 pt-0.5"></p>
+          <p id="geoStatusText" class="text-[10px] text-center font-bold text-sub pt-0.5"></p>
         </div>
 
         <div class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#EAE3D9]">
           <div class="flex justify-between items-center mb-2">
-            <span class="font-bold text-[#5C4F44]">喜愛評分 (0.5 級距)</span>
-            <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-[#C86D51] bg-white border border-[#E0D7CC] rounded-lg py-1 text-sm outline-none" />
+            <span class="font-bold text-main">喜愛評分 (0.5 級距)</span>
+            <input type="number" id="inputRatingNumber" min="1.0" max="5.0" step="0.5" value="4.5" oninput="handleNumberInput(this.value)" class="w-16 text-center font-black text-theme bg-white border border-[#E0D7CC] rounded-lg py-1 text-sm outline-none" />
           </div>
           <div class="flex items-center justify-center space-x-2 py-1 bg-white rounded-xl border border-[#EAE3D9]">
             <div id="starContainer" class="flex text-2xl text-amber-400 cursor-pointer select-none space-x-1"></div>
@@ -400,41 +532,41 @@
 
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label class="block font-bold text-[#5C4F44]">造訪回憶照片 (可複選)</label>
-            <span id="photoCountBadge" class="text-[11px] text-[#C86D51] font-bold">已選 0 張</span>
+            <label class="block font-bold text-main">造訪回憶照片 (可複選)</label>
+            <span id="photoCountBadge" class="text-[11px] text-theme font-bold">已選 0 張</span>
           </div>
           <div id="photosThumbnailGrid" class="grid grid-cols-3 gap-2 mb-2"></div>
-          <label class="touch-btn border-2 border-dashed border-[#D6CCC2] hover:border-[#C86D51] bg-[#FAF8F5] rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
-            <i class="fa-solid fa-camera text-[#C86D51] text-sm"></i>
-            <span class="font-bold text-[#5C4F44] text-xs">拍照或選取多張照片</span>
+          <label class="touch-btn border-2 border-dashed border-[#D6CCC2] hover:border-theme bg-[#FAF8F5] rounded-2xl p-3 flex items-center justify-center cursor-pointer transition space-x-2">
+            <i class="fa-solid fa-camera text-theme text-sm"></i>
+            <span class="font-bold text-main text-xs">拍照或選取多張照片</span>
             <input type="file" id="inputPhotos" accept="image/*" multiple onchange="handlePhotosSelect(event)" class="hidden" />
           </label>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-bold text-[#5C4F44] mb-1">造訪日期</label>
-            <input type="date" id="inputDate" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-2 py-1.5 text-xs text-[#3D3231]" />
+            <label class="block font-bold text-main mb-1">造訪日期</label>
+            <input type="date" id="inputDate" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-2 py-1.5 text-xs text-main" />
           </div>
           <div>
-            <label class="block font-bold text-[#5C4F44] mb-1">消費預算 / 門票 (選填)</label>
+            <label class="block font-bold text-main mb-1">消費預算 / 門票 (選填)</label>
             <input type="number" id="inputCost" placeholder="例如: 350" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-2 py-1.5 text-xs" />
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-[#5C4F44] mb-1">分類標籤 (以逗號分隔)</label>
+          <label class="block font-bold text-main mb-1">分類標籤 (以逗號分隔)</label>
           <input type="text" id="inputTags" placeholder="景點, 咖啡廳, 拉麵, 散步" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl px-3 py-2 text-xs" />
         </div>
 
         <div>
-          <label class="block font-bold text-[#5C4F44] mb-1">心情隨筆與旅行回憶</label>
+          <label class="block font-bold text-main mb-1">心情隨筆與旅行回憶</label>
           <textarea id="inputReview" rows="3" placeholder="記下那天的微風、好吃的美食，或是難忘的心情..." class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 text-xs leading-relaxed"></textarea>
         </div>
 
         <div class="flex items-center space-x-2">
-          <input type="checkbox" id="inputRevisit" checked class="w-4 h-4 rounded border-gray-300 accent-[#C86D51]" />
-          <label for="inputRevisit" class="font-bold text-[#5C4F44] text-xs">推薦好地方 / 期待再訪 👍</label>
+          <input type="checkbox" id="inputRevisit" checked class="w-4 h-4 rounded border-gray-300 accent-theme" />
+          <label for="inputRevisit" class="font-bold text-main text-xs">推薦好地方 / 期待再訪 👍</label>
         </div>
       </div>
 
@@ -442,8 +574,8 @@
         <button id="modalDeleteBtn" onclick="deleteCurrentEditingVisit()" class="touch-btn hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition">
           刪除
         </button>
-        <button onclick="closeModal()" class="touch-btn py-2 px-4 bg-[#EAE3D9] text-[#5C4F44] font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
-        <button onclick="confirmSaveRecord()" class="touch-btn flex-1 py-2 bg-[#C86D51] hover:bg-[#B35C42] text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition" id="submitBtnText">存入回憶手帳</button>
+        <button onclick="closeModal()" class="touch-btn py-2 px-4 bg-[#EAE3D9] text-main font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
+        <button onclick="confirmSaveRecord()" class="touch-btn flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition" id="submitBtnText">存入回憶手帳</button>
       </div>
     </div>
   </div>
@@ -524,12 +656,15 @@
     let uploadedPhotosList = [];
     let pendingLocation = null;
 
-    // 【修改 1】：預設標記顏色改為落日焦糖橘 (#C86D51)
-    let currentMarkerColor = localStorage.getItem("my_marker_color") || "#C86D51";
+    // 自訂顏色管理 (從 localStorage 讀取，沒有則使用預設)
+    let currentColors = {
+      text: localStorage.getItem("my_diary_text_color") || "#3D3231",
+      theme: localStorage.getItem("my_diary_theme_color") || "#C86D51",
+      marker: localStorage.getItem("my_diary_marker_color") || "#C86D51"
+    };
 
     async function initApp() {
-      document.documentElement.style.setProperty('--marker-color', currentMarkerColor);
-
+      applyAllColors();
       initMap();
       await initDB();
       appData = await dbGetAll();
@@ -578,37 +713,82 @@
       }
     }
 
+    // ========== 🎨 顏色與字體自定義調色盤核心邏輯 ==========
     function toggleColorPickerMenu() {
-      document.getElementById("colorPickerMenu").classList.toggle("hidden");
+      document.getElementById("colorPickerModal").classList.toggle("hidden");
+      // 同步目前顏色至選色器
+      document.getElementById("pickerTextColor").value = currentColors.text;
+      document.getElementById("pickerThemeColor").value = currentColors.theme;
+      document.getElementById("pickerMarkerColor").value = currentColors.marker;
     }
 
-    function setMarkerTheme(colorHex, name) {
-      currentMarkerColor = colorHex;
-      localStorage.setItem("my_marker_color", colorHex);
-      document.documentElement.style.setProperty('--marker-color', colorHex);
-      document.getElementById("currentThemeNameText").innerText = `目前色調：${name}`;
-      document.getElementById("colorPickerMenu").classList.add("hidden");
+    function applyPresetColor(type, hex) {
+      applyCustomColor(type, hex);
+    }
+
+    function applyCustomColor(type, hex) {
+      currentColors[type] = hex;
+      if (type === 'text') localStorage.setItem("my_diary_text_color", hex);
+      if (type === 'theme') localStorage.setItem("my_diary_theme_color", hex);
+      if (type === 'marker') localStorage.setItem("my_diary_marker_color", hex);
+      applyAllColors();
       renderMarkers();
     }
 
+    function applyAllColors() {
+      document.documentElement.style.setProperty('--ui-text', currentColors.text);
+      document.documentElement.style.setProperty('--ui-theme', currentColors.theme);
+      document.documentElement.style.setProperty('--marker-color', currentColors.marker);
+      // 自動生成柔和的主題淺底色 (加上 15% 透明度)
+      document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "18");
+    }
+
+    function resetThemeDefaults() {
+      currentColors = { text: "#3D3231", theme: "#C86D51", marker: "#C86D51" };
+      localStorage.removeItem("my_diary_text_color");
+      localStorage.removeItem("my_diary_theme_color");
+      localStorage.removeItem("my_diary_marker_color");
+      applyAllColors();
+      renderMarkers();
+      toggleColorPickerMenu();
+    }
+
+    // ========== 點點滴滴儀表板：縣市統計與真實數據 ==========
     function updateDashboardStats() {
       document.getElementById("statUniquePlaces").innerText = appData.length;
 
-      const citySet = new Set();
+      const cityCountMap = {};
+      const tagCountMap = {};
+      const revisitMap = [];
+      const yearCountMap = {};
       let totalPhotos = 0;
       const monthSet = new Set();
       const allMemories = [];
 
       appData.forEach(store => {
-        if (store.city && store.city.trim()) {
-          citySet.add(store.city.trim());
-        }
+        // 統計縣市
+        const cityKey = (store.city && store.city.trim()) ? store.city.trim() : (store.country || "其他");
+        cityCountMap[cityKey] = (cityCountMap[cityKey] || 0) + 1;
+
+        // 統計標籤
+        (store.tags || []).forEach(tag => {
+          const t = tag.trim();
+          if (t) tagCountMap[t] = (tagCountMap[t] || 0) + 1;
+        });
 
         const visits = store.visits || [];
+        if (visits.length > 1) {
+          revisitMap.push({ name: store.name, count: visits.length, city: store.city });
+        }
+
         visits.forEach(v => {
           const photos = getVisitPhotos(v);
           totalPhotos += photos.length;
-          if (v.date) monthSet.add(v.date.substring(0, 7));
+          if (v.date) {
+            monthSet.add(v.date.substring(0, 7));
+            const y = v.date.substring(0, 4);
+            yearCountMap[y] = (yearCountMap[y] || 0) + 1;
+          }
 
           allMemories.push({
             storeId: store.id,
@@ -625,18 +805,85 @@
         });
       });
 
-      document.getElementById("statUniqueCities").innerText = citySet.size;
+      document.getElementById("statUniqueCities").innerText = Object.keys(cityCountMap).length;
       document.getElementById("statTotalPhotos").innerText = totalPhotos;
       document.getElementById("statTotalMonths").innerText = monthSet.size;
+
+      // 渲染探索統計手帳圖表
+      renderExplorationStats(cityCountMap, revisitMap, tagCountMap, yearCountMap);
 
       allMemories.sort((a, b) => new Date(b.date) - new Date(a.date));
       renderRecentMemories(allMemories.slice(0, 4));
     }
 
+    // 渲染手帳風格探索統計圖表
+    function renderExplorationStats(cityMap, revisitList, tagMap, yearMap) {
+      // 1. 城市足跡比例條
+      const cityContainer = document.getElementById("statCityBars");
+      const sortedCities = Object.entries(cityMap).sort((a, b) => b[1] - a[1]);
+      if (sortedCities.length === 0) {
+        cityContainer.innerHTML = `<p class="text-[10px] text-sub">尚無城市紀錄</p>`;
+      } else {
+        const maxCity = sortedCities[0][1] || 1;
+        cityContainer.innerHTML = sortedCities.slice(0, 5).map(([c, count]) => `
+          <div class="space-y-0.5">
+            <div class="flex justify-between text-[11px]">
+              <span class="font-bold text-main">${c}</span>
+              <span class="text-sub font-semibold">${count} 個地點</span>
+            </div>
+            <div class="w-full h-2 bg-[#F2ECE4] rounded-full overflow-hidden">
+              <div class="h-full bg-theme rounded-full transition-all duration-500" style="width: ${(count / maxCity) * 100}%"></div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 2. 回訪排行榜 (Top 3)
+      const revisitContainer = document.getElementById("statTopRevisitList");
+      revisitList.sort((a, b) => b.count - a.count);
+      if (revisitList.length === 0) {
+        revisitContainer.innerHTML = `<p class="text-[10px] text-sub">目前尚未有多次回訪的地點，快去二訪想念的好店吧！</p>`;
+      } else {
+        revisitContainer.innerHTML = revisitList.slice(0, 3).map((item, idx) => `
+          <div class="flex justify-between items-center bg-[#FAF8F5] p-2 rounded-xl border border-[#F0EBE3]">
+            <span class="font-bold text-main truncate pr-2">#${idx + 1} ${item.name} <span class="text-[10px] text-sub">(${item.city || '當地'})</span></span>
+            <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-black whitespace-nowrap">訪過 ${item.count} 次</span>
+          </div>
+        `).join('');
+      }
+
+      // 3. 類型標籤分佈
+      const tagsContainer = document.getElementById("statTagsList");
+      const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
+      if (sortedTags.length === 0) {
+        tagsContainer.innerHTML = `<p class="text-[10px] text-sub">尚無分類標籤</p>`;
+      } else {
+        tagsContainer.innerHTML = sortedTags.slice(0, 8).map(([t, count]) => `
+          <span class="bg-[#F2ECE4] text-main text-[11px] px-2.5 py-1 rounded-full font-medium flex items-center">
+            #${t} <b class="ml-1 text-theme font-black">${count}</b>
+          </span>
+        `).join('');
+      }
+
+      // 4. 年度趨勢
+      const yearContainer = document.getElementById("statYearlyTrend");
+      const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
+      if (sortedYears.length === 0) {
+        yearContainer.innerHTML = `<p class="text-[10px] text-sub">尚無年度紀錄</p>`;
+      } else {
+        yearContainer.innerHTML = sortedYears.map(([y, count]) => `
+          <div class="flex items-center justify-between text-[11px] bg-[#FAF8F5] px-2.5 py-1.5 rounded-xl border border-[#F0EBE3]">
+            <span class="font-bold text-main">📅 ${y} 年</span>
+            <span class="text-sub font-semibold">留下了 <b class="text-theme">${count}</b> 則足跡</span>
+          </div>
+        `).join('');
+      }
+    }
+
     function renderRecentMemories(recentList) {
       const container = document.getElementById("recentMemoriesCards");
       if (!recentList.length) {
-        container.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-xs text-[#9E8E81] border border-[#EAE3D9]">尚無任何回憶日記，點擊上方按鈕記錄你的第一筆足跡吧！</div>`;
+        container.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-xs text-sub border border-[#EAE3D9]">尚無任何回憶日記，點擊上方按鈕記錄你的第一筆足跡吧！</div>`;
         return;
       }
 
@@ -646,12 +893,12 @@
           <div class="bg-white rounded-2xl p-3.5 border border-[#EAE3D9] shadow-xs flex flex-col space-y-2.5">
             <div class="flex justify-between items-start">
               <div>
-                <span class="bg-[#F2ECE4] text-[#8C7A6B] text-[10px] px-2 py-0.5 rounded-full font-bold">${item.city || item.country || '私房地點'}</span>
-                <h4 class="font-bold text-[#3D3231] text-sm mt-0.5">${item.storeName}</h4>
+                <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold">${item.city || item.country || '私房地點'}</span>
+                <h4 class="font-bold text-main text-sm mt-0.5">${item.storeName}</h4>
               </div>
               <div class="text-right">
                 <span class="text-amber-500 font-black text-xs">★ ${Number(item.rating).toFixed(1)}</span>
-                <span class="text-[10px] text-[#A6998E] block">${item.date}</span>
+                <span class="text-[10px] text-sub block">${item.date}</span>
               </div>
             </div>
 
@@ -662,13 +909,13 @@
               </div>
             ` : ''}
 
-            <p class="text-xs text-[#5C4F44] leading-relaxed line-clamp-2 italic font-serif">
+            <p class="text-xs text-main leading-relaxed line-clamp-2 italic font-serif">
               "${item.review || '美好的一天，在此留下足跡。'}"
             </p>
 
             <div class="flex justify-between items-center text-[11px] pt-1 border-t border-[#F5F0E8]">
-              <span class="text-[#C86D51] font-medium">${item.revisit ? '值得回味 👍' : '探訪留念'}</span>
-              <button onclick="openEditModal('${item.storeId}', '${item.visitId}')" class="text-[#C86D51] hover:text-[#8C7A6B] font-bold">
+              <span class="text-theme font-medium">${item.revisit ? '值得回味 👍' : '探訪留念'}</span>
+              <button onclick="openEditModal('${item.storeId}', '${item.visitId}')" class="text-theme hover:underline font-bold">
                 回味並編輯筆記 →
               </button>
             </div>
@@ -702,15 +949,15 @@
       searchTimeout = setTimeout(() => {
         let html = "";
         if (localMatches.length > 0) {
-          html += `<div class="text-[10px] font-bold text-[#C86D51] px-2 py-0.5">我的日記中已有記錄：</div>`;
+          html += `<div class="text-[10px] font-bold text-theme px-2 py-0.5">我的日記中已有記錄：</div>`;
           localMatches.forEach(item => {
             html += `
-              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="touch-btn flex items-center justify-between p-2 hover:bg-[#FDF2EC] rounded-xl cursor-pointer">
+              <div onclick="quickFlyTo('${item.name.replace(/'/g, "\\'")}', ${item.lat}, ${item.lng})" class="touch-btn flex items-center justify-between p-2 hover:bg-theme-light rounded-xl cursor-pointer">
                 <div>
-                  <h4 class="font-bold text-[#3D3231] text-xs">${item.name}</h4>
-                  <p class="text-[10px] text-[#9E8E81] truncate">${item.city} · ${item.address || ''}</p>
+                  <h4 class="font-bold text-main text-xs">${item.name}</h4>
+                  <p class="text-[10px] text-sub truncate">${item.city} · ${item.address || ''}</p>
                 </div>
-                <span class="text-[10px] bg-[#FDF2EC] text-[#C86D51] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">前往</span>
+                <span class="text-[10px] bg-theme-light text-theme px-2 py-0.5 rounded-full font-bold whitespace-nowrap">前往</span>
               </div>
             `;
           });
@@ -728,10 +975,10 @@
                 html += `
                   <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl">
                     <div class="pr-2 truncate cursor-pointer" onclick="quickFlyTo('${title.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})">
-                      <h4 class="font-bold text-gray-800 text-xs truncate">${title}</h4>
-                      <p class="text-[10px] text-gray-400 truncate">${cleanAddress}</p>
+                      <h4 class="font-bold text-main text-xs truncate">${title}</h4>
+                      <p class="text-[10px] text-sub truncate">${cleanAddress}</p>
                     </div>
-                    <button onclick="selectAndAddFromSearch('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="touch-btn bg-[#C86D51] text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
+                    <button onclick="selectAndAddFromSearch('${title.replace(/'/g, "\\'")}', '${cleanAddress.replace(/'/g, "\\'")}', ${place.lat}, ${place.lon})" class="touch-btn bg-theme text-white text-[11px] font-bold px-2.5 py-1 rounded-xl shadow-xs whitespace-nowrap active:scale-95">
                       記這家
                     </button>
                   </div>
@@ -844,11 +1091,11 @@
       if (match) {
         const lat = parseFloat(match[1]);
         const lng = parseFloat(match[2]);
-        pendingLocation = { lat: lat, lng: lng };
+        pendingLocation = { lat, lng };
 
         const statusText = document.getElementById("geoStatusText");
         statusText.innerText = `🎯 方法二已強制鎖定此座標！(${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-        statusText.className = "text-[10px] text-center font-bold text-[#C86D51] animate-pulse";
+        statusText.className = "text-[10px] text-center font-bold text-theme animate-pulse";
 
         if (map) map.flyTo([lat, lng], 16);
       }
@@ -1238,7 +1485,7 @@
         });
 
         const revisitBadge = latest.revisit
-          ? `<span style="color:#C86D51; font-weight:900; background:#FAF0E6; padding:2px 6px; border-radius:6px;">值得再訪 👍</span>`
+          ? `<span style="color:var(--ui-theme); font-weight:900; background:var(--ui-theme-light); padding:2px 6px; border-radius:6px;">值得再訪 👍</span>`
           : `<span style="color:#8C827A; font-weight:bold; background:#F3F4F6; padding:2px 6px; border-radius:6px;">探訪留念</span>`;
 
         const photoHtml = photos.length > 0 
@@ -1249,16 +1496,16 @@
           : '';
 
         const content = `
-          <div style="font-family: system-ui; width: 220px;">
+          <div style="font-family: -apple-system, sans-serif; width: 220px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-              <span style="font-size:10px; background:#F2ECE4; color:#8C7A6B; padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
-              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:#C86D51; padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
+              <span style="font-size:10px; background:var(--ui-theme-light); color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
+              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
             </div>
             ${photoHtml}
-            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:#3D3231;">${item.name}</h4>
+            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:var(--ui-text);">${item.name}</h4>
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:var(--marker-color); font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
-            <p style="font-size:11px; color:#6B5F54; margin:0 0 6px;">${latest.review || '無心得'}</p>
-            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="width:100%; background:#FAF8F5; color:#5C4F44; border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯回憶筆記</button>
+            <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;">${latest.review || '無心得'}</p>
+            <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="width:100%; background:#FAF8F5; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯回憶筆記</button>
           </div>
         `;
 
@@ -1296,7 +1543,7 @@
       const container = document.getElementById("restaurantCards");
 
       if (!list.length) {
-        container.innerHTML = `<div class="text-center text-[#9E8E81] py-12 text-xs">查無符合的回憶日記</div>`;
+        container.innerHTML = `<div class="text-center text-sub py-12 text-xs">查無符合的回憶日記</div>`;
         return;
       }
 
@@ -1320,7 +1567,7 @@
                   </div>
                 `).join('')}
               </div>
-              <span class="text-[9px] text-[#A6998E] block text-right mt-0.5 font-medium">👈 左右滑動查看 ${photos.length} 張照片</span>
+              <span class="text-[9px] text-sub block text-right mt-0.5 font-medium">👈 左右滑動查看 ${photos.length} 張照片</span>
             </div>
           `;
         }
@@ -1329,37 +1576,38 @@
           <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
             <div class="flex justify-between items-start">
               <div>
-                <span class="bg-[#F2ECE4] text-[#8C7A6B] text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country || ''} · ${item.city || ''}</span>
-                <h3 class="font-bold text-[#3D3231] text-sm mt-0.5">${item.name}</h3>
-                <p class="text-[11px] text-[#A6998E]">${item.address || '無詳細地址'}</p>
+                <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country || ''} · ${item.city || ''}</span>
+                <h3 class="font-bold text-main text-sm mt-0.5">${item.name}</h3>
+                <p class="text-[11px] text-sub">${item.address || '無詳細地址'}</p>
               </div>
-              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-[#C86D51] bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
+              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
                 ✏️ 編輯
               </button>
             </div>
 
+            <!-- 照片展示區 -->
             ${photosRenderHtml}
 
             <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
               <div class="flex justify-between items-center text-xs border-b border-[#F0EBE3] pb-1">
                 <div class="flex items-center space-x-1">
                   <span class="font-black text-amber-500">★ ${latest.rating.toFixed(1)}</span>
-                  <span class="text-[#A6998E] text-[10px]">(${latest.date})</span>
-                  ${latest.revisit ? '<span class="text-[#C86D51] font-bold text-[10px] ml-1">· 值得再訪 👍</span>' : ''}
+                  <span class="text-sub text-[10px]">(${latest.date})</span>
+                  ${latest.revisit ? '<span class="text-theme font-bold text-[10px] ml-1">· 值得再訪 👍</span>' : ''}
                 </div>
                 <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="touch-btn text-gray-400 hover:text-red-500 p-1 text-xs">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
-              <p class="text-xs text-[#5C4F44] leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
+              <p class="text-xs text-main leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
             </div>
 
-            <div class="flex justify-between items-center text-[11px] text-[#A6998E] pt-1 border-t border-[#F5F0E8]">
-              <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-[#A6998E] hover:text-red-500 flex items-center space-x-1 font-medium">
+            <div class="flex justify-between items-center text-[11px] text-sub pt-1 border-t border-[#F5F0E8]">
+              <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-sub hover:text-red-500 flex items-center space-x-1 font-medium">
                 <i class="fa-solid fa-trash-can"></i>
                 <span>刪除地點</span>
               </button>
-              <button onclick="openRevisitModal('${item.id}')" class="touch-btn bg-[#F2ECE4] text-[#8C7A6B] hover:bg-[#8C7A6B] hover:text-white px-3 py-1 rounded-full font-bold transition flex items-center active:scale-95">
+              <button onclick="openRevisitModal('${item.id}')" class="touch-btn bg-theme-light text-theme px-3 py-1 rounded-full font-bold transition flex items-center active:scale-95">
                 <i class="fa-solid fa-pen-nib mr-1"></i> ＋ 記新一次造訪
               </button>
             </div>
@@ -1480,7 +1728,7 @@
       setRating(Math.round(num * 2) / 2);
     }
 
-    // 分頁切換 (焦糖橘色高亮選中)
+    // 分頁切換
     function switchTab(tab) {
       const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
@@ -1499,15 +1747,15 @@
 
       if (tab === 'dashboard') {
         dashView.classList.remove("hidden");
-        tabDashBtn.className = "touch-btn flex flex-col items-center text-[#C86D51] font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabDashBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
         updateDashboardStats();
       } else if (tab === 'map') {
         mapView.classList.remove("hidden");
-        tabMapBtn.className = "touch-btn flex flex-col items-center text-[#C86D51] font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabMapBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
         setTimeout(() => { if (map) map.invalidateSize(); }, 150);
       } else {
         listView.classList.remove("hidden");
-        tabListBtn.className = "touch-btn flex flex-col items-center text-[#C86D51] font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabListBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
         renderListView();
       }
     }
