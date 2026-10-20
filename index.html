@@ -133,10 +133,10 @@
     </label>
     <div class="border-t border-[#F0EBE3] my-1"></div>
     <button onclick="exportData()" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-main">
-      <i class="fa-solid fa-download mr-2 text-sub"></i> 匯出本機備份檔 (JSON)
+      <i class="fa-solid fa-download mr-2 text-sub"></i> 匯出本機備份檔 (含心願)
     </button>
     <label class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-main cursor-pointer">
-      <i class="fa-solid fa-upload mr-2 text-sub"></i> 還原日記備份檔
+      <i class="fa-solid fa-upload mr-2 text-sub"></i> 還原備份檔 (日記+心願)
       <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden" />
     </label>
     <button onclick="openStorageModal(); toggleBackupMenu();" class="touch-btn w-full text-left py-1.5 px-2.5 hover:bg-[#FAF8F5] rounded-xl flex items-center font-medium text-theme">
@@ -177,7 +177,7 @@
           <span id="persistBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-sub">檢查中...</span>
         </div>
         <p class="text-[10px] text-sub leading-relaxed">
-          若啟用持久儲存，瀏覽器在裝置硬碟空間吃緊時將不會擅自清除本手帳的回憶資料。
+          若啟用持久儲存，瀏覽器在裝置硬碟空間吃緊時將不會擅自清除本手帳的回憶與心願清單。
         </p>
         <button id="requestPersistBtn" onclick="requestPersistence()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs active:scale-95 transition flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-shield-halved"></i>
@@ -230,7 +230,7 @@
     </div>
   </div>
 
-  <!-- 🖼️ 拍立得手帳卡片設計室 (含直接分享、文字對齊、印章位置與間距調整) -->
+  <!-- 🖼️ 拍立得手帳卡片設計室 (升級：照片挑選 + 浮水印大小縮放) -->
   <div id="polaroidModal" class="hidden fixed inset-0 bg-black/75 z-[3100] flex flex-col items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-3xl p-3.5 sm:p-4 max-w-sm sm:max-w-md w-full flex flex-col items-center space-y-2.5 shadow-2xl max-h-[96dvh] overflow-y-auto">
       <div class="w-full flex justify-between items-center border-b border-gray-100 pb-2">
@@ -241,8 +241,17 @@
       </div>
 
       <!-- 產生的拍立得圖片即時預覽 -->
-      <div class="w-full flex justify-center py-1.5 bg-[#FAF8F5] rounded-2xl border border-[#EAE3D9]">
-        <img id="polaroidPreviewImg" class="max-w-full max-h-[44vh] sm:max-h-[48vh] object-contain rounded-xl shadow-md" />
+      <div class="w-full flex justify-center py-1 bg-[#FAF8F5] rounded-2xl border border-[#EAE3D9]">
+        <img id="polaroidPreviewImg" class="max-w-full max-h-[40vh] sm:max-h-[46vh] object-contain rounded-xl shadow-md" />
+      </div>
+
+      <!-- 【新增】：照片自由挑選輪播列 (若該次有照片時顯示) -->
+      <div id="polaroidPhotoPickerBox" class="w-full space-y-1.5 bg-[#FAF8F5] p-2.5 rounded-2xl border border-[#EAE3D9]">
+        <div class="flex justify-between items-center text-[10px] text-sub font-bold">
+          <span>📷 點擊選擇呈現在卡片上的相片：</span>
+          <span id="polaroidPhotoPickerCount">共 0 張</span>
+        </div>
+        <div id="polaroidPhotoThumbnails" class="flex space-x-2 overflow-x-auto no-scrollbar py-1"></div>
       </div>
 
       <!-- 即時自訂樣式面板 -->
@@ -259,11 +268,18 @@
           <span id="polScaleLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">1.15x</span>
         </div>
 
-        <!-- 相片與文字間距控制滑桿 (確保永遠不覆蓋照片) -->
+        <!-- 相片與文字間距控制滑桿 -->
         <div class="flex items-center space-x-2">
           <label class="text-[11px] font-bold text-sub w-20 flex-shrink-0">圖文間距:</label>
           <input type="range" id="polGap" min="40" max="120" step="5" value="65" oninput="onPolaroidSettingChanged()" class="flex-1 accent-theme cursor-pointer" />
           <span id="polGapLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">65px</span>
+        </div>
+
+        <!-- 【新增】：印章浮水印大小滑桿 -->
+        <div class="flex items-center space-x-2">
+          <label class="text-[11px] font-bold text-sub w-20 flex-shrink-0">印章大小:</label>
+          <input type="range" id="polStampSize" min="40" max="85" step="3" value="56" oninput="onPolaroidSettingChanged()" class="flex-1 accent-theme cursor-pointer" />
+          <span id="polStampSizeLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">56px</span>
         </div>
 
         <!-- 文字對齊方式 & 印章位置選擇 -->
@@ -347,7 +363,7 @@
         </div>
       </div>
 
-      <!-- 操作按鈕列 (含直接分享按鈕) -->
+      <!-- 操作按鈕列 -->
       <div class="w-full flex space-x-2 pt-0.5">
         <button onclick="sharePolaroidImage()" class="touch-btn flex-1 bg-theme text-white py-2.5 rounded-xl font-bold text-xs shadow-xs active:scale-95 transition flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-arrow-up-from-bracket"></i>
@@ -364,7 +380,7 @@
     </div>
   </div>
 
-  <!-- 主要內容區域 -->
+  <!-- 主要內容區域 (四個平行大板塊) -->
   <main class="flex-1 relative w-full h-full overflow-hidden">
     
     <!-- 頁面 1：【點點滴滴・首頁足跡總覽 ＋ 探索回憶統計】 -->
@@ -489,7 +505,7 @@
         </div>
       </div>
 
-      <!-- 🚀 最近造訪的回憶 (改為左右滑動輪播顯示) -->
+      <!-- 最近造訪的回憶 (左右滑動輪播) -->
       <div class="space-y-2">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -502,8 +518,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 橫向滑動容器 -->
         <div id="recentMemoriesCards" class="flex space-x-3 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1 px-0.5"></div>
       </div>
     </div>
@@ -539,7 +553,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：【日記列表】 -->
+    <!-- 頁面 3：【日記列表】 (修正按鈕換行跑版問題) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
       <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
@@ -593,33 +607,139 @@
 
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
+
+    <!-- 頁面 4：【✨ 全新板塊：心願清單 (景點與美食雙分頁)】 -->
+    <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
+      <!-- 願望心願手帳橫幅 -->
+      <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs flex justify-between items-center">
+        <div>
+          <span class="text-xs font-bold text-theme bg-theme-light px-2.5 py-1 rounded-full inline-flex items-center">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-xs text-theme"></i> 未來探索手帳
+          </span>
+          <h2 class="text-base font-bold text-main leading-snug mt-1.5">想去的地方，<br>都是未來的風景。</h2>
+        </div>
+        <button onclick="openWishlistModal()" class="touch-btn bg-theme text-white px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center shadow-xs active:scale-95 transition flex-shrink-0">
+          <i class="fa-solid fa-plus mr-1"></i>
+          <span>許個願</span>
+        </button>
+      </div>
+
+      <!-- 景點 vs 美食 雙分頁膠囊切換 -->
+      <div class="bg-white p-1 rounded-2xl border border-[#EAE3D9] flex text-xs font-bold shadow-xs">
+        <button onclick="switchWishCategory('spot')" id="wishTabSpotBtn" class="touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 bg-theme text-white shadow-xs">
+          <i class="fa-solid fa-mountain-sun"></i>
+          <span>景點 · 探索待辦集</span>
+          <span id="wishCountSpot" class="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">0</span>
+        </button>
+        <button onclick="switchWishCategory('food')" id="wishTabFoodBtn" class="touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 text-sub hover:text-main">
+          <i class="fa-solid fa-bowl-food"></i>
+          <span>美食 · 吃貨待辦集</span>
+          <span id="wishCountFood" class="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-gray-100 text-sub">0</span>
+        </button>
+      </div>
+
+      <!-- 心願清單內容卡片容器 -->
+      <div id="wishlistCardsContainer" class="space-y-2.5"></div>
+    </div>
   </main>
 
-  <!-- 膠囊懸浮導覽列 -->
-  <nav class="fixed bottom-4 left-4 right-4 max-w-xs mx-auto z-[1000] pointer-events-auto mb-[env(safe-area-inset-bottom,0px)]">
+  <!-- 膠囊懸浮導覽列 (4 大板塊平行切換) -->
+  <nav class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-[1000] pointer-events-auto mb-[env(safe-area-inset-bottom,0px)]">
     <div class="bg-white/95 backdrop-blur-md border border-[#EAE3D9] rounded-full shadow-2xl px-2 py-1.5 flex justify-around items-center">
-      <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
+      <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap">
         <i class="fa-solid fa-sparkles text-base mb-0.5"></i>
         <span>點點滴滴</span>
       </button>
-      <button onclick="switchTab('map')" id="tabMapBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
+      <button onclick="switchTab('map')" id="tabMapBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap">
         <i class="fa-solid fa-map-location-dot text-base mb-0.5"></i>
         <span>足跡地圖</span>
       </button>
-      <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap">
+      <button onclick="switchTab('list')" id="tabListBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap">
         <i class="fa-solid fa-book-bookmark text-base mb-0.5"></i>
         <span>日記列表</span>
+      </button>
+      <button onclick="switchTab('wishlist')" id="tabWishBtn" class="touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap">
+        <i class="fa-solid fa-compass text-base mb-0.5"></i>
+        <span>心願清單</span>
       </button>
     </div>
   </nav>
 
-  <!-- 彈跳日記表單視窗 -->
+  <!-- 心願清單 新增/編輯 彈跳視窗 -->
+  <div id="wishModal" class="hidden fixed inset-0 bg-black/60 z-[2200] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
+        <div>
+          <h3 class="font-bold text-main text-sm" id="wishModalTitle">許下一個想去的心願</h3>
+          <p class="text-[10px] text-theme">記下那些想去探索的美好角落</p>
+        </div>
+        <button onclick="closeWishModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-main mb-1">類別分類 *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="touch-btn p-2 border rounded-xl flex items-center justify-center space-x-1.5 cursor-pointer font-bold" id="labelWishSpot">
+              <input type="radio" name="inputWishType" value="spot" checked onchange="updateWishTypeUI()" class="accent-theme" />
+              <span>🏞️ 景點探索</span>
+            </label>
+            <label class="touch-btn p-2 border rounded-xl flex items-center justify-center space-x-1.5 cursor-pointer font-bold" id="labelWishFood">
+              <input type="radio" name="inputWishType" value="food" onchange="updateWishTypeUI()" class="accent-theme" />
+              <span>🍜 美食吃貨</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-main mb-1">地點 / 店家名稱 *</label>
+          <input type="text" id="inputWishName" placeholder="例如: 司馬庫斯巨木群、阿堂鹹粥" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 font-bold text-main text-sm outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-sub font-medium mb-0.5">國家</label>
+            <input type="text" id="inputWishCountry" value="台灣" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sub font-medium mb-0.5">城市 / 縣市</label>
+            <input type="text" id="inputWishCity" placeholder="例如: 台南市" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sub font-medium mb-0.5">詳細地址 / 位置備忘 (選填)</label>
+          <input type="text" id="inputWishAddress" placeholder="輸入約略位置或交通指南" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
+        </div>
+
+        <div>
+          <label class="block font-bold text-main mb-1">想去的原因 / 必點清單 / 備忘筆記</label>
+          <textarea id="inputWishReason" rows="3" placeholder="例如: 聽說秋天楓葉超級美、必點招牌鮮魚湯..." class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 leading-relaxed outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sub font-medium mb-0.5">分類標籤 (逗號分隔)</label>
+          <input type="text" id="inputWishTags" placeholder="賞楓, 散步, 私房甜點" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
+        </div>
+      </div>
+
+      <div class="p-3.5 border-t border-[#EAE3D9] bg-[#FAF8F5] flex items-center justify-between space-x-2 flex-shrink-0">
+        <button id="wishModalDeleteBtn" onclick="deleteCurrentWish()" class="touch-btn hidden py-2 px-3 bg-red-50 text-red-600 font-bold rounded-xl text-xs active:scale-95 transition">
+          刪除
+        </button>
+        <button onclick="closeWishModal()" class="touch-btn py-2 px-4 bg-[#EAE3D9] text-main font-bold rounded-xl text-xs active:scale-95 transition">取消</button>
+        <button onclick="confirmSaveWish()" class="touch-btn flex-1 py-2 bg-theme text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition">收入心願清單</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈跳日記表單視窗 (支援一鍵解鎖心願) -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
         <div>
           <h3 class="font-bold text-main text-sm" id="modalMainTitle">記錄回憶足跡</h3>
-          <p class="text-[10px] text-theme">記下此時此刻的感動</p>
+          <p class="text-[10px] text-theme" id="modalSubTitle">記下此時此刻的感動</p>
         </div>
         <button onclick="closeModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
@@ -741,7 +861,7 @@
     </div>
   </div>
 
-  <!-- IndexedDB 本機資料庫核心 (含 QuotaExceededError 攔截保護) -->
+  <!-- IndexedDB 本機資料庫核心 -->
   <script>
     let db;
     const DB_NAME = "FreeFoodDiaryDB_v12";
@@ -833,6 +953,11 @@
     };
 
     let appData = [];
+    let wishlists = []; // 【需求 1】：心願清單獨立資料結構
+    let activeWishCategory = 'spot'; // 'spot' or 'food'
+    let editingWishId = null;
+    let unlockingWishId = null;
+
     let map, markersLayer;
     let currentModalMode = 'CREATE';
     let editingStoreId = null, editingVisitId = null;
@@ -856,7 +981,9 @@
       review: ""
     };
 
+    // 拍立得手帳設計標的 (含相片挑選索引)
     let activePolaroidTarget = { storeId: null, visitId: null };
+    let selectedPolaroidPhotoIndex = 0;
     let currentPolaroidDataUrl = "";
 
     async function initApp() {
@@ -864,6 +991,7 @@
       initMap();
       await initDB();
       appData = await dbGetAll();
+      loadWishlistsFromStorage();
 
       const isInitialized = localStorage.getItem("food_diary_initialized");
       if (!isInitialized && appData.length === 0) {
@@ -895,6 +1023,7 @@
 
       buildStarsUI();
       refreshViews();
+      renderWishlistView();
       updateDashboardStats();
       pickRandomMemory();
       initLightboxSwipe();
@@ -936,6 +1065,273 @@
       document.documentElement.style.setProperty('--ui-theme', currentColors.theme);
       document.documentElement.style.setProperty('--marker-color', currentColors.marker);
       document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
+    }
+
+    // ========== 【需求 1 實作】：心願清單資料處理與介面 ==========
+    function loadWishlistsFromStorage() {
+      try {
+        const stored = localStorage.getItem("my_diary_wishlist");
+        if (stored) {
+          wishlists = JSON.parse(stored);
+        } else {
+          // 預設樣例
+          wishlists = [
+            {
+              id: "wish_sample_1",
+              type: "spot",
+              name: "司馬庫斯 巨木群步道",
+              country: "台灣",
+              city: "新竹縣",
+              address: "新竹縣尖石鄉玉峰村",
+              reason: "想看上帝的部落、秋天賞楓與千年紅檜！",
+              tags: ["賞楓", "登山", "大自然"],
+              createdAt: "2026-10-20"
+            },
+            {
+              id: "wish_sample_2",
+              type: "food",
+              name: "阿堂鹹粥",
+              country: "台灣",
+              city: "台南市",
+              address: "台南市中西區西門路一段728號",
+              reason: "清晨一定要去喝一碗熱呼呼的虱目魚肚粥。",
+              tags: ["台南小吃", "早餐", "海鮮"],
+              createdAt: "2026-10-20"
+            }
+          ];
+          saveWishlistsToStorage();
+        }
+      } catch(e) {
+        wishlists = [];
+      }
+    }
+
+    function saveWishlistsToStorage() {
+      localStorage.setItem("my_diary_wishlist", JSON.stringify(wishlists));
+    }
+
+    function switchWishCategory(cat) {
+      activeWishCategory = cat;
+      const spotBtn = document.getElementById("wishTabSpotBtn");
+      const foodBtn = document.getElementById("wishTabFoodBtn");
+
+      if (cat === 'spot') {
+        spotBtn.className = "touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 bg-theme text-white shadow-xs font-bold";
+        foodBtn.className = "touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 text-sub hover:text-main font-bold";
+      } else {
+        foodBtn.className = "touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 bg-theme text-white shadow-xs font-bold";
+        spotBtn.className = "touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 text-sub hover:text-main font-bold";
+      }
+      renderWishlistView();
+    }
+
+    function renderWishlistView() {
+      const container = document.getElementById("wishlistCardsContainer");
+      if (!container) return;
+
+      const spotList = wishlists.filter(w => w.type === 'spot');
+      const foodList = wishlists.filter(w => w.type === 'food');
+
+      document.getElementById("wishCountSpot").innerText = spotList.length;
+      document.getElementById("wishCountFood").innerText = foodList.length;
+
+      const currentList = activeWishCategory === 'spot' ? spotList : foodList;
+
+      if (!currentList.length) {
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 text-center text-sub border border-[#EAE3D9] space-y-2">
+            <div class="w-12 h-12 rounded-full bg-theme-light mx-auto flex items-center justify-center text-theme text-xl">
+              ${activeWishCategory === 'spot' ? '<i class="fa-solid fa-mountain-sun"></i>' : '<i class="fa-solid fa-bowl-food"></i>'}
+            </div>
+            <h4 class="font-bold text-main text-sm">目前還沒有${activeWishCategory === 'spot' ? '景點' : '美食'}待辦心願</h4>
+            <p class="text-xs text-sub">點擊上方「許個願」按鈕，把想去探索的好地方記錄下來吧！</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = currentList.map(item => `
+        <div class="bg-white rounded-2xl p-4 border border-[#EAE3D9] shadow-xs flex flex-col space-y-2.5">
+          <div class="flex justify-between items-start gap-2">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center space-x-1.5 flex-wrap">
+                <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+                  ${item.type === 'spot' ? '🏞️ 景點' : '🍜 美食'} · ${item.city || item.country || '未設定'}
+                </span>
+                ${(item.tags || []).map(t => `<span class="bg-gray-100 text-sub text-[9px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap">#${t}</span>`).join('')}
+              </div>
+              <h3 class="font-bold text-main text-sm mt-1 truncate">${item.name}</h3>
+              <p class="text-[11px] text-sub truncate">${item.address || '尚未記錄詳細地址'}</p>
+            </div>
+            <button onclick="openEditWishModal('${item.id}')" class="touch-btn text-sub hover:text-main p-1 text-xs">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+          </div>
+
+          <!-- 想去的原因備忘 -->
+          <div class="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#F0EBE3] text-xs text-main leading-relaxed">
+            <span class="text-theme font-bold mr-1">💡 探索備忘：</span>
+            <span>${item.reason || '暫無特別備忘，只想去走走！'}</span>
+          </div>
+
+          <!-- 底部動作按鈕列 (含快捷解鎖轉換) -->
+          <div class="flex justify-between items-center text-[11px] pt-1 border-t border-[#F5F0E8]">
+            <button onclick="deleteSingleWish('${item.id}')" class="touch-btn text-sub hover:text-red-500 font-medium flex items-center space-x-1">
+              <i class="fa-solid fa-trash-can text-[10px]"></i>
+              <span>刪除心願</span>
+            </button>
+            <button onclick="unlockWishToDiary('${item.id}')" class="touch-btn bg-theme text-white px-3.5 py-1.5 rounded-xl font-bold flex items-center space-x-1.5 shadow-xs active:scale-95 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+              <span>✨ 解鎖造訪 (轉為日記)</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openWishlistModal() {
+      editingWishId = null;
+      document.getElementById("wishModalTitle").innerText = "許下一個想去的心願";
+      document.getElementById("inputWishName").value = "";
+      document.getElementById("inputWishCountry").value = "台灣";
+      document.getElementById("inputWishCity").value = "新竹市";
+      document.getElementById("inputWishAddress").value = "";
+      document.getElementById("inputWishReason").value = "";
+      document.getElementById("inputWishTags").value = "";
+      document.getElementById("wishModalDeleteBtn").classList.add("hidden");
+
+      const radios = document.getElementsByName("inputWishType");
+      radios.forEach(r => r.checked = (r.value === activeWishCategory));
+      updateWishTypeUI();
+
+      document.getElementById("wishModal").classList.remove("hidden");
+    }
+
+    function openEditWishModal(id) {
+      const item = wishlists.find(w => w.id === id);
+      if (!item) return;
+
+      editingWishId = id;
+      document.getElementById("wishModalTitle").innerText = "編輯心願待辦";
+      document.getElementById("inputWishName").value = item.name || "";
+      document.getElementById("inputWishCountry").value = item.country || "台灣";
+      document.getElementById("inputWishCity").value = item.city || "";
+      document.getElementById("inputWishAddress").value = item.address || "";
+      document.getElementById("inputWishReason").value = item.reason || "";
+      document.getElementById("inputWishTags").value = (item.tags || []).join(', ');
+      document.getElementById("wishModalDeleteBtn").classList.remove("hidden");
+
+      const radios = document.getElementsByName("inputWishType");
+      radios.forEach(r => r.checked = (r.value === item.type));
+      updateWishTypeUI();
+
+      document.getElementById("wishModal").classList.remove("hidden");
+    }
+
+    function updateWishTypeUI() {
+      const selected = document.querySelector('input[name="inputWishType"]:checked')?.value || 'spot';
+      const labelSpot = document.getElementById("labelWishSpot");
+      const labelFood = document.getElementById("labelWishFood");
+
+      if (selected === 'spot') {
+        labelSpot.className = "touch-btn p-2 border-2 border-theme bg-theme-light rounded-xl flex items-center justify-center space-x-1.5 font-bold text-theme";
+        labelFood.className = "touch-btn p-2 border border-[#EAE3D9] bg-white rounded-xl flex items-center justify-center space-x-1.5 font-medium text-sub";
+      } else {
+        labelFood.className = "touch-btn p-2 border-2 border-theme bg-theme-light rounded-xl flex items-center justify-center space-x-1.5 font-bold text-theme";
+        labelSpot.className = "touch-btn p-2 border border-[#EAE3D9] bg-white rounded-xl flex items-center justify-center space-x-1.5 font-medium text-sub";
+      }
+    }
+
+    function closeWishModal() {
+      document.getElementById("wishModal").classList.add("hidden");
+    }
+
+    function confirmSaveWish() {
+      const name = document.getElementById("inputWishName").value.trim();
+      if (!name) return alert("請填寫心願地點名稱！");
+
+      const type = document.querySelector('input[name="inputWishType"]:checked')?.value || 'spot';
+      const country = document.getElementById("inputWishCountry").value.trim() || "台灣";
+      const city = document.getElementById("inputWishCity").value.trim();
+      const address = document.getElementById("inputWishAddress").value.trim();
+      const reason = document.getElementById("inputWishReason").value.trim();
+      const tags = document.getElementById("inputWishTags").value.split(/[,，\s]+/).filter(Boolean);
+
+      if (editingWishId) {
+        const item = wishlists.find(w => w.id === editingWishId);
+        if (item) {
+          item.name = name;
+          item.type = type;
+          item.country = country;
+          item.city = city;
+          item.address = address;
+          item.reason = reason;
+          item.tags = tags;
+        }
+      } else {
+        wishlists.unshift({
+          id: "wish_" + Date.now(),
+          type,
+          name,
+          country,
+          city,
+          address,
+          reason,
+          tags,
+          createdAt: new Date().toISOString().split("T")[0]
+        });
+      }
+
+      saveWishlistsToStorage();
+      closeWishModal();
+      activeWishCategory = type;
+      switchWishCategory(type);
+    }
+
+    function deleteCurrentWish() {
+      if (!editingWishId) return;
+      deleteSingleWish(editingWishId);
+      closeWishModal();
+    }
+
+    function deleteSingleWish(id) {
+      if (confirm("確定要將這個心願自清單中移除嗎？")) {
+        wishlists = wishlists.filter(w => w.id !== id);
+        saveWishlistsToStorage();
+        renderWishlistView();
+      }
+    }
+
+    // 【一鍵解鎖狀態轉移】：將心願轉入日記
+    function unlockWishToDiary(wishId) {
+      const wish = wishlists.find(w => w.id === wishId);
+      if (!wish) return;
+
+      unlockingWishId = wishId;
+      currentModalMode = 'CREATE';
+      pendingLocation = null;
+      uploadedPhotosList = [];
+
+      document.getElementById("modalMainTitle").innerText = `解鎖心願：${wish.name} 🎉`;
+      document.getElementById("modalSubTitle").innerText = "恭喜親自造訪！補上評分與照片存入正式手帳";
+
+      document.getElementById("inputStoreName").value = wish.name;
+      document.getElementById("inputCountry").value = wish.country || "台灣";
+      document.getElementById("inputCity").value = wish.city || "新竹市";
+      document.getElementById("inputStoreAddress").value = wish.address || "";
+      document.getElementById("inputCoords").value = "";
+      document.getElementById("geoStatusText").innerText = "已由心願清單帶入資訊，可使用下方方法查找座標或拍照保存";
+      document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("inputTags").value = (wish.tags && wish.tags.length) ? wish.tags.join(', ') : (wish.type === 'spot' ? '景點' : '美食');
+      document.getElementById("inputReview").value = wish.reason ? `【心願解鎖】：${wish.reason}\n今天終於親自來到了這裡，心情真好！` : '今天終於親自解鎖了這處心願景點！';
+      document.getElementById("inputCost").value = "";
+      document.getElementById("modalDeleteBtn").classList.add("hidden");
+
+      renderPhotosThumbnails();
+      renderModalQuickTagChips();
+      setRating(5.0);
+
+      document.getElementById("entryModal").classList.remove("hidden");
     }
 
     // ========== 本機儲存空間管理核心 ==========
@@ -1147,10 +1543,45 @@
       }, { passive: true });
     }
 
-    // ========== 拍立得手帳卡客製繪製 & 免下載直接分享 ==========
+    // ========== 【需求 3 實作】：拍立得手帳卡相片挑選 ＆ 浮水印大小自由調整 ==========
     function generatePolaroidCard(storeId, visitId) {
       activePolaroidTarget = { storeId, visitId };
+      selectedPolaroidPhotoIndex = 0;
       document.getElementById("polaroidModal").classList.remove("hidden");
+      renderPolaroidPhotoThumbnails();
+      renderPolaroidWithSettings();
+    }
+
+    function renderPolaroidPhotoThumbnails() {
+      const { storeId, visitId } = activePolaroidTarget;
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      const visit = store.visits.find(v => v.visitId === visitId) || store.visits[0];
+      if (!visit) return;
+      const photos = getVisitPhotos(visit);
+
+      const pickerBox = document.getElementById("polaroidPhotoPickerBox");
+      const thumbContainer = document.getElementById("polaroidPhotoThumbnails");
+      const countEl = document.getElementById("polaroidPhotoPickerCount");
+
+      if (photos.length <= 1) {
+        pickerBox.classList.add("hidden");
+        return;
+      }
+
+      pickerBox.classList.remove("hidden");
+      countEl.innerText = `共 ${photos.length} 張相片`;
+
+      thumbContainer.innerHTML = photos.map((p, idx) => `
+        <div onclick="selectPolaroidPhoto(${idx})" class="touch-btn flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition ${selectedPolaroidPhotoIndex === idx ? 'border-theme shadow-md scale-105' : 'border-[#EAE3D9] opacity-70'}">
+          <img src="${p}" class="w-full h-full object-cover" />
+        </div>
+      `).join('');
+    }
+
+    function selectPolaroidPhoto(idx) {
+      selectedPolaroidPhotoIndex = idx;
+      renderPolaroidPhotoThumbnails();
       renderPolaroidWithSettings();
     }
 
@@ -1161,28 +1592,37 @@
       const gap = document.getElementById("polGap").value;
       document.getElementById("polGapLabel").innerText = `${gap}px`;
 
+      const stampSize = document.getElementById("polStampSize").value;
+      document.getElementById("polStampSizeLabel").innerText = `${stampSize}px`;
+
       renderPolaroidWithSettings();
     }
 
-    // 繪製「咖啡環形印章」浮水印 (支援四角自由定位)
+    // 繪製「咖啡環形印章」浮水印 (支援半徑自由縮放)
     function drawCoffeeStampSeal(ctx, x, y, radius, stampColor) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(-8 * Math.PI / 180);
 
+      // 依使用者所選半徑進行相對縮放
+      const scaleFactor = radius / 56;
+      ctx.scale(scaleFactor, scaleFactor);
+
+      const baseR = 56;
+
       ctx.strokeStyle = stampColor;
       ctx.lineWidth = 3.5;
       ctx.beginPath();
-      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.arc(0, 0, baseR, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);
+      ctx.arc(0, 0, baseR - 6, 0, Math.PI * 2);
       ctx.stroke();
 
       const text = "我的點點滴滴 • 生活回憶手帳 • ";
-      const textRadius = radius - 15;
+      const textRadius = baseR - 15;
       const angleStep = (Math.PI * 2) / text.length;
 
       ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
@@ -1202,7 +1642,7 @@
 
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(0, 0, radius - 26, 0, Math.PI * 2);
+      ctx.arc(0, 0, baseR - 26, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.lineWidth = 2.2;
@@ -1248,6 +1688,7 @@
 
       const fontScale = parseFloat(document.getElementById("polScale").value) || 1.15;
       const userGap = parseInt(document.getElementById("polGap").value, 10) || 65;
+      const userStampRadius = parseInt(document.getElementById("polStampSize").value, 10) || 56;
       const textAlign = document.getElementById("polTextAlign").value || "left";
       const stampPos = document.getElementById("polStampPos").value || "bottom-right";
       const fontFamily = document.getElementById("polFontFamily").value;
@@ -1271,15 +1712,18 @@
       let photoH = 0;
       let imgObj = null;
 
-      if (photos.length > 0) {
+      // 使用者指定的當前照片
+      const currentPhotoSrc = photos[selectedPolaroidPhotoIndex] || photos[0];
+
+      if (currentPhotoSrc) {
         imgObj = await new Promise((resolve) => {
           const img = new Image();
-          if (!photos[0].startsWith('data:')) {
+          if (!currentPhotoSrc.startsWith('data:')) {
             img.crossOrigin = "anonymous";
           }
           img.onload = () => resolve(img);
           img.onerror = () => resolve(null);
-          img.src = photos[0];
+          img.src = currentPhotoSrc;
         });
 
         if (imgObj) {
@@ -1287,7 +1731,7 @@
         }
       }
 
-      // 嚴格維持使用者設定的相片與文字間距 (加上 fontScale 緩衝)
+      // 相片與文字的安全間距
       const photoToTextGap = photoH > 0 ? Math.round(userGap + (fontScale - 1) * 20) : 24;
 
       let textBlockHeight = 0;
@@ -1307,13 +1751,13 @@
         textBlockHeight += reviewLines.length * reviewLineH + 16;
       }
 
-      const stampReservedHeight = (showStamp && (stampPos === 'bottom-right' || stampPos === 'bottom-left')) ? 130 : 30;
+      const stampReservedHeight = (showStamp && (stampPos === 'bottom-right' || stampPos === 'bottom-left')) ? Math.max(120, userStampRadius * 2 + 20) : 30;
       const totalH = pad + photoH + photoToTextGap + textBlockHeight + stampReservedHeight + pad;
 
       canvas.width = W;
       canvas.height = Math.max(540, totalH);
 
-      // 1. 拍立得底紙與陰影
+      // 1. 拍立得底紙
       ctx.fillStyle = "#FAF8F5";
       ctx.fillRect(0, 0, W, canvas.height);
 
@@ -1338,10 +1782,8 @@
         curY += 24;
       }
 
-      // 關鍵保護：強制 textBaseline 為 "top"，文字完全向下繪製，絕不會向上覆蓋相片
       ctx.textBaseline = "top";
 
-      // 依對齊選項計算基準 X 軸
       let textX = pad;
       if (textAlign === "center") textX = W / 2;
       else if (textAlign === "right") textX = W - pad;
@@ -1356,7 +1798,7 @@
         curY += titleLineH + 8;
       }
 
-      // 4. 星等評分、日期與城市 (維持星星紅字與次要灰字分離)
+      // 4. 星等評分、日期與城市
       if (showRating || showDate || showCity) {
         const starStr = showRating ? `★ ${Number(visit.rating).toFixed(1)}` : "";
         const metaSegments = [];
@@ -1374,7 +1816,7 @@
         if (textAlign === "center") startX = W / 2 - totalMetaW / 2;
         else if (textAlign === "right") startX = W - pad - totalMetaW;
 
-        ctx.textAlign = "left"; // 分段繪製時以左對齊排版
+        ctx.textAlign = "left";
         if (starStr) {
           ctx.fillStyle = "#E04A4A";
           ctx.font = `bold ${Math.round(22 * fontScale)}px ${fontFamily}`;
@@ -1385,7 +1827,7 @@
           ctx.font = `bold ${Math.round(18 * fontScale)}px ${fontFamily}`;
           ctx.fillText(metaStr, startX + starWidth, curY);
         }
-        ctx.textAlign = textAlign; // 恢復使用者選取的對齊
+        ctx.textAlign = textAlign;
 
         curY += metaLineH + 6;
       }
@@ -1410,30 +1852,30 @@
         curY += 12;
       }
 
-      // 7. 蓋上「咖啡回憶印章」浮水印 (支援四個角落自由配置)
+      // 7. 蓋上「咖啡回憶印章」浮水印 (按使用者指定半徑與位置繪製)
       if (showStamp) {
-        let stampX = W - pad - 68;
-        let stampY = canvas.height - pad - 50;
+        let stampX = W - pad - userStampRadius - 12;
+        let stampY = canvas.height - pad - userStampRadius - 10;
 
         if (stampPos === 'bottom-left') {
-          stampX = pad + 68;
-          stampY = canvas.height - pad - 50;
+          stampX = pad + userStampRadius + 12;
+          stampY = canvas.height - pad - userStampRadius - 10;
         } else if (stampPos === 'top-right') {
-          stampX = W - pad - 58;
-          stampY = pad + 58;
+          stampX = W - pad - userStampRadius - 10;
+          stampY = pad + userStampRadius + 10;
         } else if (stampPos === 'top-left') {
-          stampX = pad + 58;
-          stampY = pad + 58;
+          stampX = pad + userStampRadius + 10;
+          stampY = pad + userStampRadius + 10;
         }
 
-        drawCoffeeStampSeal(ctx, stampX, stampY, 56, "rgba(200, 60, 60, 0.78)");
+        drawCoffeeStampSeal(ctx, stampX, stampY, userStampRadius, "rgba(200, 60, 60, 0.78)");
       }
 
       try {
         currentPolaroidDataUrl = canvas.toDataURL("image/png");
         document.getElementById("polaroidPreviewImg").src = currentPolaroidDataUrl;
       } catch(err) {
-        console.warn("Canvas 導出受限，可能含有未開放跨域之範例圖片", err);
+        console.warn("Canvas 導出受限", err);
       }
     }
 
@@ -1456,7 +1898,7 @@
       return lines;
     }
 
-    // 🚀 免下載直接分享拍立得圖片 (Web Share API 原生整合)
+    // 原生分享拍立得圖片
     async function sharePolaroidImage() {
       if (!currentPolaroidDataUrl) return;
 
@@ -1472,7 +1914,6 @@
             files: [file]
           });
         } else if (navigator.clipboard && window.ClipboardItem) {
-          // 瀏覽器不支援原生分享面板時，自動將圖片拷貝至剪貼簿
           await navigator.clipboard.write([
             new ClipboardItem({ 'image/png': blob })
           ]);
@@ -1608,7 +2049,7 @@
       renderYearTimelinePills(Object.keys(yearCountMap).sort((a,b) => b.localeCompare(a)));
 
       allMemories.sort((a, b) => new Date(b.date) - new Date(a.date));
-      renderRecentMemories(allMemories.slice(0, 8)); // 橫向滑軌擴大呈現 8 則回憶
+      renderRecentMemories(allMemories.slice(0, 8));
     }
 
     function renderYearTimelinePills(years) {
@@ -1699,7 +2140,6 @@
       }
     }
 
-    // 🚀【更新】：最近造訪回憶改為左右橫向輪播顯示
     function renderRecentMemories(recentList) {
       const container = document.getElementById("recentMemoriesCards");
       if (!recentList.length) {
@@ -1859,6 +2299,7 @@
       uploadedPhotosList = [];
       
       document.getElementById("modalMainTitle").innerText = "記錄新地點";
+      document.getElementById("modalSubTitle").innerText = "記下此時此刻的感動";
       document.getElementById("inputStoreName").value = name;
       document.getElementById("inputStoreAddress").value = address;
       document.getElementById("inputCountry").value = "台灣";
@@ -2212,6 +2653,18 @@
           };
           await dbPut(newStore);
           appData.unshift(newStore);
+
+          // 若是由心願清單解鎖成功，詢問是否自動移除已達成的心願
+          if (unlockingWishId) {
+            const unlockedWish = wishlists.find(w => w.id === unlockingWishId);
+            if (unlockedWish) {
+              wishlists = wishlists.filter(w => w.id !== unlockingWishId);
+              saveWishlistsToStorage();
+              renderWishlistView();
+              alert(`🎉 太棒了！已成功解鎖「${name}」並轉存為正式手帳，且自心願清單中標記完成！`);
+            }
+            unlockingWishId = null;
+          }
         }
 
         closeModal();
@@ -2433,6 +2886,7 @@
       }
     }
 
+    // 【需求 2 修正】：列表卡片按鈕絕對保持水平不換行
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -2504,20 +2958,23 @@
 
         return `
           <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="flex items-center space-x-1.5">
-                  <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold">${item.country || ''} · ${item.city || ''}</span>
-                  ${!hasCoords ? '<span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded font-bold">📍 待補座標</span>' : ''}
+            <!-- 修正：左右兩端對齊，左邊自適應縮排，右邊鎖定不換行 -->
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center space-x-1.5 flex-wrap">
+                  <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${item.country || ''} · ${item.city || ''}</span>
+                  ${!hasCoords ? '<span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap">📍 待補座標</span>' : ''}
                 </div>
-                <h3 class="font-bold text-main text-sm mt-0.5">${item.name}</h3>
-                <p class="text-[11px] text-sub">${item.address || '無詳細地址'}</p>
+                <h3 class="font-bold text-main text-sm mt-0.5 truncate">${item.name}</h3>
+                <p class="text-[11px] text-sub truncate">${item.address || '無詳細地址'}</p>
               </div>
-              <div class="flex items-center space-x-1.5">
-                <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center">
-                  <i class="fa-solid fa-camera mr-1 text-[10px]"></i> 拍立得卡
+              
+              <!-- 修正：嚴格禁止換行 (whitespace-nowrap flex-shrink-0) -->
+              <div class="flex items-center space-x-1.5 flex-shrink-0 whitespace-nowrap pt-0.5">
+                <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
+                  <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得卡
                 </button>
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition">
+                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex-shrink-0 whitespace-nowrap">
                   ✏️ 編輯
                 </button>
               </div>
@@ -2554,10 +3011,12 @@
     }
 
     function openManualAddModal() {
+      unlockingWishId = null;
       currentModalMode = 'CREATE';
       pendingLocation = null;
       uploadedPhotosList = [];
       document.getElementById("modalMainTitle").innerText = "記錄新地點";
+      document.getElementById("modalSubTitle").innerText = "記下此時此刻的感動";
       document.getElementById("inputStoreName").value = "";
       document.getElementById("inputCountry").value = "台灣";
       document.getElementById("inputCity").value = "新竹市";
@@ -2576,6 +3035,7 @@
     }
 
     function openRevisitModal(storeId) {
+      unlockingWishId = null;
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
       currentModalMode = 'REVISIT';
@@ -2584,6 +3044,7 @@
       const nextVisitNum = store.visits.length + 1;
 
       document.getElementById("modalMainTitle").innerText = `第 ${nextVisitNum} 次造訪回憶 ✍️`;
+      document.getElementById("modalSubTitle").innerText = `重溫 ${store.name} 的美好時刻`;
       document.getElementById("inputStoreName").value = store.name;
       document.getElementById("inputCountry").value = store.country || "台灣";
       document.getElementById("inputCity").value = store.city || "";
@@ -2602,6 +3063,7 @@
     }
 
     function openEditModal(storeId, visitId) {
+      unlockingWishId = null;
       const store = appData.find(s => s.id === storeId);
       if (!store) return;
       const visit = store.visits.find(v => v.visitId === visitId) || store.visits[0];
@@ -2613,6 +3075,7 @@
       uploadedPhotosList = [...getVisitPhotos(visit)];
 
       document.getElementById("modalMainTitle").innerText = `編輯回憶筆記 ✏️`;
+      document.getElementById("modalSubTitle").innerText = store.name;
       document.getElementById("inputStoreName").value = store.name;
       document.getElementById("inputCountry").value = store.country || "台灣";
       document.getElementById("inputCity").value = store.city || "新竹市";
@@ -2633,6 +3096,7 @@
 
     function closeModal() {
       document.getElementById("entryModal").classList.add("hidden");
+      unlockingWishId = null;
     }
 
     function buildStarsUI() {
@@ -2670,35 +3134,48 @@
       setRating(Math.round(num * 2) / 2);
     }
 
+    // 四大平行板塊切換
     function switchTab(tab) {
       const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
       const listView = document.getElementById("listView");
+      const wishView = document.getElementById("wishlistView");
+
       const tabDashBtn = document.getElementById("tabDashBtn");
       const tabMapBtn = document.getElementById("tabMapBtn");
       const tabListBtn = document.getElementById("tabListBtn");
+      const tabWishBtn = document.getElementById("tabWishBtn");
 
       dashView.classList.add("hidden");
       mapView.classList.add("hidden");
       listView.classList.add("hidden");
+      wishView.classList.add("hidden");
 
-      tabDashBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
-      tabMapBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
-      tabListBtn.className = "touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+      const inActiveStyle = "touch-btn flex flex-col items-center text-gray-400 font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap";
+      const activeStyle = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap";
+
+      tabDashBtn.className = inActiveStyle;
+      tabMapBtn.className = inActiveStyle;
+      tabListBtn.className = inActiveStyle;
+      tabWishBtn.className = inActiveStyle;
 
       if (tab === 'dashboard') {
         dashView.classList.remove("hidden");
-        tabDashBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabDashBtn.className = activeStyle;
         updateDashboardStats();
       } else if (tab === 'map') {
         mapView.classList.remove("hidden");
-        tabMapBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabMapBtn.className = activeStyle;
         renderMapCategoryChips();
         setTimeout(() => { if (map) map.invalidateSize(); }, 150);
-      } else {
+      } else if (tab === 'list') {
         listView.classList.remove("hidden");
-        tabListBtn.className = "touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-3 transition active:scale-95 whitespace-nowrap";
+        tabListBtn.className = activeStyle;
         renderListView();
+      } else if (tab === 'wishlist') {
+        wishView.classList.remove("hidden");
+        tabWishBtn.className = activeStyle;
+        renderWishlistView();
       }
     }
 
@@ -2713,29 +3190,54 @@
       document.getElementById("backupMenu").classList.toggle("hidden");
     }
 
+    // 匯出包含正式手帳與心願清單
     function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const backupPayload = {
+        version: "v13_with_wishlist",
+        exportDate: new Date().toISOString(),
+        restaurants: appData,
+        wishlists: wishlists
+      };
+
+      const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `我的點點滴滴_生活回憶手帳備份_${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `我的點點滴滴_手帳與心願備份_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
     }
 
+    // 還原備份
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
-          const list = JSON.parse(e.target.result);
-          if (Array.isArray(list)) {
-            for (const item of list) await dbPut(item);
+          const parsed = JSON.parse(e.target.result);
+          
+          // 支援新版結構 (含 wishlists) 與舊版純陣列
+          let restList = [];
+          if (Array.isArray(parsed)) {
+            restList = parsed;
+          } else if (parsed && parsed.restaurants) {
+            restList = parsed.restaurants;
+            if (Array.isArray(parsed.wishlists)) {
+              wishlists = parsed.wishlists;
+              saveWishlistsToStorage();
+            }
+          }
+
+          if (restList.length > 0) {
+            for (const item of restList) await dbPut(item);
             appData = await dbGetAll();
             refreshViews();
+            renderWishlistView();
             updateDashboardStats();
             pickRandomMemory();
-            alert(`✅ 還原成功！已完整同步載入 ${list.length} 筆回憶紀錄。`);
+            alert(`✅ 還原成功！已完整同步載入 ${restList.length} 筆正式手帳與 ${wishlists.length} 筆心願。`);
+          } else {
+            alert("備份檔無任何資料！");
           }
         } catch(err) {
           if (err.name === 'QuotaExceededError') {
@@ -2752,4 +3254,5 @@
     window.onload = initApp;
   </script>
 </body>
-</html>​
+</html>
+​
