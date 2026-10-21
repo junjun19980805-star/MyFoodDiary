@@ -1,11 +1,23 @@
+這是一份為您正式製作的 單一 HTML 正式版代碼。已完整實作探索類型標籤與日記列表的無縫連動，並整合先前所有的功能（心願清單雙待辦、縣市複選與清除、GPS
+最近心願扭蛋、拍立得相片挑選與印章大小位置控制、可愛手繪繪本地圖）。
+
+代碼已完全封裝，直接複製儲存為 .html 檔案即可在任何瀏覽器中離線運行使用。
+
+🌟 本次新連動功能說明：
+
+  - 探索類型標籤點擊直達日記：在「點點滴滴」首頁統計的「探索類型標籤」中，每個標籤（例如 #美食、#拉麵、#散步）現在都是可愛的可點擊膠囊按鈕。
+  - 點擊任一標籤，系統會自動跳轉至日記列表，並自動選定該標籤進行篩選，立即列出所有具備該標籤的精彩回憶！
+
+完整正式版程式碼：
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>我的點點滴滴 - 可愛手繪版</title>
+  <title>我的點點滴滴</title>
 
-  <!-- PWA 行動裝置設定 -->
+  <!-- PWA 行動裝置體驗設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -36,7 +48,7 @@
       --ui-text-muted: #71717A;
       --ui-theme: #9C95DB;
       --ui-theme-light: #F2F0FB;
-      --marker-color: #FF6B6B; /* 可愛草莓紅 */
+      --marker-color: #FF6B6B; /* 可愛手繪草莓紅 */
     }
 
     body { color: var(--ui-text); }
@@ -60,12 +72,12 @@
 
     .touch-btn { touch-action: manipulation; cursor: pointer; }
 
-    /* 🎨【重點一】：可愛手繪紙張與粉彩色調濾鏡 */
+    /* 可愛手繪紙張與粉彩濾鏡 */
     .leaflet-tile-pane {
       filter: sepia(0.12) saturate(1.45) brightness(1.03) contrast(1.05) hue-rotate(-8deg);
     }
 
-    /* 🧸【重點二】：手繪貼紙風格圖釘 (帶白色粗貼紙邊框 + 可愛微彈動效) */
+    /* 手繪貼紙風格圖釘 */
     .custom-marker {
       background: var(--marker-color);
       width: 36px;
@@ -95,7 +107,7 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
-    /* 💌【重點三】：便條紙般圓潤的手帳氣泡彈窗 */
+    /* 便條紙手帳氣泡彈窗 */
     .leaflet-popup-content-wrapper {
       background: #FAF8F5 !important;
       border-radius: 22px !important;
@@ -103,9 +115,7 @@
       border: 2px solid #EAE3D9 !important;
       padding: 4px !important;
     }
-    .leaflet-popup-tip {
-      background: #FAF8F5 !important;
-    }
+    .leaflet-popup-tip { background: #FAF8F5 !important; }
   </style>
 </head>
 <body class="flex flex-col h-full w-full relative select-none">
@@ -366,7 +376,40 @@
     </div>
   </div>
 
-  <!-- 主要內容區域 -->
+  <!-- 通用多選縣市彈跳視窗 -->
+  <div id="cityMultiSelectModal" class="hidden fixed inset-0 bg-black/60 z-[2600] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md max-h-[85dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
+        <div>
+          <h3 class="font-bold text-main text-sm" id="cityModalTitle">選擇縣市 (可複選)</h3>
+          <p class="text-[10px] text-theme">點選想篩選的縣市，支援多個地區</p>
+        </div>
+        <button onclick="closeCityModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-sub font-medium" id="citySelectedCountText">已選擇 0 個縣市</span>
+          <button onclick="clearCurrentCitySelection()" class="touch-btn text-red-500 font-bold hover:underline flex items-center">
+            <i class="fa-solid fa-rotate-left mr-1"></i> 全部清除
+          </button>
+        </div>
+
+        <div id="cityChipsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+      </div>
+
+      <div class="p-3.5 border-t border-[#EAE3D9] bg-[#FAF8F5] flex space-x-2">
+        <button onclick="clearCurrentCitySelection(); applyCitySelection();" class="touch-btn py-2.5 px-4 bg-gray-150 text-sub font-bold rounded-xl text-xs">
+          重設清除
+        </button>
+        <button onclick="applyCitySelection()" class="touch-btn flex-1 py-2.5 bg-theme text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition">
+          套用篩選
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主要內容區域 (四大板塊) -->
   <main class="flex-1 relative w-full h-full overflow-hidden">
     
     <!-- 頁面 1：點點滴滴首頁 -->
@@ -439,7 +482,7 @@
         </button>
       </div>
 
-      <!-- 隨機回憶 -->
+      <!-- 隨機時光回憶抽屜 -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -451,6 +494,52 @@
           </button>
         </div>
         <div id="randomMemoryBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]"></div>
+      </div>
+
+      <!-- 探索回憶統計 -->
+      <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-3.5">
+        <div class="flex items-center justify-between border-b border-[#F5F0E8] pb-2">
+          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
+            <i class="fa-solid fa-compass mr-1.5 text-theme"></i> 探索生活足跡統計
+          </h3>
+          <span class="text-[10px] text-sub">真實日記統計</span>
+        </div>
+
+        <div>
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-city mr-1 text-theme"></i> 城市足跡分佈
+          </h4>
+          <div id="statCityBars" class="space-y-1.5 text-xs"></div>
+        </div>
+
+        <div class="pt-1">
+          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
+            <i class="fa-solid fa-crown mr-1 text-amber-500"></i> 最愛回訪的好地方 (Top 3)
+          </h4>
+          <div id="statTopRevisitList" class="space-y-1 text-xs"></div>
+        </div>
+
+        <!-- 【升級】：探索類型標籤點擊直接連動日記列表 -->
+        <div class="pt-1">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-[11px] font-bold text-sub flex items-center">
+              <i class="fa-solid fa-tags mr-1 text-theme"></i> 探索類型標籤
+            </h4>
+            <span class="text-[10px] text-theme font-medium">點選標籤查看日記 👉</span>
+          </div>
+          <div id="statTagsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- 年度回憶累積 (點擊連動日記列表) -->
+        <div class="pt-1">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-[11px] font-bold text-sub flex items-center">
+              <i class="fa-solid fa-timeline mr-1 text-theme"></i> 年度回憶累積
+            </h4>
+            <span class="text-[10px] text-theme font-medium">點選年份快速查看日記 👉</span>
+          </div>
+          <div id="statYearlyTrend" class="space-y-1.5 text-xs"></div>
+        </div>
       </div>
 
       <!-- 最近造訪回憶 (左右橫向輪播) -->
@@ -470,7 +559,7 @@
       </div>
     </div>
 
-    <!-- 頁面 2：【足跡地圖】(已套用可愛手繪底圖與貼紙圖釘) -->
+    <!-- 頁面 2：足跡地圖 (手繪可愛底圖 + 貼紙圖釘) -->
     <div id="mapView" class="hidden w-full h-full relative">
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto space-y-1.5">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
@@ -485,7 +574,6 @@
         <div id="searchResultsCard" class="hidden mt-1 bg-white rounded-2xl shadow-xl border border-[#EAE3D9] max-h-72 overflow-y-auto p-2 space-y-1.5"></div>
       </div>
 
-      <!-- 無座標地點提示 -->
       <div id="unmappedNoticeBar" class="hidden absolute top-28 left-4 right-4 z-[900] bg-white/95 backdrop-blur border border-[#EAE3D9] rounded-2xl p-2.5 shadow-md flex items-center justify-between text-xs">
         <span class="text-sub flex items-center">
           <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
@@ -498,12 +586,12 @@
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
 
-      <!-- 地圖容器 -->
       <div id="map"></div>
     </div>
 
     <!-- 頁面 3：日記列表 -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
+      <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
         <label class="text-[11px] font-bold text-sub flex items-center">
           <i class="fa-solid fa-hourglass-half mr-1 text-theme"></i> 年度時光回顧膠囊
@@ -517,11 +605,18 @@
             <label class="font-bold text-main">1. 選擇國家</label>
             <select id="filterCountry" onchange="onCountryChange()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main outline-none"></select>
           </div>
+
           <div>
-            <label class="font-bold text-main">2. 選擇城市</label>
-            <select id="filterCity" onchange="onCityChange()" disabled class="w-full mt-1 bg-gray-100 text-gray-400 border border-[#EAE3D9] rounded-lg p-2 font-medium outline-none cursor-not-allowed">
-              <option value="">請先選擇國家</option>
-            </select>
+            <div class="flex justify-between items-center">
+              <label class="font-bold text-main">2. 選擇城市 (可複選)</label>
+              <button id="diaryCityClearBtn" onclick="clearDiaryCityFilter()" class="hidden text-[10px] text-red-500 font-bold hover:underline">
+                ✕ 清除
+              </button>
+            </div>
+            <button type="button" onclick="openCityFilterModal('diary')" id="diaryCityFilterBtn" class="touch-btn w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-left text-sub flex items-center justify-between">
+              <span id="diaryCityBtnLabel" class="truncate">全部城市 (不限)</span>
+              <span id="diaryCityBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            </button>
           </div>
         </div>
 
@@ -558,6 +653,8 @@
 
     <!-- 頁面 4：心願清單板塊 -->
     <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
+      
+      <!-- 頂部手帳橫幅 -->
       <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs flex justify-between items-center">
         <div>
           <span class="text-xs font-bold text-theme bg-theme-light px-2.5 py-1 rounded-full inline-flex items-center">
@@ -571,6 +668,32 @@
         </button>
       </div>
 
+      <!-- 心願靈感扭蛋機 -->
+      <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
+            <i class="fa-solid fa-dice text-theme mr-1.5"></i> 今天吃什麼？去哪玩？靈感扭蛋
+          </h3>
+          <span class="text-[10px] text-sub">連動心願清單</span>
+        </div>
+
+        <div class="flex space-x-2">
+          <button onclick="pickRandomWish(false)" class="touch-btn flex-1 bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs flex items-center justify-center space-x-1 active:scale-95 transition">
+            <i class="fa-solid fa-shuffle"></i>
+            <span>隨機翻個心願</span>
+          </button>
+          <button onclick="pickNearestWish()" class="touch-btn flex-1 bg-amber-50 text-amber-800 border border-amber-300 py-2 rounded-xl font-bold text-xs flex items-center justify-center space-x-1 active:scale-95 transition">
+            <i class="fa-solid fa-location-crosshairs text-amber-600"></i>
+            <span>🛰️ 定位挑最近的</span>
+          </button>
+        </div>
+
+        <div id="wishRandomResultBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]">
+          <p class="text-xs text-sub text-center py-1">不知道想去哪時，點擊上方按鈕翻開一張心願吧！</p>
+        </div>
+      </div>
+
+      <!-- 景點 vs 美食 雙分頁膠囊切換 -->
       <div class="bg-white p-1 rounded-2xl border border-[#EAE3D9] flex text-xs font-bold shadow-xs">
         <button onclick="switchWishCategory('spot')" id="wishTabSpotBtn" class="touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 bg-theme text-white shadow-xs">
           <i class="fa-solid fa-mountain-sun"></i>
@@ -584,6 +707,24 @@
         </button>
       </div>
 
+      <!-- 心願清單縣市篩選列 -->
+      <div class="bg-white p-2.5 rounded-2xl border border-[#EAE3D9] flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-2 flex-1 min-w-0">
+          <button type="button" onclick="openCityFilterModal('wishlist')" class="touch-btn bg-[#FAF8F5] border border-[#EAE3D9] px-3 py-1.5 rounded-xl font-bold text-main flex items-center space-x-1.5 hover:border-theme">
+            <i class="fa-solid fa-filter text-theme"></i>
+            <span id="wishCityBtnLabel">篩選縣市 (不限)</span>
+            <span id="wishCityBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+          </button>
+          
+          <span id="wishFilterSummaryText" class="text-[10px] text-sub truncate hidden sm:inline">顯示全部地區</span>
+        </div>
+
+        <button id="wishCityClearBtn" onclick="clearWishCityFilter()" class="touch-btn hidden text-[11px] text-red-500 font-bold px-2.5 py-1 rounded-xl bg-red-50 hover:bg-red-100 transition whitespace-nowrap">
+          ✕ 清除複選
+        </button>
+      </div>
+
+      <!-- 心願清單內容卡片容器 -->
       <div id="wishlistCardsContainer" class="space-y-2.5"></div>
     </div>
   </main>
@@ -869,14 +1010,28 @@
   <!-- 應用程式邏輯 -->
   <script>
     const TAIWAN_CITIES = {
-      "新竹市": [24.8138, 120.9675],
-      "新竹縣": [24.8383, 121.0177],
+      "基隆市": [25.1276, 121.7392],
       "台北市": [25.0375, 121.5637],
       "新北市": [25.0169, 121.4628],
+      "桃園市": [24.9936, 121.3010],
+      "新竹市": [24.8138, 120.9675],
+      "新竹縣": [24.8383, 121.0177],
+      "苗栗縣": [24.5602, 120.8214],
       "台中市": [24.1631, 120.6473],
-      "高雄市": [22.6273, 120.3014],
+      "彰化縣": [24.0815, 120.5385],
+      "南投縣": [23.9037, 120.6859],
+      "雲林縣": [23.7092, 120.4313],
+      "嘉義市": [23.4800, 120.4491],
+      "嘉義縣": [23.4518, 120.2555],
       "台南市": [22.9997, 120.2270],
-      "桃園市": [24.9936, 121.3010]
+      "高雄市": [22.6273, 120.3014],
+      "屏東縣": [22.6830, 120.4879],
+      "宜蘭縣": [24.7570, 121.7530],
+      "花蓮縣": [23.9912, 121.6111],
+      "台東縣": [22.7583, 121.1444],
+      "澎湖縣": [23.5711, 119.5793],
+      "金門縣": [24.4489, 118.3766],
+      "連江縣": [26.1505, 119.9499]
     };
 
     let appData = [];
@@ -884,6 +1039,10 @@
     let activeWishCategory = 'spot';
     let editingWishId = null;
     let unlockingWishId = null;
+
+    let selectedWishCities = new Set();
+    let selectedDiaryCities = new Set();
+    let currentCityModalContext = 'diary';
 
     let map, markersLayer;
     let currentModalMode = 'CREATE';
@@ -929,7 +1088,7 @@
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "歡迎來到你的生活手帳！這是一張可愛的手繪地圖，點點滴滴記錄去過的好地方。",
+            review: "歡迎來到生活手帳！這是一張可愛的手繪地圖，點點滴滴記錄去過的好地方。",
             photos: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"]
           }]
         };
@@ -972,16 +1131,13 @@
       document.getElementById("dashTodayDate").innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
     }
 
-    // 🎨【手繪地圖核心】：使用免金鑰的 CARTO Voyager
     function initMap() {
       try {
         map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 13);
-        
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           subdomains: 'abcd',
           maxZoom: 19
         }).addTo(map);
-
         markersLayer = L.layerGroup().addTo(map);
       } catch(e) {
         console.warn("地圖載入略過", e);
@@ -1012,7 +1168,263 @@
       document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
     }
 
-    // 心願清單
+    // 城市多選彈窗邏輯
+    function openCityFilterModal(context) {
+      currentCityModalContext = context;
+      const modal = document.getElementById("cityMultiSelectModal");
+      const title = document.getElementById("cityModalTitle");
+      const container = document.getElementById("cityChipsContainer");
+
+      title.innerText = context === 'diary' ? "日記列表 · 篩選城市 (可複選)" : "心願清單 · 篩選縣市 (可複選)";
+
+      const allCities = new Set();
+      if (context === 'diary') {
+        appData.forEach(item => { if (item.city) allCities.add(item.city.trim()); });
+      } else {
+        wishlists.forEach(item => { if (item.city) allCities.add(item.city.trim()); });
+      }
+
+      Object.keys(TAIWAN_CITIES).forEach(c => allCities.add(c));
+      const sortedCities = Array.from(allCities).filter(Boolean);
+      const targetSet = context === 'diary' ? selectedDiaryCities : selectedWishCities;
+
+      container.innerHTML = sortedCities.map(city => {
+        const isSelected = targetSet.has(city);
+        return `
+          <button type="button" onclick="toggleCityChip('${city}')" id="cityChip_${city}" class="touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition ${isSelected ? 'bg-theme text-white shadow-xs' : 'bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light'}">
+            ${city}
+          </button>
+        `;
+      }).join('');
+
+      updateCitySelectedCountText();
+      modal.classList.remove("hidden");
+    }
+
+    function toggleCityChip(city) {
+      const targetSet = currentCityModalContext === 'diary' ? selectedDiaryCities : selectedWishCities;
+      const btn = document.getElementById(`cityChip_${city}`);
+
+      if (targetSet.has(city)) {
+        targetSet.delete(city);
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light";
+      } else {
+        targetSet.add(city);
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-theme text-white shadow-xs";
+      }
+      updateCitySelectedCountText();
+    }
+
+    function updateCitySelectedCountText() {
+      const targetSet = currentCityModalContext === 'diary' ? selectedDiaryCities : selectedWishCities;
+      document.getElementById("citySelectedCountText").innerText = `已選擇 ${targetSet.size} 個地區`;
+    }
+
+    function clearCurrentCitySelection() {
+      if (currentCityModalContext === 'diary') {
+        selectedDiaryCities.clear();
+      } else {
+        selectedWishCities.clear();
+      }
+      const chips = document.querySelectorAll("#cityChipsContainer button");
+      chips.forEach(btn => {
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light";
+      });
+      updateCitySelectedCountText();
+    }
+
+    function applyCitySelection() {
+      closeCityModal();
+      if (currentCityModalContext === 'diary') {
+        updateDiaryCityFilterUI();
+        renderListView();
+      } else {
+        updateWishCityFilterUI();
+        renderWishlistView();
+      }
+    }
+
+    function closeCityModal() {
+      document.getElementById("cityMultiSelectModal").classList.add("hidden");
+    }
+
+    function updateDiaryCityFilterUI() {
+      const label = document.getElementById("diaryCityBtnLabel");
+      const badge = document.getElementById("diaryCityBadge");
+      const clearBtn = document.getElementById("diaryCityClearBtn");
+
+      if (selectedDiaryCities.size === 0) {
+        label.innerText = "全部城市 (不限)";
+        badge.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+      } else {
+        label.innerText = Array.from(selectedDiaryCities).join(', ');
+        badge.innerText = selectedDiaryCities.size;
+        badge.classList.remove("hidden");
+        clearBtn.classList.remove("hidden");
+      }
+    }
+
+    function clearDiaryCityFilter() {
+      selectedDiaryCities.clear();
+      updateDiaryCityFilterUI();
+      renderListView();
+    }
+
+    function updateWishCityFilterUI() {
+      const label = document.getElementById("wishCityBtnLabel");
+      const badge = document.getElementById("wishCityBadge");
+      const clearBtn = document.getElementById("wishCityClearBtn");
+      const summaryText = document.getElementById("wishFilterSummaryText");
+
+      if (selectedWishCities.size === 0) {
+        label.innerText = "篩選縣市 (不限)";
+        badge.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+        summaryText.innerText = "顯示全部地區";
+      } else {
+        const cityArr = Array.from(selectedWishCities);
+        label.innerText = cityArr.slice(0, 2).join(', ') + (cityArr.length > 2 ? '...' : '');
+        badge.innerText = selectedWishCities.size;
+        badge.classList.remove("hidden");
+        clearBtn.classList.remove("hidden");
+        summaryText.innerText = `限定地區: ${cityArr.join('、')}`;
+      }
+    }
+
+    function clearWishCityFilter() {
+      selectedWishCities.clear();
+      updateWishCityFilterUI();
+      renderWishlistView();
+    }
+
+    // 心願靈感扭蛋機 (隨機 ＋ GPS 衛星定位找最近)
+    function pickRandomWish(isNearest = false, nearestItem = null, distanceKm = null) {
+      const box = document.getElementById("wishRandomResultBox");
+      const currentList = wishlists.filter(w => w.type === activeWishCategory);
+
+      if (!wishlists.length) {
+        box.innerHTML = `<p class="text-xs text-sub text-center py-2">心願清單空空如也，先點右上角「許個願」記下想去的地方吧！</p>`;
+        return;
+      }
+
+      let pickItem = null;
+      let distStr = "";
+
+      if (isNearest && nearestItem) {
+        pickItem = nearestItem;
+        distStr = `<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center"><i class="fa-solid fa-location-arrow mr-1"></i> 距離目前現場約 ${distanceKm.toFixed(1)} 公里</span>`;
+      } else {
+        const pool = currentList.length ? currentList : wishlists;
+        pickItem = pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      box.innerHTML = `
+        <div class="space-y-2">
+          <div class="flex justify-between items-start">
+            <div class="min-w-0 flex-1 pr-2">
+              <div class="flex items-center space-x-1.5 flex-wrap">
+                <span class="bg-theme-light text-theme text-[9px] px-2 py-0.5 rounded-full font-bold">
+                  ${pickItem.type === 'spot' ? '🏞️ 景點' : '🍜 美食'} · ${pickItem.city || pickItem.country || '未設定地區'}
+                </span>
+                ${distStr}
+              </div>
+              <h4 class="font-bold text-main text-sm mt-1 truncate">${pickItem.name}</h4>
+              <p class="text-[10px] text-sub truncate">${pickItem.address || '尚未記錄地址'}</p>
+            </div>
+            <button onclick="pickRandomWish(false)" title="再抽一次" class="touch-btn text-theme hover:bg-theme-light p-1.5 rounded-full active:rotate-180 transition">
+              <i class="fa-solid fa-rotate-right text-sm"></i>
+            </button>
+          </div>
+
+          <div class="bg-white p-2 rounded-xl border border-[#EAE3D9] text-xs text-main font-serif italic">
+            "${pickItem.reason || '想去散散步，享受一段美好時光！'}"
+          </div>
+
+          <div class="flex space-x-2 pt-1">
+            <button onclick="unlockWishToDiary('${pickItem.id}')" class="touch-btn flex-1 bg-theme text-white py-1.5 rounded-xl font-bold text-xs shadow-xs active:scale-95 transition flex items-center justify-center space-x-1">
+              <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+              <span>立刻去解鎖 (轉日記)</span>
+            </button>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((pickItem.city || '') + ' ' + pickItem.name)}" target="_blank" class="touch-btn px-3 py-1.5 bg-[#FAF8F5] border border-[#EAE3D9] text-main font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:text-theme">
+              <i class="fa-solid fa-location-dot text-theme"></i>
+              <span>導航</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function pickNearestWish() {
+      const box = document.getElementById("wishRandomResultBox");
+      if (!navigator.geolocation) {
+        alert("此裝置或瀏覽器不支援 GPS 定位！");
+        return;
+      }
+
+      if (!wishlists.length) {
+        alert("目前心願清單尚未記錄任何地點喔！");
+        return;
+      }
+
+      box.innerHTML = `<p class="text-xs text-theme font-bold text-center py-2 animate-pulse"><i class="fa-solid fa-satellite-dish mr-1"></i> 正在搜尋現場衛星 GPS，換算離您最近的心願...</p>`;
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const userLat = pos.coords.latitude;
+          const userLng = pos.coords.longitude;
+
+          let nearestItem = null;
+          let minDistance = Infinity;
+
+          wishlists.forEach(item => {
+            let lat = item.lat;
+            let lng = item.lng;
+
+            if (!lat || !lng) {
+              const cityKey = Object.keys(TAIWAN_CITIES).find(c => item.city && item.city.includes(c));
+              if (cityKey) {
+                lat = TAIWAN_CITIES[cityKey][0];
+                lng = TAIWAN_CITIES[cityKey][1];
+              }
+            }
+
+            if (lat && lng) {
+              const dist = calculateHaversineKm(userLat, userLng, lat, lng);
+              if (dist < minDistance) {
+                minDistance = dist;
+                nearestItem = item;
+              }
+            }
+          });
+
+          if (nearestItem && minDistance !== Infinity) {
+            pickRandomWish(true, nearestItem, minDistance);
+          } else {
+            alert("目前心願地點尚無縣市位置，無法精準測距，已為您隨機抽選！");
+            pickRandomWish(false);
+          }
+        },
+        () => {
+          alert("無法取得手機定位權限，已為您改用隨機抽選！");
+          pickRandomWish(false);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+
+    function calculateHaversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // 心願清單資料處理
     function loadWishlistsFromStorage() {
       try {
         const stored = localStorage.getItem("my_diary_wishlist");
@@ -1027,6 +1439,8 @@
               country: "台灣",
               city: "新竹縣",
               address: "新竹縣尖石鄉玉峰村",
+              lat: 24.5794,
+              lng: 121.3361,
               reason: "想看上帝的部落、秋天賞楓與千年紅檜！",
               tags: ["賞楓", "登山", "大自然"],
               createdAt: "2026-10-20"
@@ -1038,6 +1452,8 @@
               country: "台灣",
               city: "台南市",
               address: "台南市中西區西門路一段728號",
+              lat: 22.9886,
+              lng: 120.1983,
               reason: "清晨一定要去喝一碗熱呼呼的虱目魚肚粥。",
               tags: ["台南小吃", "早餐", "海鮮"],
               createdAt: "2026-10-20"
@@ -1077,7 +1493,11 @@
       document.getElementById("wishCountSpot").innerText = spotList.length;
       document.getElementById("wishCountFood").innerText = foodList.length;
 
-      const currentList = activeWishCategory === 'spot' ? spotList : foodList;
+      let currentList = activeWishCategory === 'spot' ? spotList : foodList;
+
+      if (selectedWishCities.size > 0) {
+        currentList = currentList.filter(item => item.city && selectedWishCities.has(item.city.trim()));
+      }
 
       if (!currentList.length) {
         container.innerHTML = `
@@ -1085,8 +1505,8 @@
             <div class="w-12 h-12 rounded-full bg-theme-light mx-auto flex items-center justify-center text-theme text-xl">
               ${activeWishCategory === 'spot' ? '<i class="fa-solid fa-mountain-sun"></i>' : '<i class="fa-solid fa-bowl-food"></i>'}
             </div>
-            <h4 class="font-bold text-main text-sm">目前還沒有${activeWishCategory === 'spot' ? '景點' : '美食'}待辦心願</h4>
-            <p class="text-xs text-sub">點擊上方「許個願」按鈕，把想去探索的好地方記錄下來吧！</p>
+            <h4 class="font-bold text-main text-sm">查無符合條件的心願</h4>
+            <p class="text-xs text-sub">點擊上方「許個願」新增地點，或清除地區篩選！</p>
           </div>
         `;
         return;
@@ -1197,6 +1617,15 @@
       const reason = document.getElementById("inputWishReason").value.trim();
       const tags = document.getElementById("inputWishTags").value.split(/[,，\s]+/).filter(Boolean);
 
+      let lat = null, lng = null;
+      for (const c in TAIWAN_CITIES) {
+        if (city && city.includes(c)) {
+          lat = TAIWAN_CITIES[c][0];
+          lng = TAIWAN_CITIES[c][1];
+          break;
+        }
+      }
+
       if (editingWishId) {
         const item = wishlists.find(w => w.id === editingWishId);
         if (item) {
@@ -1207,6 +1636,7 @@
           item.address = address;
           item.reason = reason;
           item.tags = tags;
+          if (lat && lng) { item.lat = lat; item.lng = lng; }
         }
       } else {
         wishlists.unshift({
@@ -1216,6 +1646,8 @@
           country,
           city,
           address,
+          lat,
+          lng,
           reason,
           tags,
           createdAt: new Date().toISOString().split("T")[0]
@@ -1258,7 +1690,7 @@
       document.getElementById("inputCountry").value = wish.country || "台灣";
       document.getElementById("inputCity").value = wish.city || "新竹市";
       document.getElementById("inputStoreAddress").value = wish.address || "";
-      document.getElementById("inputCoords").value = "";
+      document.getElementById("inputCoords").value = wish.lat ? `${wish.lat.toFixed(5)}, ${wish.lng.toFixed(5)}` : '';
       document.getElementById("geoStatusText").innerText = "已由心願清單帶入資訊，可使用下方方法查找座標或拍照保存";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
       document.getElementById("inputTags").value = (wish.tags && wish.tags.length) ? wish.tags.join(', ') : (wish.type === 'spot' ? '景點' : '美食');
@@ -1952,6 +2384,32 @@
       renderListView();
     }
 
+    // 點選年度直接跳轉日記列表並篩選該年份
+    function goToYearDiaries(year) {
+      switchTab('list');
+      document.getElementById("filterCountry").value = "";
+      selectedDiaryCities.clear();
+      updateDiaryCityFilterUI();
+      document.getElementById("filterTag").value = "";
+      setYearFilter(year);
+    }
+
+    // 【新增需求】：點選首頁探索標籤直接跳轉日記列表並篩選該標籤
+    function goToTagDiaries(tag) {
+      switchTab('list');
+      document.getElementById("filterCountry").value = "";
+      selectedDiaryCities.clear();
+      updateDiaryCityFilterUI();
+      selectedYearFilter = "all";
+      setYearFilter("all");
+
+      const tagSelect = document.getElementById("filterTag");
+      if (tagSelect) {
+        tagSelect.value = tag;
+      }
+      renderListView();
+    }
+
     function renderExplorationStats(cityMap, revisitList, tagMap, yearMap) {
       const cityContainer = document.getElementById("statCityBars");
       const sortedCities = Object.entries(cityMap).sort((a, b) => b[1] - a[1]);
@@ -1985,27 +2443,32 @@
         `).join('');
       }
 
+      // 探索類型標籤 (連動日記列表按鈕)
       const tagsContainer = document.getElementById("statTagsList");
       const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
       if (sortedTags.length === 0) {
         tagsContainer.innerHTML = `<p class="text-[10px] text-sub">尚無分類標籤</p>`;
       } else {
         tagsContainer.innerHTML = sortedTags.slice(0, 8).map(([t, count]) => `
-          <span class="bg-[#F2ECE4] text-main text-[11px] px-2.5 py-1 rounded-full font-medium flex items-center">
+          <button type="button" onclick="goToTagDiaries('${t.replace(/'/g, "\\'")}')" class="touch-btn bg-[#F2ECE4] hover:bg-theme-light text-main hover:text-theme text-[11px] px-2.5 py-1 rounded-full font-medium flex items-center transition active:scale-95 border border-[#EAE3D9]">
             #${t} <b class="ml-1 text-theme font-black">${count}</b>
-          </span>
+          </button>
         `).join('');
       }
 
+      // 年度回憶累積清單 (連動日記列表)
       const yearContainer = document.getElementById("statYearlyTrend");
       const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
       if (sortedYears.length === 0) {
         yearContainer.innerHTML = `<p class="text-[10px] text-sub">尚無年度紀錄</p>`;
       } else {
         yearContainer.innerHTML = sortedYears.map(([y, count]) => `
-          <div class="flex items-center justify-between text-[11px] bg-[#FAF8F5] px-2.5 py-1.5 rounded-xl border border-[#F0EBE3]">
-            <span class="font-bold text-main">📅 ${y} 年</span>
-            <span class="text-sub font-semibold">留下了 <b class="text-theme">${count}</b> 則足跡</span>
+          <div onclick="goToYearDiaries('${y}')" class="touch-btn flex items-center justify-between text-[11px] bg-[#FAF8F5] hover:bg-theme-light px-3 py-2 rounded-xl border border-[#F0EBE3] transition cursor-pointer">
+            <span class="font-bold text-main flex items-center">📅 ${y} 年</span>
+            <span class="text-sub font-semibold flex items-center">
+              留下了 <b class="text-theme mx-1">${count}</b> 則足跡
+              <i class="fa-solid fa-chevron-right text-[10px] text-theme ml-1.5"></i>
+            </span>
           </div>
         `).join('');
       }
@@ -2601,6 +3064,8 @@
     function refreshViews() {
       initCountryFilter();
       initTagFilter();
+      updateDiaryCityFilterUI();
+      updateWishCityFilterUI();
       renderMapCategoryChips();
       renderMarkers();
       renderListView();
@@ -2613,21 +3078,8 @@
     }
 
     function onCountryChange() {
-      const country = document.getElementById("filterCountry").value;
-      const citySelect = document.getElementById("filterCity");
-      if (!country) {
-        citySelect.disabled = true;
-        citySelect.innerHTML = `<option value="">請先選擇國家</option>`;
-      } else {
-        citySelect.disabled = false;
-        const cities = new Set(appData.filter(i => i.country === country).map(i => i.city).filter(Boolean));
-        citySelect.innerHTML = `<option value="">全部城市 (${cities.size})</option>` + 
-          [...cities].map(c => `<option value="${c}">${c}</option>`).join('');
-      }
       renderListView();
     }
-
-    function onCityChange() { renderListView(); }
 
     function initTagFilter() {
       const tagSet = new Set();
@@ -2677,7 +3129,6 @@
       return [];
     }
 
-    // 🧸【手繪可愛風圖釘渲染】
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
@@ -2698,7 +3149,6 @@
         if (!latest) return;
         const photos = getVisitPhotos(latest);
 
-        // 可愛貼紙圖釘
         const icon = L.divIcon({
           className: '',
           html: `<div class="custom-marker ${latest.rating < 3 ? 'low-score':''}"><span class="custom-marker-text">${latest.rating.toFixed(1)}</span></div>`,
@@ -2751,7 +3201,6 @@
 
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
-      const cityFilter = document.getElementById("filterCity").value;
       const tagFilter = document.getElementById("filterTag").value;
       const ratingFilter = document.getElementById("filterRating").value;
       const sortOrder = document.getElementById("sortOrder").value;
@@ -2763,7 +3212,11 @@
       }
 
       if (countryFilter) list = list.filter(i => i.country === countryFilter);
-      if (cityFilter) list = list.filter(i => i.city === cityFilter);
+
+      if (selectedDiaryCities.size > 0) {
+        list = list.filter(i => i.city && selectedDiaryCities.has(i.city.trim()));
+      }
+
       if (tagFilter) list = list.filter(i => (i.tags || []).includes(tagFilter));
       if (ratingFilter === "gte_4.5") list = list.filter(i => i.visits[0]?.rating >= 4.5);
       else if (ratingFilter === "lt_3.0") list = list.filter(i => i.visits[0]?.rating < 3.0);
@@ -2784,7 +3237,7 @@
       const container = document.getElementById("restaurantCards");
 
       if (!list.length) {
-        container.innerHTML = `<div class="text-center text-sub py-12 text-xs">查無符合的回憶日記</div>`;
+        container.innerHTML = `<div class="text-center text-sub py-12 text-xs">查無符合條件的回憶日記</div>`;
         return;
       }
 
@@ -3051,7 +3504,7 @@
 
     function exportData() {
       const backupPayload = {
-        version: "v13_with_wishlist",
+        version: "v15_production",
         exportDate: new Date().toISOString(),
         restaurants: appData,
         wishlists: wishlists
@@ -3106,3 +3559,9 @@
   </script>
 </body>
 </html>
+
+💻 使用方式：
+
+1.  將代碼整段複製，儲存為 index.html。
+2.  點擊開啟即可使用。
+3.  進入首頁「點點滴滴」下滑至「探索類型標籤」，點選任一標籤，頁面便會自動切換至「日記列表」並為您過濾出該標籤的所有日記！
