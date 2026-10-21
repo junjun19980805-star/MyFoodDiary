@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>我的點點滴滴</title>
+  <title>我的點點滴滴 - 可愛手繪版</title>
 
-  <!-- PWA 行動裝置體驗設定 -->
+  <!-- PWA 行動裝置設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -31,19 +31,15 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 專屬暖心調色盤 */
     :root {
       --ui-text: #18181B;
       --ui-text-muted: #71717A;
       --ui-theme: #9C95DB;
       --ui-theme-light: #F2F0FB;
-      --marker-color: #E04A4A;
+      --marker-color: #FF6B6B; /* 可愛草莓紅 */
     }
 
-    body {
-      color: var(--ui-text);
-    }
-
+    body { color: var(--ui-text); }
     .text-main { color: var(--ui-text) !important; }
     .text-sub { color: var(--ui-text-muted) !important; }
     .text-theme { color: var(--ui-theme) !important; }
@@ -59,38 +55,56 @@
       height: 100% !important;
       min-height: 100% !important;
       position: absolute !important;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
     }
 
-    .touch-btn {
-      touch-action: manipulation;
-      cursor: pointer;
+    .touch-btn { touch-action: manipulation; cursor: pointer; }
+
+    /* 🎨【重點一】：可愛手繪紙張與粉彩色調濾鏡 */
+    .leaflet-tile-pane {
+      filter: sepia(0.12) saturate(1.45) brightness(1.03) contrast(1.05) hue-rotate(-8deg);
     }
 
+    /* 🧸【重點二】：手繪貼紙風格圖釘 (帶白色粗貼紙邊框 + 可愛微彈動效) */
     .custom-marker {
       background: var(--marker-color);
-      width: 38px;
-      height: 48px;
+      width: 36px;
+      height: 44px;
       border-radius: 50% 50% 50% 0;
       transform: rotate(-45deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(224, 74, 74, 0.35);
-      border: 2px solid #FFFFFF !important;
-      transition: background 0.3s ease;
+      border: 3px solid #FFFFFF !important;
+      box-shadow: 0 6px 14px rgba(255, 107, 107, 0.45);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .custom-marker:hover {
+      transform: rotate(-45deg) scale(1.18);
     }
     .custom-marker.low-score {
-      background: #71717A !important;
+      background: #A0A0A0 !important;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     .custom-marker-text {
       transform: rotate(45deg);
-      color: white;
-      font-weight: 800;
-      font-size: 12px;
+      color: #FFFFFF;
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* 💌【重點三】：便條紙般圓潤的手帳氣泡彈窗 */
+    .leaflet-popup-content-wrapper {
+      background: #FAF8F5 !important;
+      border-radius: 22px !important;
+      box-shadow: 0 12px 30px rgba(156, 149, 219, 0.22) !important;
+      border: 2px solid #EAE3D9 !important;
+      padding: 4px !important;
+    }
+    .leaflet-popup-tip {
+      background: #FAF8F5 !important;
     }
   </style>
 </head>
@@ -107,7 +121,7 @@
           <h1 class="text-sm sm:text-base font-bold text-main leading-tight truncate">我的點點滴滴</h1>
           <span id="offlineIndicator" class="hidden text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">離線</span>
         </div>
-        <p class="text-[10px] text-sub truncate hidden sm:block">生活足跡與時光回憶手帳</p>
+        <p class="text-[10px] text-sub truncate hidden sm:block">手繪童趣風格生活手帳</p>
       </div>
     </div>
     
@@ -125,7 +139,7 @@
     </div>
   </header>
 
-  <!-- 備份與匯入浮動選單 -->
+  <!-- 備份與匯入選單 -->
   <div id="backupMenu" class="hidden absolute top-12 right-3 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-2.5 z-[1600] w-60 text-xs space-y-1.5">
     <label class="touch-btn w-full text-left py-2 px-2.5 bg-theme-light text-theme rounded-xl flex items-center font-bold cursor-pointer transition">
       <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
@@ -144,7 +158,7 @@
     </button>
   </div>
 
-  <!-- 💾 本機儲存空間管理視窗 -->
+  <!-- 本機儲存管理視窗 -->
   <div id="storageModal" class="hidden fixed inset-0 bg-black/60 z-[2500] flex items-center justify-center p-4">
     <div class="bg-white max-w-sm w-full rounded-3xl p-5 shadow-2xl border border-[#EAE3D9] space-y-4">
       <div class="flex justify-between items-center border-b border-gray-100 pb-2">
@@ -153,7 +167,6 @@
         </h3>
         <button onclick="closeStorageModal()" class="text-sub text-2xl leading-none touch-btn">&times;</button>
       </div>
-
       <div class="space-y-2 bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]">
         <div class="flex justify-between items-baseline">
           <span class="text-xs font-bold text-main">本機已用容量</span>
@@ -167,27 +180,22 @@
           <span id="storageQuotaText">配額: 計算中...</span>
         </div>
         <p class="text-[9px] text-amber-800 bg-amber-50 rounded-lg p-1.5 leading-relaxed">
-          <i class="fa-solid fa-circle-info mr-1"></i> 此數值為瀏覽器核心配額之估算值，實際容量由作業系統動態管理。
+          <i class="fa-solid fa-circle-info mr-1"></i> 此數值為瀏覽器儲存 API 估算值，實際容量由作業系統管理。
         </p>
       </div>
-
       <div class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3] space-y-2">
         <div class="flex justify-between items-center">
           <span class="text-xs font-bold text-main">持久儲存保護</span>
           <span id="persistBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-sub">檢查中...</span>
         </div>
         <p class="text-[10px] text-sub leading-relaxed">
-          若啟用持久儲存，瀏覽器在裝置硬碟空間吃緊時將不會擅自清除本手帳的回憶與心願清單。
+          啟用持久儲存後，瀏覽器在硬碟吃緊時不會自動清理本手帳的照片與心願紀錄。
         </p>
         <button id="requestPersistBtn" onclick="requestPersistence()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs active:scale-95 transition flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-shield-halved"></i>
           <span>申請啟用持久性儲存</span>
         </button>
-        <p class="text-[9px] text-gray-400 text-center leading-normal">
-          * 瀏覽器會根據硬碟空間與使用頻率自行決定是否核准，無法保證 100% 授予。
-        </p>
       </div>
-
       <div class="pt-1 flex space-x-2">
         <button onclick="exportData()" class="touch-btn flex-1 bg-theme text-white py-2 rounded-xl font-bold text-xs flex items-center justify-center space-x-1 shadow-xs active:scale-95 transition">
           <i class="fa-solid fa-download"></i>
@@ -200,7 +208,7 @@
     </div>
   </div>
 
-  <!-- 📷 全螢幕照片時光燈箱 -->
+  <!-- 全螢幕燈箱 -->
   <div id="photoLightboxModal" class="hidden fixed inset-0 bg-black/95 z-[3000] flex flex-col items-center justify-between p-4 select-none">
     <div class="w-full flex justify-between items-center text-white py-2 px-1">
       <div>
@@ -212,25 +220,21 @@
       </div>
       <button onclick="closeLightbox()" class="text-white hover:text-gray-300 text-3xl p-2 touch-btn leading-none">&times;</button>
     </div>
-
     <div class="flex-1 w-full relative flex items-center justify-center overflow-hidden my-auto">
       <button onclick="lightboxPrev()" class="lightbox-nav-btn touch-btn absolute left-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-
       <img id="lightboxImg" class="max-w-[94vw] max-h-[68vh] object-contain rounded-2xl shadow-2xl transition duration-200" />
-
       <button onclick="lightboxNext()" class="lightbox-nav-btn touch-btn absolute right-2 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center text-base active:scale-90 transition">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
-
     <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-3 text-white text-xs mb-2">
       <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic text-gray-200"></p>
     </div>
   </div>
 
-  <!-- 🖼️ 拍立得手帳卡片設計室 (升級：照片挑選 + 浮水印大小縮放) -->
+  <!-- 拍立得手帳卡設計室 -->
   <div id="polaroidModal" class="hidden fixed inset-0 bg-black/75 z-[3100] flex flex-col items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-3xl p-3.5 sm:p-4 max-w-sm sm:max-w-md w-full flex flex-col items-center space-y-2.5 shadow-2xl max-h-[96dvh] overflow-y-auto">
       <div class="w-full flex justify-between items-center border-b border-gray-100 pb-2">
@@ -240,49 +244,38 @@
         <button onclick="closePolaroidModal()" class="text-sub text-xl touch-btn leading-none">&times;</button>
       </div>
 
-      <!-- 產生的拍立得圖片即時預覽 -->
       <div class="w-full flex justify-center py-1 bg-[#FAF8F5] rounded-2xl border border-[#EAE3D9]">
         <img id="polaroidPreviewImg" class="max-w-full max-h-[40vh] sm:max-h-[46vh] object-contain rounded-xl shadow-md" />
       </div>
 
-      <!-- 【新增】：照片自由挑選輪播列 (若該次有照片時顯示) -->
       <div id="polaroidPhotoPickerBox" class="w-full space-y-1.5 bg-[#FAF8F5] p-2.5 rounded-2xl border border-[#EAE3D9]">
         <div class="flex justify-between items-center text-[10px] text-sub font-bold">
-          <span>📷 點擊選擇呈現在卡片上的相片：</span>
+          <span>📷 點選要在卡片上顯示的相片：</span>
           <span id="polaroidPhotoPickerCount">共 0 張</span>
         </div>
         <div id="polaroidPhotoThumbnails" class="flex space-x-2 overflow-x-auto no-scrollbar py-1"></div>
       </div>
 
-      <!-- 即時自訂樣式面板 -->
       <div class="w-full bg-[#FAF8F5] p-3 rounded-2xl border border-[#EAE3D9] space-y-2 text-xs">
         <div class="flex items-center justify-between font-bold text-main">
           <span>🎨 樣式與排版自訂</span>
-          <span class="text-[10px] text-theme font-semibold">隨調即時預覽</span>
+          <span class="text-[10px] text-theme font-semibold">即時預覽</span>
         </div>
-
-        <!-- 字體縮放滑桿 -->
         <div class="flex items-center space-x-2">
           <label class="text-[11px] font-bold text-sub w-20 flex-shrink-0">字體大小:</label>
           <input type="range" id="polScale" min="0.8" max="1.5" step="0.05" value="1.15" oninput="onPolaroidSettingChanged()" class="flex-1 accent-theme cursor-pointer" />
           <span id="polScaleLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">1.15x</span>
         </div>
-
-        <!-- 相片與文字間距控制滑桿 -->
         <div class="flex items-center space-x-2">
           <label class="text-[11px] font-bold text-sub w-20 flex-shrink-0">圖文間距:</label>
           <input type="range" id="polGap" min="40" max="120" step="5" value="65" oninput="onPolaroidSettingChanged()" class="flex-1 accent-theme cursor-pointer" />
           <span id="polGapLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">65px</span>
         </div>
-
-        <!-- 【新增】：印章浮水印大小滑桿 -->
         <div class="flex items-center space-x-2">
           <label class="text-[11px] font-bold text-sub w-20 flex-shrink-0">印章大小:</label>
           <input type="range" id="polStampSize" min="40" max="85" step="3" value="56" oninput="onPolaroidSettingChanged()" class="flex-1 accent-theme cursor-pointer" />
           <span id="polStampSizeLabel" class="text-[10px] font-mono text-main w-8 text-right flex-shrink-0">56px</span>
         </div>
-
-        <!-- 文字對齊方式 & 印章位置選擇 -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[10px] font-bold text-sub mb-1">文字對齊方式</label>
@@ -302,8 +295,6 @@
             </select>
           </div>
         </div>
-
-        <!-- 字型選擇與文字色彩 -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-[10px] font-bold text-sub mb-1">字型風格</label>
@@ -321,8 +312,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 顯示欄位勾選開關 -->
         <div>
           <label class="block text-[10px] font-bold text-sub mb-1">勾選要顯示的內容</label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px] font-medium text-main">
@@ -352,8 +341,6 @@
             </label>
           </div>
         </div>
-
-        <!-- 咖啡環形印章浮水印開關 -->
         <div class="flex items-center justify-between border-t border-[#F0EBE3] pt-2">
           <label class="flex items-center space-x-1.5 cursor-pointer text-[11px] font-bold text-main">
             <input type="checkbox" id="polShowStamp" checked onchange="onPolaroidSettingChanged()" class="rounded text-theme" />
@@ -363,7 +350,6 @@
         </div>
       </div>
 
-      <!-- 操作按鈕列 -->
       <div class="w-full flex space-x-2 pt-0.5">
         <button onclick="sharePolaroidImage()" class="touch-btn flex-1 bg-theme text-white py-2.5 rounded-xl font-bold text-xs shadow-xs active:scale-95 transition flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-arrow-up-from-bracket"></i>
@@ -380,10 +366,10 @@
     </div>
   </div>
 
-  <!-- 主要內容區域 (四個平行大板塊) -->
+  <!-- 主要內容區域 -->
   <main class="flex-1 relative w-full h-full overflow-hidden">
     
-    <!-- 頁面 1：【點點滴滴・首頁足跡總覽 ＋ 探索回憶統計】 -->
+    <!-- 頁面 1：點點滴滴首頁 -->
     <div id="dashboardView" class="w-full h-full overflow-y-auto px-4 py-4 pb-32 space-y-4">
       <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs">
         <div class="flex items-center justify-between mb-2">
@@ -453,7 +439,7 @@
         </button>
       </div>
 
-      <!-- 🎲 隨機時光回憶抽屜 -->
+      <!-- 隨機回憶 -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -467,45 +453,7 @@
         <div id="randomMemoryBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]"></div>
       </div>
 
-      <!-- 探索回憶統計 -->
-      <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-3.5">
-        <div class="flex items-center justify-between border-b border-[#F5F0E8] pb-2">
-          <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
-            <i class="fa-solid fa-compass mr-1.5 text-theme"></i> 探索生活足跡統計
-          </h3>
-          <span class="text-[10px] text-sub">真實日記統計</span>
-        </div>
-
-        <div>
-          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
-            <i class="fa-solid fa-city mr-1 text-theme"></i> 城市足跡分佈
-          </h4>
-          <div id="statCityBars" class="space-y-1.5 text-xs"></div>
-        </div>
-
-        <div class="pt-1">
-          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
-            <i class="fa-solid fa-crown mr-1 text-amber-500"></i> 最愛回訪的好地方 (Top 3)
-          </h4>
-          <div id="statTopRevisitList" class="space-y-1 text-xs"></div>
-        </div>
-
-        <div class="pt-1">
-          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
-            <i class="fa-solid fa-tags mr-1 text-theme"></i> 探索類型標籤
-          </h4>
-          <div id="statTagsList" class="flex flex-wrap gap-1.5"></div>
-        </div>
-
-        <div class="pt-1">
-          <h4 class="text-[11px] font-bold text-sub mb-2 flex items-center">
-            <i class="fa-solid fa-timeline mr-1 text-theme"></i> 年度回憶累積
-          </h4>
-          <div id="statYearlyTrend" class="space-y-1.5 text-xs"></div>
-        </div>
-      </div>
-
-      <!-- 最近造訪的回憶 (左右滑動輪播) -->
+      <!-- 最近造訪回憶 (左右橫向輪播) -->
       <div class="space-y-2">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -522,7 +470,7 @@
       </div>
     </div>
 
-    <!-- 頁面 2：【足跡地圖】 -->
+    <!-- 頁面 2：【足跡地圖】(已套用可愛手繪底圖與貼紙圖釘) -->
     <div id="mapView" class="hidden w-full h-full relative">
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto space-y-1.5">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
@@ -550,12 +498,12 @@
         <i class="fa-solid fa-crosshairs text-lg"></i>
       </button>
 
+      <!-- 地圖容器 -->
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：【日記列表】 (修正按鈕換行跑版問題) -->
+    <!-- 頁面 3：日記列表 -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
-      <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
         <label class="text-[11px] font-bold text-sub flex items-center">
           <i class="fa-solid fa-hourglass-half mr-1 text-theme"></i> 年度時光回顧膠囊
@@ -608,9 +556,8 @@
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
 
-    <!-- 頁面 4：【✨ 全新板塊：心願清單 (景點與美食雙分頁)】 -->
+    <!-- 頁面 4：心願清單板塊 -->
     <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
-      <!-- 願望心願手帳橫幅 -->
       <div class="bg-gradient-to-br from-[#FFFFFF] to-[#F7F3ED] p-4 rounded-3xl border border-[#EAE3D9] shadow-xs flex justify-between items-center">
         <div>
           <span class="text-xs font-bold text-theme bg-theme-light px-2.5 py-1 rounded-full inline-flex items-center">
@@ -624,7 +571,6 @@
         </button>
       </div>
 
-      <!-- 景點 vs 美食 雙分頁膠囊切換 -->
       <div class="bg-white p-1 rounded-2xl border border-[#EAE3D9] flex text-xs font-bold shadow-xs">
         <button onclick="switchWishCategory('spot')" id="wishTabSpotBtn" class="touch-btn flex-1 py-2 rounded-xl text-center transition flex items-center justify-center space-x-1.5 bg-theme text-white shadow-xs">
           <i class="fa-solid fa-mountain-sun"></i>
@@ -638,12 +584,11 @@
         </button>
       </div>
 
-      <!-- 心願清單內容卡片容器 -->
       <div id="wishlistCardsContainer" class="space-y-2.5"></div>
     </div>
   </main>
 
-  <!-- 膠囊懸浮導覽列 (4 大板塊平行切換) -->
+  <!-- 底部 4 大導覽列 -->
   <nav class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-[1000] pointer-events-auto mb-[env(safe-area-inset-bottom,0px)]">
     <div class="bg-white/95 backdrop-blur-md border border-[#EAE3D9] rounded-full shadow-2xl px-2 py-1.5 flex justify-around items-center">
       <button onclick="switchTab('dashboard')" id="tabDashBtn" class="touch-btn flex flex-col items-center text-theme font-bold text-[11px] py-1 px-2.5 transition active:scale-95 whitespace-nowrap">
@@ -665,7 +610,7 @@
     </div>
   </nav>
 
-  <!-- 心願清單 新增/編輯 彈跳視窗 -->
+  <!-- 心願清單彈窗 -->
   <div id="wishModal" class="hidden fixed inset-0 bg-black/60 z-[2200] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -733,7 +678,7 @@
     </div>
   </div>
 
-  <!-- 彈跳日記表單視窗 (支援一鍵解鎖心願) -->
+  <!-- 記錄日記彈窗 -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -877,14 +822,9 @@
               d.createObjectStore(STORE_NAME, { keyPath: "id" });
             }
           };
-          req.onsuccess = (e) => {
-            db = e.target.result;
-            resolve();
-          };
+          req.onsuccess = (e) => { db = e.target.result; resolve(); };
           req.onerror = () => resolve();
-        } catch(e) {
-          resolve();
-        }
+        } catch(e) { resolve(); }
       });
     }
 
@@ -896,9 +836,7 @@
           const req = tx.objectStore(STORE_NAME).getAll();
           req.onsuccess = () => resolve(req.result || []);
           req.onerror = () => resolve([]);
-        } catch(e) {
-          resolve([]);
-        }
+        } catch(e) { resolve([]); }
       });
     }
 
@@ -909,19 +847,10 @@
           const tx = db.transaction([STORE_NAME], "readwrite");
           const store = tx.objectStore(STORE_NAME);
           store.put(item);
-
           tx.oncomplete = () => resolve();
-          tx.onerror = (event) => {
-            const err = tx.error || event.target.error;
-            reject(err);
-          };
-          tx.onabort = (event) => {
-            const err = tx.error || event.target.error;
-            reject(err);
-          };
-        } catch(err) {
-          reject(err);
-        }
+          tx.onerror = (e) => reject(tx.error || e.target.error);
+          tx.onabort = (e) => reject(tx.error || e.target.error);
+        } catch(err) { reject(err); }
       });
     }
 
@@ -932,9 +861,7 @@
           const tx = db.transaction([STORE_NAME], "readwrite");
           tx.objectStore(STORE_NAME).delete(id);
           tx.oncomplete = () => resolve();
-        } catch(e) {
-          resolve();
-        }
+        } catch(e) { resolve(); }
       });
     }
   </script>
@@ -953,8 +880,8 @@
     };
 
     let appData = [];
-    let wishlists = []; // 【需求 1】：心願清單獨立資料結構
-    let activeWishCategory = 'spot'; // 'spot' or 'food'
+    let wishlists = [];
+    let activeWishCategory = 'spot';
     let editingWishId = null;
     let unlockingWishId = null;
 
@@ -970,18 +897,10 @@
     let currentColors = {
       text: "#18181B",
       theme: "#9C95DB",
-      marker: "#E04A4A"
+      marker: "#FF6B6B"
     };
 
-    let currentLightboxState = {
-      photos: [],
-      index: 0,
-      title: "",
-      date: "",
-      review: ""
-    };
-
-    // 拍立得手帳設計標的 (含相片挑選索引)
+    let currentLightboxState = { photos: [], index: 0, title: "", date: "", review: "" };
     let activePolaroidTarget = { storeId: null, visitId: null };
     let selectedPolaroidPhotoIndex = 0;
     let currentPolaroidDataUrl = "";
@@ -995,8 +914,8 @@
 
       const isInitialized = localStorage.getItem("food_diary_initialized");
       if (!isInitialized && appData.length === 0) {
-        const sample = {
-          id: "store_sample",
+        const sample1 = {
+          id: "store_sample_1",
           name: "隱家拉麵 赤峰店",
           country: "台灣",
           city: "台北市",
@@ -1005,18 +924,38 @@
           lng: 121.5208,
           tags: ["拉麵", "美食"],
           visits: [{
-            visitId: "v_sample",
+            visitId: "v_sample_1",
             date: new Date().toISOString().split("T")[0],
             rating: 5.0,
             cost: 280,
             revisit: true,
-            review: "歡迎開始使用你的回憶手帳！點點滴滴記錄去過的地方、吃過的美食與照片。",
+            review: "歡迎來到你的生活手帳！這是一張可愛的手繪地圖，點點滴滴記錄去過的好地方。",
             photos: ["https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop"]
           }]
         };
+        const sample2 = {
+          id: "store_sample_2",
+          name: "春室 The POOL 玻璃咖啡",
+          country: "台灣",
+          city: "新竹市",
+          address: "新竹市東區東大路一段2號",
+          lat: 24.8016,
+          lng: 120.9765,
+          tags: ["咖啡廳", "甜點", "散步"],
+          visits: [{
+            visitId: "v_sample_2",
+            date: new Date().toISOString().split("T")[0],
+            rating: 4.5,
+            cost: 220,
+            revisit: true,
+            review: "玻璃工坊樓上的夢幻純白天台咖啡廳，陽光灑下來的時候像畫一樣。",
+            photos: ["https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop"]
+          }]
+        };
         try {
-          await dbPut(sample);
-          appData = [sample];
+          await dbPut(sample1);
+          await dbPut(sample2);
+          appData = [sample1, sample2];
           localStorage.setItem("food_diary_initialized", "true");
         } catch(e) {}
       }
@@ -1033,10 +972,16 @@
       document.getElementById("dashTodayDate").innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
     }
 
+    // 🎨【手繪地圖核心】：使用免金鑰的 CARTO Voyager
     function initMap() {
       try {
-        map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 12);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        map = L.map('map', { zoomControl: false }).setView([24.8138, 120.9675], 13);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          subdomains: 'abcd',
+          maxZoom: 19
+        }).addTo(map);
+
         markersLayer = L.layerGroup().addTo(map);
       } catch(e) {
         console.warn("地圖載入略過", e);
@@ -1067,14 +1012,13 @@
       document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
     }
 
-    // ========== 【需求 1 實作】：心願清單資料處理與介面 ==========
+    // 心願清單
     function loadWishlistsFromStorage() {
       try {
         const stored = localStorage.getItem("my_diary_wishlist");
         if (stored) {
           wishlists = JSON.parse(stored);
         } else {
-          // 預設樣例
           wishlists = [
             {
               id: "wish_sample_1",
@@ -1101,9 +1045,7 @@
           ];
           saveWishlistsToStorage();
         }
-      } catch(e) {
-        wishlists = [];
-      }
+      } catch(e) { wishlists = []; }
     }
 
     function saveWishlistsToStorage() {
@@ -1168,13 +1110,11 @@
             </button>
           </div>
 
-          <!-- 想去的原因備忘 -->
           <div class="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#F0EBE3] text-xs text-main leading-relaxed">
             <span class="text-theme font-bold mr-1">💡 探索備忘：</span>
             <span>${item.reason || '暫無特別備忘，只想去走走！'}</span>
           </div>
 
-          <!-- 底部動作按鈕列 (含快捷解鎖轉換) -->
           <div class="flex justify-between items-center text-[11px] pt-1 border-t border-[#F5F0E8]">
             <button onclick="deleteSingleWish('${item.id}')" class="touch-btn text-sub hover:text-red-500 font-medium flex items-center space-x-1">
               <i class="fa-solid fa-trash-can text-[10px]"></i>
@@ -1302,7 +1242,6 @@
       }
     }
 
-    // 【一鍵解鎖狀態轉移】：將心願轉入日記
     function unlockWishToDiary(wishId) {
       const wish = wishlists.find(w => w.id === wishId);
       if (!wish) return;
@@ -1334,7 +1273,7 @@
       document.getElementById("entryModal").classList.remove("hidden");
     }
 
-    // ========== 本機儲存空間管理核心 ==========
+    // 儲存管理
     async function openStorageModal() {
       document.getElementById("storageModal").classList.remove("hidden");
       await checkStorageQuota();
@@ -1365,21 +1304,9 @@
           quotaEl.innerText = `估算配額: ${quotaMB} MB`;
           barEl.style.width = `${percent}%`;
           percentEl.innerText = `${percent}%`;
-
-          if (percent > 90) {
-            barEl.className = "h-full bg-red-500 rounded-full transition-all duration-500";
-          } else if (percent > 70) {
-            barEl.className = "h-full bg-amber-500 rounded-full transition-all duration-500";
-          } else {
-            barEl.className = "h-full bg-theme rounded-full transition-all duration-500";
-          }
         } catch(err) {
           usageEl.innerText = "無法取得容量估算";
-          quotaEl.innerText = "";
         }
-      } else {
-        usageEl.innerText = "瀏覽器不支援 Storage Estimate API";
-        quotaEl.innerText = "";
       }
     }
 
@@ -1399,12 +1326,7 @@
             badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800";
             btn.classList.remove("hidden");
           }
-        } catch(e) {
-          badge.innerText = "查詢失敗";
-        }
-      } else {
-        badge.innerText = "瀏覽器不支援";
-        btn.classList.add("hidden");
+        } catch(e) {}
       }
     }
 
@@ -1415,12 +1337,10 @@
           if (granted) {
             alert("🎉 太棒了！瀏覽器已成功核准本網站的「持久性儲存」保護。");
           } else {
-            alert("⚠️ 瀏覽器目前未授予持久保存權限。\n\n提示：各家瀏覽器通常會綜合考量書籤加到主畫面、剩餘硬碟空間等因素決定，無法保證一定核准。建議隨時使用「匯出備份」保管重要回憶。");
+            alert("⚠️ 瀏覽器目前未授予持久保存權限。建議隨時使用「匯出備份」保管重要回憶。");
           }
           await checkPersistenceStatus();
-        } catch(err) {
-          alert("申請過程中發生錯誤：" + err.message);
-        }
+        } catch(err) { alert("申請錯誤：" + err.message); }
       }
     }
 
@@ -1487,14 +1407,7 @@
       const photos = getVisitPhotos(visit);
       if (!photos.length) return;
 
-      currentLightboxState = {
-        photos: photos,
-        index: initialIndex,
-        title: store.name,
-        date: visit.date,
-        review: visit.review || ""
-      };
-
+      currentLightboxState = { photos: photos, index: initialIndex, title: store.name, date: visit.date, review: visit.review || "" };
       updateLightboxDisplay();
       document.getElementById("photoLightboxModal").classList.remove("hidden");
     }
@@ -1508,9 +1421,7 @@
       document.getElementById("lightboxCounter").innerText = `${index + 1} / ${photos.length}`;
 
       const navBtns = document.querySelectorAll(".lightbox-nav-btn");
-      navBtns.forEach(btn => {
-        btn.style.display = photos.length > 1 ? "flex" : "none";
-      });
+      navBtns.forEach(btn => btn.style.display = photos.length > 1 ? "flex" : "none");
     }
 
     function lightboxPrev() {
@@ -1533,9 +1444,7 @@
       let touchStartX = 0;
       let touchEndX = 0;
       const modal = document.getElementById("photoLightboxModal");
-      modal.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
+      modal.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
       modal.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
         if (touchEndX < touchStartX - 50) lightboxNext();
@@ -1543,7 +1452,7 @@
       }, { passive: true });
     }
 
-    // ========== 【需求 3 實作】：拍立得手帳卡相片挑選 ＆ 浮水印大小自由調整 ==========
+    // 拍立得手帳卡設計室
     function generatePolaroidCard(storeId, visitId) {
       activePolaroidTarget = { storeId, visitId };
       selectedPolaroidPhotoIndex = 0;
@@ -1598,18 +1507,15 @@
       renderPolaroidWithSettings();
     }
 
-    // 繪製「咖啡環形印章」浮水印 (支援半徑自由縮放)
     function drawCoffeeStampSeal(ctx, x, y, radius, stampColor) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(-8 * Math.PI / 180);
 
-      // 依使用者所選半徑進行相對縮放
       const scaleFactor = radius / 56;
       ctx.scale(scaleFactor, scaleFactor);
 
       const baseR = 56;
-
       ctx.strokeStyle = stampColor;
       ctx.lineWidth = 3.5;
       ctx.beginPath();
@@ -1712,15 +1618,12 @@
       let photoH = 0;
       let imgObj = null;
 
-      // 使用者指定的當前照片
       const currentPhotoSrc = photos[selectedPolaroidPhotoIndex] || photos[0];
 
       if (currentPhotoSrc) {
         imgObj = await new Promise((resolve) => {
           const img = new Image();
-          if (!currentPhotoSrc.startsWith('data:')) {
-            img.crossOrigin = "anonymous";
-          }
+          if (!currentPhotoSrc.startsWith('data:')) img.crossOrigin = "anonymous";
           img.onload = () => resolve(img);
           img.onerror = () => resolve(null);
           img.src = currentPhotoSrc;
@@ -1731,7 +1634,6 @@
         }
       }
 
-      // 相片與文字的安全間距
       const photoToTextGap = photoH > 0 ? Math.round(userGap + (fontScale - 1) * 20) : 24;
 
       let textBlockHeight = 0;
@@ -1757,7 +1659,6 @@
       canvas.width = W;
       canvas.height = Math.max(540, totalH);
 
-      // 1. 拍立得底紙
       ctx.fillStyle = "#FAF8F5";
       ctx.fillRect(0, 0, W, canvas.height);
 
@@ -1770,13 +1671,10 @@
 
       let curY = pad;
 
-      // 2. 拍立得相片
       if (imgObj && photoH > 0) {
         ctx.fillStyle = "#F5F0E8";
         ctx.fillRect(pad, curY, photoW, photoH);
-        try {
-          ctx.drawImage(imgObj, pad, curY, photoW, photoH);
-        } catch(e) {}
+        try { ctx.drawImage(imgObj, pad, curY, photoW, photoH); } catch(e) {}
         curY += photoH + photoToTextGap;
       } else {
         curY += 24;
@@ -1790,7 +1688,6 @@
 
       ctx.textAlign = textAlign;
 
-      // 3. 店名標題
       if (showTitle) {
         ctx.fillStyle = textColor;
         ctx.font = `bold ${Math.round(34 * fontScale)}px ${fontFamily}`;
@@ -1798,7 +1695,6 @@
         curY += titleLineH + 8;
       }
 
-      // 4. 星等評分、日期與城市
       if (showRating || showDate || showCity) {
         const starStr = showRating ? `★ ${Number(visit.rating).toFixed(1)}` : "";
         const metaSegments = [];
@@ -1828,11 +1724,9 @@
           ctx.fillText(metaStr, startX + starWidth, curY);
         }
         ctx.textAlign = textAlign;
-
         curY += metaLineH + 6;
       }
 
-      // 5. 詳細地址
       if (showAddress && store.address) {
         ctx.fillStyle = "#A1A1AA";
         ctx.font = `500 ${Math.round(16 * fontScale)}px ${fontFamily}`;
@@ -1840,7 +1734,6 @@
         curY += addressLineH + 6;
       }
 
-      // 6. 心情隨筆
       if (showReview && reviewLines.length > 0) {
         curY += 4;
         ctx.fillStyle = textColor;
@@ -1852,7 +1745,6 @@
         curY += 12;
       }
 
-      // 7. 蓋上「咖啡回憶印章」浮水印 (按使用者指定半徑與位置繪製)
       if (showStamp) {
         let stampX = W - pad - userStampRadius - 12;
         let stampY = canvas.height - pad - userStampRadius - 10;
@@ -1874,16 +1766,13 @@
       try {
         currentPolaroidDataUrl = canvas.toDataURL("image/png");
         document.getElementById("polaroidPreviewImg").src = currentPolaroidDataUrl;
-      } catch(err) {
-        console.warn("Canvas 導出受限", err);
-      }
+      } catch(err) {}
     }
 
     function wrapCanvasText(ctx, text, maxWidth) {
       const words = text.split('');
       const lines = [];
       let currentLine = '';
-
       for (let i = 0; i < words.length; i++) {
         const testLine = currentLine + words[i];
         const metrics = ctx.measureText(testLine);
@@ -1898,10 +1787,8 @@
       return lines;
     }
 
-    // 原生分享拍立得圖片
     async function sharePolaroidImage() {
       if (!currentPolaroidDataUrl) return;
-
       try {
         const res = await fetch(currentPolaroidDataUrl);
         const blob = await res.blob();
@@ -1914,18 +1801,13 @@
             files: [file]
           });
         } else if (navigator.clipboard && window.ClipboardItem) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          alert("📋 瀏覽器未支援系統原生檔案分享，已將卡片圖片複製至您的剪貼簿！可直接至通訊軟體貼上發送。");
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          alert("📋 瀏覽器未支援原生分享，已將卡片圖片複製至您的剪貼簿！可直接貼上發送。");
         } else {
           alert("💡 您的瀏覽器不支援原生分享，請點擊「下載相片」即可儲存分享！");
         }
       } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.warn("Share failed:", err);
-          alert("分享已取消或暫不支援，可改用下載卡片進行傳送。");
-        }
+        if (err.name !== 'AbortError') alert("分享已取消或暫不支援。");
       }
     }
 
@@ -1941,7 +1823,6 @@
       document.getElementById("polaroidModal").classList.add("hidden");
     }
 
-    // 常用標籤點選記憶庫
     function renderModalQuickTagChips() {
       const container = document.getElementById("modalFrequentTagChips");
       if (!container) return;
@@ -1954,11 +1835,7 @@
         });
       });
 
-      const sortedTags = Object.entries(tagCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(e => e[0]);
-
+      const sortedTags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => e[0]);
       if (!sortedTags.length) {
         container.innerHTML = `<span class="text-[10px] text-sub">輸入過的標籤會自動記憶於此</span>`;
         return;
@@ -1980,18 +1857,12 @@
     function toggleTagChip(tag) {
       const input = document.getElementById("inputTags");
       let currentTags = input.value.split(/[,，\s]+/).filter(Boolean);
-
-      if (currentTags.includes(tag)) {
-        currentTags = currentTags.filter(t => t !== tag);
-      } else {
-        currentTags.push(tag);
-      }
-
+      if (currentTags.includes(tag)) currentTags = currentTags.filter(t => t !== tag);
+      else currentTags.push(tag);
       input.value = currentTags.join(', ');
       renderModalQuickTagChips();
     }
 
-    // 儀表板統計更新
     function updateDashboardStats() {
       document.getElementById("statUniquePlaces").innerText = appData.length;
 
@@ -2392,9 +2263,7 @@
         const text = await navigator.clipboard.readText();
         document.getElementById("inputCoords").value = text;
         handleManualCoordsInput(text);
-      } catch(e) {
-        alert("請長按輸入框貼上座標！");
-      }
+      } catch(e) { alert("請長按輸入框貼上座標！"); }
     }
 
     function autoLocateCurrentSpot() {
@@ -2485,11 +2354,7 @@
           updateDashboardStats();
           alert(`🎉 成功匯入了 ${count} 個足跡地點！已全數同步至日記。`);
         } catch(err) {
-          if (err.name === 'QuotaExceededError') {
-            alert("❌ 匯入失敗：本機儲存空間不足 (QuotaExceededError)！\n請先匯出備份，或清理裝置本機空間。");
-          } else {
-            alert("匯入失敗，請確認檔案格式是否正確。");
-          }
+          alert("匯入失敗，請確認檔案格式是否正確。");
         }
       };
       reader.readAsText(file);
@@ -2574,9 +2439,7 @@
       const manualCoordsInputVal = document.getElementById("inputCoords").value.trim();
       if (manualCoordsInputVal) {
         const match = manualCoordsInputVal.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
-        if (match) {
-          pendingLocation = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-        }
+        if (match) pendingLocation = { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
       }
 
       let finalCoords = pendingLocation;
@@ -2654,7 +2517,6 @@
           await dbPut(newStore);
           appData.unshift(newStore);
 
-          // 若是由心願清單解鎖成功，詢問是否自動移除已達成的心願
           if (unlockingWishId) {
             const unlockedWish = wishlists.find(w => w.id === unlockingWishId);
             if (unlockedWish) {
@@ -2671,9 +2533,8 @@
         refreshViews();
         updateDashboardStats();
       } catch(err) {
-        console.error("寫入 IndexedDB 失敗", err);
         if (err.name === 'QuotaExceededError' || err.code === 22) {
-          alert("❌ 儲存失敗：本機儲存配額已滿 (QuotaExceededError)！\n\n您的照片或日記已達瀏覽器允許的最大限制。請點擊右上角「箱子」圖示匯出備份，或清理裝置內部儲存空間後再試。");
+          alert("❌ 儲存失敗：本機儲存配額已滿！請點擊右上角「箱子」圖示匯出備份，或清理裝置空間。");
         } else {
           alert(`❌ 儲存失敗：${err.message || '本機資料庫寫入異常'}`);
         }
@@ -2816,6 +2677,7 @@
       return [];
     }
 
+    // 🧸【手繪可愛風圖釘渲染】
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
@@ -2836,12 +2698,13 @@
         if (!latest) return;
         const photos = getVisitPhotos(latest);
 
+        // 可愛貼紙圖釘
         const icon = L.divIcon({
           className: '',
           html: `<div class="custom-marker ${latest.rating < 3 ? 'low-score':''}"><span class="custom-marker-text">${latest.rating.toFixed(1)}</span></div>`,
-          iconSize: [38, 48],
-          iconAnchor: [19, 48],
-          popupAnchor: [0, -42]
+          iconSize: [36, 44],
+          iconAnchor: [18, 44],
+          popupAnchor: [0, -40]
         });
 
         const revisitBadge = latest.revisit
@@ -2856,18 +2719,18 @@
           : '';
 
         const content = `
-          <div style="font-family: -apple-system, sans-serif; width: 220px;">
+          <div style="font-family: -apple-system, sans-serif; width: 220px; padding: 2px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-              <span style="font-size:10px; background:var(--ui-theme-light); color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
-              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
+              <span style="font-size:10px; background:var(--ui-theme-light); color:var(--ui-theme); padding:2px 8px; border-radius:8px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
+              ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:var(--ui-theme); padding:2px 8px; border-radius:8px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
             </div>
             ${photoHtml}
-            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:var(--ui-text);">${item.name}</h4>
+            <h4 style="margin:2px 0; font-weight:bold; font-size:13px; color:var(--ui-text);">${item.name}</h4>
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:var(--marker-color); font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
             <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;">${latest.review || '無心得'}</p>
             <div style="display:flex; gap:4px;">
-              <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">📸 拍立得</button>
-              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯筆記</button>
+              <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FFFFFF; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:10px; padding:5px 0; font-size:11px; font-weight:bold;">📸 拍立得</button>
+              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FFFFFF; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:10px; padding:5px 0; font-size:11px; font-weight:bold;">✏️ 編輯筆記</button>
             </div>
           </div>
         `;
@@ -2886,7 +2749,6 @@
       }
     }
 
-    // 【需求 2 修正】：列表卡片按鈕絕對保持水平不換行
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const cityFilter = document.getElementById("filterCity").value;
@@ -2958,7 +2820,6 @@
 
         return `
           <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
-            <!-- 修正：左右兩端對齊，左邊自適應縮排，右邊鎖定不換行 -->
             <div class="flex justify-between items-start gap-2">
               <div class="min-w-0 flex-1">
                 <div class="flex items-center space-x-1.5 flex-wrap">
@@ -2969,7 +2830,6 @@
                 <p class="text-[11px] text-sub truncate">${item.address || '無詳細地址'}</p>
               </div>
               
-              <!-- 修正：嚴格禁止換行 (whitespace-nowrap flex-shrink-0) -->
               <div class="flex items-center space-x-1.5 flex-shrink-0 whitespace-nowrap pt-0.5">
                 <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
                   <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得卡
@@ -3134,7 +2994,6 @@
       setRating(Math.round(num * 2) / 2);
     }
 
-    // 四大平行板塊切換
     function switchTab(tab) {
       const dashView = document.getElementById("dashboardView");
       const mapView = document.getElementById("mapView");
@@ -3190,7 +3049,6 @@
       document.getElementById("backupMenu").classList.toggle("hidden");
     }
 
-    // 匯出包含正式手帳與心願清單
     function exportData() {
       const backupPayload = {
         version: "v13_with_wishlist",
@@ -3207,7 +3065,6 @@
       a.click();
     }
 
-    // 還原備份
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -3215,8 +3072,6 @@
       reader.onload = async (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
-          
-          // 支援新版結構 (含 wishlists) 與舊版純陣列
           let restList = [];
           if (Array.isArray(parsed)) {
             restList = parsed;
@@ -3240,11 +3095,7 @@
             alert("備份檔無任何資料！");
           }
         } catch(err) {
-          if (err.name === 'QuotaExceededError') {
-            alert("❌ 還原失敗：本機儲存空間不足 (QuotaExceededError)！\n備份檔的照片數量已超過此裝置瀏覽器允許配額。");
-          } else {
-            alert("匯入失敗，請確認檔案格式是否正確。");
-          }
+          alert("匯入失敗，請確認檔案格式是否正確。");
         }
       };
       reader.readAsText(file);
@@ -3255,4 +3106,3 @@
   </script>
 </body>
 </html>
-​
