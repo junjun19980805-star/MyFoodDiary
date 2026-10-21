@@ -31,7 +31,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 經典專屬美學配置：墨黑文字、薰衣草紫 UI、珊瑚赤紅圖釘 */
     :root {
       --ui-text: #18181B;
       --ui-text-muted: #71717A;
@@ -61,7 +60,6 @@
 
     .touch-btn { touch-action: manipulation; cursor: pointer; }
 
-    /* 經典珊瑚赤紅圖釘 */
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -75,9 +73,7 @@
       border: 2px solid #FFFFFF !important;
       transition: background 0.3s ease;
     }
-    .custom-marker.low-score {
-      background: #71717A !important;
-    }
+    .custom-marker.low-score { background: #71717A !important; }
     .custom-marker-text {
       transform: rotate(45deg);
       color: white;
@@ -117,7 +113,7 @@
     </div>
   </header>
 
-  <!-- 備份與匯入選單 -->
+  <!-- 備份選單 -->
   <div id="backupMenu" class="hidden absolute top-12 right-3 bg-white shadow-2xl rounded-2xl border border-[#EAE3D9] p-2.5 z-[1600] w-60 text-xs space-y-1.5">
     <label class="touch-btn w-full text-left py-2 px-2.5 bg-theme-light text-theme rounded-xl flex items-center font-bold cursor-pointer transition">
       <i class="fa-solid fa-map-location-dot mr-2 text-theme"></i> 匯入 Google Maps 收藏檔
@@ -344,7 +340,7 @@
     </div>
   </div>
 
-  <!-- 通用多選縣市彈跳視窗 -->
+  <!-- 🌟【通用多選縣市彈跳視窗】 -->
   <div id="cityMultiSelectModal" class="hidden fixed inset-0 bg-black/60 z-[2600] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[85dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -354,7 +350,6 @@
         </div>
         <button onclick="closeCityModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
       </div>
-
       <div class="p-4 overflow-y-auto space-y-3">
         <div class="flex justify-between items-center text-xs">
           <span class="text-sub font-medium" id="citySelectedCountText">已選擇 0 個縣市</span>
@@ -362,16 +357,44 @@
             <i class="fa-solid fa-rotate-left mr-1"></i> 全部清除
           </button>
         </div>
-
         <div id="cityChipsContainer" class="flex flex-wrap gap-2 pt-1"></div>
       </div>
-
       <div class="p-3.5 border-t border-[#EAE3D9] bg-[#FAF8F5] flex space-x-2">
         <button onclick="clearCurrentCitySelection(); applyCitySelection();" class="touch-btn py-2.5 px-4 bg-gray-150 text-sub font-bold rounded-xl text-xs">
           重設清除
         </button>
         <button onclick="applyCitySelection()" class="touch-btn flex-1 py-2.5 bg-theme text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition">
           套用篩選
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌟【全新：通用標籤多選彈跳視窗】(支援日記與心願清單複選) -->
+  <div id="tagMultiSelectModal" class="hidden fixed inset-0 bg-black/60 z-[2650] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-md max-h-[85dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
+        <div>
+          <h3 class="font-bold text-main text-sm" id="tagModalTitle">篩選標籤 (可複選)</h3>
+          <p class="text-[10px] text-theme">可同時勾選多個標籤進行交叉過濾</p>
+        </div>
+        <button onclick="closeTagModal()" class="touch-btn text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+      <div class="p-4 overflow-y-auto space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-sub font-medium" id="tagSelectedCountText">已選擇 0 個標籤</span>
+          <button onclick="clearCurrentTagSelection()" class="touch-btn text-red-500 font-bold hover:underline flex items-center">
+            <i class="fa-solid fa-rotate-left mr-1"></i> 全部清除
+          </button>
+        </div>
+        <div id="tagChipsContainer" class="flex flex-wrap gap-2 pt-1"></div>
+      </div>
+      <div class="p-3.5 border-t border-[#EAE3D9] bg-[#FAF8F5] flex space-x-2">
+        <button onclick="clearCurrentTagSelection(); applyTagSelection();" class="touch-btn py-2.5 px-4 bg-gray-150 text-sub font-bold rounded-xl text-xs">
+          重設清除
+        </button>
+        <button onclick="applyTagSelection()" class="touch-btn flex-1 py-2.5 bg-theme text-white font-bold rounded-xl text-xs shadow-xs active:scale-95 transition">
+          套用標籤篩選
         </button>
       </div>
     </div>
@@ -464,7 +487,7 @@
         <div id="randomMemoryBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]"></div>
       </div>
 
-      <!-- 探索回憶統計 -->
+      <!-- 探索回憶統計 (標籤與年度皆連動日記列表) -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-3.5">
         <div class="flex items-center justify-between border-b border-[#F5F0E8] pb-2">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -527,7 +550,7 @@
       </div>
     </div>
 
-    <!-- 頁面 2：足跡地圖 (穩定版 OpenStreetMap + 經典珊瑚紅圖釘) -->
+    <!-- 頁面 2：足跡地圖 (穩定版 OpenStreetMap) -->
     <div id="mapView" class="hidden w-full h-full relative">
       <div class="absolute top-3 left-3 right-3 z-[900] max-w-md mx-auto space-y-1.5">
         <div class="bg-white/95 backdrop-blur rounded-2xl shadow-md border border-[#EAE3D9] p-2 flex items-center space-x-2">
@@ -557,7 +580,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：日記列表 -->
+    <!-- 頁面 3：日記列表 (全筆記導航 ＋ 標籤複選) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
       <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
@@ -589,10 +612,20 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs">
+          <!-- 標籤複選篩選鈕 -->
           <div>
-            <label class="font-bold text-main">🏷️ 標籤分類</label>
-            <select id="filterTag" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main"></select>
+            <div class="flex justify-between items-center">
+              <label class="font-bold text-main">🏷️ 標籤分類 (可複選)</label>
+              <button id="diaryTagClearBtn" onclick="clearDiaryTagFilter()" class="hidden text-[10px] text-red-500 font-bold hover:underline">
+                ✕ 清除
+              </button>
+            </div>
+            <button type="button" onclick="openTagFilterModal('diary')" class="touch-btn w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-left text-sub flex items-center justify-between">
+              <span id="diaryTagBtnLabel" class="truncate">全部標籤 (不限)</span>
+              <span id="diaryTagBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            </button>
           </div>
+
           <div>
             <label class="font-bold text-main">⭐ 評分篩選</label>
             <select id="filterRating" onchange="renderListView()" class="w-full mt-1 bg-[#FAF8F5] border border-[#EAE3D9] rounded-lg p-2 font-medium text-main">
@@ -619,7 +652,7 @@
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
 
-    <!-- 頁面 4：心願清單板塊 -->
+    <!-- 頁面 4：心願清單板塊 (全導航 ＋ 標籤複選篩選) -->
     <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
       
       <!-- 頂部手帳橫幅 -->
@@ -636,7 +669,7 @@
         </button>
       </div>
 
-      <!-- 心願靈感扭蛋機 -->
+      <!-- 心願靈感扭蛋機 (隨機抽籤 ＋ GPS 定位找最近) -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -675,21 +708,33 @@
         </button>
       </div>
 
-      <!-- 心願清單縣市篩選列 -->
-      <div class="bg-white p-2.5 rounded-2xl border border-[#EAE3D9] flex items-center justify-between text-xs">
-        <div class="flex items-center space-x-2 flex-1 min-w-0">
-          <button type="button" onclick="openCityFilterModal('wishlist')" class="touch-btn bg-[#FAF8F5] border border-[#EAE3D9] px-3 py-1.5 rounded-xl font-bold text-main flex items-center space-x-1.5 hover:border-theme">
-            <i class="fa-solid fa-filter text-theme"></i>
-            <span id="wishCityBtnLabel">篩選縣市 (不限)</span>
-            <span id="wishCityBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
-          </button>
-          
-          <span id="wishFilterSummaryText" class="text-[10px] text-sub truncate hidden sm:inline">顯示全部地區</span>
-        </div>
+      <!-- 心願清單雙篩選列 (縣市篩選 ＋ 標籤篩選) -->
+      <div class="bg-white p-2.5 rounded-2xl border border-[#EAE3D9] space-y-2 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <!-- 縣市多選 -->
+          <div class="relative">
+            <button type="button" onclick="openCityFilterModal('wishlist')" class="touch-btn w-full bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1.5 rounded-xl font-bold text-main flex items-center justify-between hover:border-theme">
+              <span class="flex items-center space-x-1 truncate">
+                <i class="fa-solid fa-city text-theme text-[11px]"></i>
+                <span id="wishCityBtnLabel" class="truncate">縣市 (不限)</span>
+              </span>
+              <span id="wishCityBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            </button>
+            <button id="wishCityClearBtn" onclick="clearWishCityFilter()" class="touch-btn hidden absolute -top-1.5 -right-1 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[9px] shadow-xs">✕</button>
+          </div>
 
-        <button id="wishCityClearBtn" onclick="clearWishCityFilter()" class="touch-btn hidden text-[11px] text-red-500 font-bold px-2.5 py-1 rounded-xl bg-red-50 hover:bg-red-100 transition whitespace-nowrap">
-          ✕ 清除複選
-        </button>
+          <!-- 標籤多選 -->
+          <div class="relative">
+            <button type="button" onclick="openTagFilterModal('wishlist')" class="touch-btn w-full bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1.5 rounded-xl font-bold text-main flex items-center justify-between hover:border-theme">
+              <span class="flex items-center space-x-1 truncate">
+                <i class="fa-solid fa-tags text-theme text-[11px]"></i>
+                <span id="wishTagBtnLabel" class="truncate">標籤 (不限)</span>
+              </span>
+              <span id="wishTagBadge" class="hidden bg-theme text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-1">0</span>
+            </button>
+            <button id="wishTagClearBtn" onclick="clearWishTagFilter()" class="touch-btn hidden absolute -top-1.5 -right-1 bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[9px] shadow-xs">✕</button>
+          </div>
+        </div>
       </div>
 
       <!-- 心願清單內容卡片容器 -->
@@ -771,9 +816,11 @@
           <textarea id="inputWishReason" rows="3" placeholder="例如: 聽說秋天楓葉超級美、必點招牌鮮魚湯..." class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 leading-relaxed outline-none"></textarea>
         </div>
 
-        <div>
-          <label class="block text-sub font-medium mb-0.5">分類標籤 (逗號分隔)</label>
+        <!-- 心願標籤輸入區 -->
+        <div class="space-y-1">
+          <label class="block font-bold text-main">標籤分類 (逗號分隔)</label>
           <input type="text" id="inputWishTags" placeholder="賞楓, 散步, 私房甜點" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
+          <div id="wishFrequentTagChips" class="flex flex-wrap gap-1.5 pt-1"></div>
         </div>
       </div>
 
@@ -787,7 +834,7 @@
     </div>
   </div>
 
-  <!-- 記錄日記彈窗 (方案 A 優化版) -->
+  <!-- 記錄日記彈窗 (含方法二智慧抓座標 ＋ 保留手動輸入) -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -817,32 +864,43 @@
           </div>
           
           <div>
-            <label class="block text-sub font-medium text-[10px] mb-0.5">詳細地址 (建議填寫，定位最精確！)</label>
+            <label class="block text-sub font-medium text-[10px] mb-0.5">詳細地址 (建議填寫，定位更精準)</label>
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、門牌 (例: 北門街35號)" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 方案 A：優化後的方法一 (地址優先精確定位) -->
+          <!-- 方法一按鈕 -->
           <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
-            <span>方法一：自動查找地點 (有填地址時以地址優先)</span>
+            <span>方法一：自動查找地點 (地址優先)</span>
           </button>
 
-          <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-1.5">
+          <!-- 🌟 方法二優化：新增「智慧自動抓取座標」快捷鈕，並保留手動輸入 -->
+          <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-2">
             <div class="flex justify-between items-center">
-              <label class="font-bold text-main text-[11px]">📍 方法二：位置錯誤？貼上 Google 座標更正</label>
-              <button type="button" onclick="pasteFromClipboard()" class="text-theme font-bold text-[10px] underline">
-                貼上剪貼簿
-              </button>
+              <label class="font-bold text-main text-[11px]">📍 方法二：座標定位 (自動抓取或手動貼上)</label>
+              <div class="flex items-center space-x-2">
+                <button type="button" onclick="pasteFromClipboard()" class="text-theme font-bold text-[10px] underline">
+                  貼上剪貼簿
+                </button>
+              </div>
             </div>
+
+            <!-- 自動智慧抓座標快捷按鈕 (100% 免費開源) -->
+            <button type="button" onclick="smartFetchCoordsFromAddress()" class="touch-btn w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 py-1.5 rounded-lg font-bold text-[11px] flex items-center justify-center space-x-1 shadow-xs active:scale-95 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-emerald-600"></i>
+              <span>🪄 依上方地址智慧取得座標 (免費自動填入)</span>
+            </button>
+
             <div class="flex items-center space-x-1.5">
               <input type="text" id="inputCoords" placeholder="例: 24.8085, 120.9712" oninput="handleManualCoordsInput(this.value)" class="flex-1 bg-[#FAF8F5] border border-gray-200 rounded-lg p-1.5 text-xs outline-none font-mono" />
               <button type="button" onclick="applyManualCoordsNow()" class="touch-btn bg-theme-light text-theme border border-theme px-3 py-1.5 rounded-lg font-bold text-[11px] whitespace-nowrap active:scale-95">
                 強制鎖定此座標
               </button>
             </div>
-            <p class="text-[9px] text-sub">💡 Google 地圖長按店家 ➔ 複製上方座標數字 ➔ 貼到此處點強制鎖定</p>
+            <p class="text-[9px] text-sub">💡 可按上方綠色按鈕自動算座標，亦可自行手動修改數值或貼上 Google 座標</p>
           </div>
 
+          <!-- 方法三按鈕 -->
           <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位目前位置 (我在現場)</span>
@@ -1009,9 +1067,15 @@
     let editingWishId = null;
     let unlockingWishId = null;
 
+    // 多選縣市狀態
     let selectedWishCities = new Set();
     let selectedDiaryCities = new Set();
     let currentCityModalContext = 'diary';
+
+    // 🌟 多選標籤狀態
+    let selectedWishTags = new Set();
+    let selectedDiaryTags = new Set();
+    let currentTagModalContext = 'diary';
 
     let map, markersLayer;
     let currentModalMode = 'CREATE';
@@ -1241,26 +1305,153 @@
       const label = document.getElementById("wishCityBtnLabel");
       const badge = document.getElementById("wishCityBadge");
       const clearBtn = document.getElementById("wishCityClearBtn");
-      const summaryText = document.getElementById("wishFilterSummaryText");
 
       if (selectedWishCities.size === 0) {
-        label.innerText = "篩選縣市 (不限)";
+        label.innerText = "縣市 (不限)";
         badge.classList.add("hidden");
         clearBtn.classList.add("hidden");
-        summaryText.innerText = "顯示全部地區";
       } else {
         const cityArr = Array.from(selectedWishCities);
-        label.innerText = cityArr.slice(0, 2).join(', ') + (cityArr.length > 2 ? '...' : '');
+        label.innerText = cityArr.slice(0, 1).join(', ') + (cityArr.length > 1 ? ` +${cityArr.length-1}` : '');
         badge.innerText = selectedWishCities.size;
         badge.classList.remove("hidden");
         clearBtn.classList.remove("hidden");
-        summaryText.innerText = `限定地區: ${cityArr.join('、')}`;
       }
     }
 
     function clearWishCityFilter() {
       selectedWishCities.clear();
       updateWishCityFilterUI();
+      renderWishlistView();
+    }
+
+    // 🌟【標籤多選彈窗邏輯】
+    function openTagFilterModal(context) {
+      currentTagModalContext = context;
+      const modal = document.getElementById("tagMultiSelectModal");
+      const title = document.getElementById("tagModalTitle");
+      const container = document.getElementById("tagChipsContainer");
+
+      title.innerText = context === 'diary' ? "日記列表 · 篩選標籤 (可複選)" : "心願清單 · 篩選標籤 (可複選)";
+
+      const allTags = new Set();
+      if (context === 'diary') {
+        appData.forEach(item => (item.tags || []).forEach(t => allTags.add(t.trim())));
+      } else {
+        wishlists.forEach(item => (item.tags || []).forEach(t => allTags.add(t.trim())));
+      }
+
+      const targetSet = context === 'diary' ? selectedDiaryTags : selectedWishTags;
+      const sortedTags = Array.from(allTags).filter(Boolean);
+
+      if (!sortedTags.length) {
+        container.innerHTML = `<p class="text-xs text-sub py-4 text-center w-full">目前尚無任何標籤紀錄</p>`;
+      } else {
+        container.innerHTML = sortedTags.map(tag => {
+          const isSelected = targetSet.has(tag);
+          return `
+            <button type="button" onclick="toggleTagChipFilter('${tag}')" id="tagChipFilter_${tag}" class="touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition ${isSelected ? 'bg-theme text-white shadow-xs' : 'bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light'}">
+              #${tag}
+            </button>
+          `;
+        }).join('');
+      }
+
+      updateTagSelectedCountText();
+      modal.classList.remove("hidden");
+    }
+
+    function toggleTagChipFilter(tag) {
+      const targetSet = currentTagModalContext === 'diary' ? selectedDiaryTags : selectedWishTags;
+      const btn = document.getElementById(`tagChipFilter_${tag}`);
+
+      if (targetSet.has(tag)) {
+        targetSet.delete(tag);
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light";
+      } else {
+        targetSet.add(tag);
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-theme text-white shadow-xs";
+      }
+      updateTagSelectedCountText();
+    }
+
+    function updateTagSelectedCountText() {
+      const targetSet = currentTagModalContext === 'diary' ? selectedDiaryTags : selectedWishTags;
+      document.getElementById("tagSelectedCountText").innerText = `已選擇 ${targetSet.size} 個標籤`;
+    }
+
+    function clearCurrentTagSelection() {
+      if (currentTagModalContext === 'diary') {
+        selectedDiaryTags.clear();
+      } else {
+        selectedWishTags.clear();
+      }
+      const chips = document.querySelectorAll("#tagChipsContainer button");
+      chips.forEach(btn => {
+        btn.className = "touch-btn text-xs px-3 py-1.5 rounded-xl font-bold transition bg-[#FAF8F5] text-sub border border-[#EAE3D9] hover:bg-theme-light";
+      });
+      updateTagSelectedCountText();
+    }
+
+    function applyTagSelection() {
+      closeTagModal();
+      if (currentTagModalContext === 'diary') {
+        updateDiaryTagFilterUI();
+        renderListView();
+      } else {
+        updateWishTagFilterUI();
+        renderWishlistView();
+      }
+    }
+
+    function closeTagModal() {
+      document.getElementById("tagMultiSelectModal").classList.add("hidden");
+    }
+
+    function updateDiaryTagFilterUI() {
+      const label = document.getElementById("diaryTagBtnLabel");
+      const badge = document.getElementById("diaryTagBadge");
+      const clearBtn = document.getElementById("diaryTagClearBtn");
+
+      if (selectedDiaryTags.size === 0) {
+        label.innerText = "全部標籤 (不限)";
+        badge.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+      } else {
+        label.innerText = Array.from(selectedDiaryTags).join(', ');
+        badge.innerText = selectedDiaryTags.size;
+        badge.classList.remove("hidden");
+        clearBtn.classList.remove("hidden");
+      }
+    }
+
+    function clearDiaryTagFilter() {
+      selectedDiaryTags.clear();
+      updateDiaryTagFilterUI();
+      renderListView();
+    }
+
+    function updateWishTagFilterUI() {
+      const label = document.getElementById("wishTagBtnLabel");
+      const badge = document.getElementById("wishTagBadge");
+      const clearBtn = document.getElementById("wishTagClearBtn");
+
+      if (selectedWishTags.size === 0) {
+        label.innerText = "標籤 (不限)";
+        badge.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+      } else {
+        const tagArr = Array.from(selectedWishTags);
+        label.innerText = tagArr.slice(0, 1).join(', ') + (tagArr.length > 1 ? ` +${tagArr.length-1}` : '');
+        badge.innerText = selectedWishTags.size;
+        badge.classList.remove("hidden");
+        clearBtn.classList.remove("hidden");
+      }
+    }
+
+    function clearWishTagFilter() {
+      selectedWishTags.clear();
+      updateWishTagFilterUI();
       renderWishlistView();
     }
 
@@ -1289,6 +1480,7 @@
         ? `${pickItem.lat},${pickItem.lng}`
         : encodeURIComponent(`${pickItem.city || ''} ${pickItem.name}`.trim());
       const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
+      const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickItem.city || ''} ${pickItem.name}`.trim())}`;
 
       box.innerHTML = `
         <div class="space-y-2">
@@ -1312,14 +1504,18 @@
             "${pickItem.reason || '想去散散步，享受一段美好時光！'}"
           </div>
 
-          <div class="flex space-x-2 pt-1">
+          <div class="flex space-x-1.5 pt-1">
             <button onclick="unlockWishToDiary('${pickItem.id}')" class="touch-btn flex-1 bg-theme text-white py-1.5 rounded-xl font-bold text-xs shadow-xs active:scale-95 transition flex items-center justify-center space-x-1">
               <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
               <span>立刻去解鎖 (轉日記)</span>
             </button>
-            <a href="${navUrl}" target="_blank" class="touch-btn px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-emerald-100 transition">
+            <a href="${navUrl}" target="_blank" class="touch-btn px-2.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-emerald-100 transition">
               <i class="fa-solid fa-location-arrow text-[10px]"></i>
               <span>導航</span>
+            </a>
+            <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家詳細評價與營業時間" class="touch-btn px-2.5 py-1.5 bg-sky-50 text-sky-800 border border-sky-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-sky-100 transition">
+              <i class="fa-solid fa-circle-info text-[10px] text-sky-600"></i>
+              <span>店家</span>
             </a>
           </div>
         </div>
@@ -1466,8 +1662,14 @@
 
       let currentList = activeWishCategory === 'spot' ? spotList : foodList;
 
+      // 縣市複選過濾
       if (selectedWishCities.size > 0) {
         currentList = currentList.filter(item => item.city && selectedWishCities.has(item.city.trim()));
+      }
+
+      // 標籤複選過濾
+      if (selectedWishTags.size > 0) {
+        currentList = currentList.filter(item => (item.tags || []).some(t => selectedWishTags.has(t.trim())));
       }
 
       if (!currentList.length) {
@@ -1477,7 +1679,7 @@
               ${activeWishCategory === 'spot' ? '<i class="fa-solid fa-mountain-sun"></i>' : '<i class="fa-solid fa-bowl-food"></i>'}
             </div>
             <h4 class="font-bold text-main text-sm">查無符合條件的心願</h4>
-            <p class="text-xs text-sub">點擊上方「許個願」新增地點，或清除地區篩選！</p>
+            <p class="text-xs text-sub">點擊上方「許個願」新增地點，或清除地區與標籤篩選！</p>
           </div>
         `;
         return;
@@ -1488,6 +1690,7 @@
           ? `${item.lat},${item.lng}`
           : encodeURIComponent(`${item.city || ''} ${item.name}`.trim());
         const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
+        const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         return `
           <div class="bg-white rounded-2xl p-4 border border-[#EAE3D9] shadow-xs flex flex-col space-y-2.5">
@@ -1503,6 +1706,7 @@
                 <p class="text-[11px] text-sub truncate">${item.address || '尚未記錄詳細地址'}</p>
               </div>
 
+              <!-- 右上角動作按鈕 -->
               <div class="flex items-center space-x-1 flex-shrink-0">
                 <button onclick="openEditWishModal('${item.id}')" class="touch-btn text-sub hover:text-main p-1.5 text-xs rounded-lg hover:bg-gray-100">
                   <i class="fa-solid fa-pen"></i>
@@ -1515,16 +1719,23 @@
               <span>${item.reason || '暫無特別備忘，只想去走走！'}</span>
             </div>
 
+            <!-- 底部動作按鈕列：刪除 ＋ 導航 ＋ 店家資訊 ＋ 解鎖 -->
             <div class="flex justify-between items-center text-[11px] pt-1.5 border-t border-[#F5F0E8]">
               <button onclick="deleteSingleWish('${item.id}')" class="touch-btn text-sub hover:text-red-500 font-medium flex items-center space-x-1">
                 <i class="fa-solid fa-trash-can text-[10px]"></i>
                 <span>刪除</span>
               </button>
               
-              <div class="flex items-center space-x-1.5">
-                <a href="${navUrl}" target="_blank" title="開啟 Google Maps 路線導航" class="touch-btn text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 transition active:scale-95 shadow-xs">
+              <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                <a href="${navUrl}" target="_blank" title="開啟 Google Maps 路線導航" class="touch-btn text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1.5 rounded-xl font-bold flex items-center space-x-1 transition active:scale-95 shadow-xs">
                   <i class="fa-solid fa-location-arrow text-[10px] text-emerald-600"></i>
                   <span>導航</span>
+                </a>
+
+                <!-- 🌟 店家資訊按鈕 (免費連至 Google 查看商家檔案/評論) -->
+                <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家詳細評價與營業時間" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1.5 rounded-xl font-bold flex items-center space-x-1 transition active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-circle-info text-[10px] text-sky-600"></i>
+                  <span>店家</span>
                 </a>
 
                 <button onclick="unlockWishToDiary('${item.id}')" class="touch-btn bg-theme text-white px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 shadow-xs active:scale-95 transition">
@@ -1536,6 +1747,48 @@
           </div>
         `;
       }).join('');
+    }
+
+    function renderWishFrequentTagChips() {
+      const container = document.getElementById("wishFrequentTagChips");
+      if (!container) return;
+
+      const tagCount = {};
+      wishlists.forEach(s => (s.tags || []).forEach(t => {
+        const clean = t.trim();
+        if (clean) tagCount[clean] = (tagCount[clean] || 0) + 1;
+      }));
+      appData.forEach(s => (s.tags || []).forEach(t => {
+        const clean = t.trim();
+        if (clean) tagCount[clean] = (tagCount[clean] || 0) + 1;
+      }));
+
+      const sorted = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]).slice(0, 8).map(e=>e[0]);
+      if (!sorted.length) {
+        container.innerHTML = `<span class="text-[10px] text-sub">輸入過的標籤會自動記憶於此</span>`;
+        return;
+      }
+
+      const inputVal = document.getElementById("inputWishTags").value;
+      const current = inputVal.split(/[,，\s]+/).filter(Boolean);
+
+      container.innerHTML = sorted.map(t => {
+        const isSel = current.includes(t);
+        return `
+          <button type="button" onclick="toggleWishTagChip('${t}')" class="touch-btn text-[10px] px-2 py-0.5 rounded-full font-bold transition ${isSel ? 'bg-theme text-white shadow-xs' : 'bg-[#EAE3D9] text-[#5C4F44] hover:bg-theme-light'}">
+            #${t}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleWishTagChip(tag) {
+      const input = document.getElementById("inputWishTags");
+      let currentTags = input.value.split(/[,，\s]+/).filter(Boolean);
+      if (currentTags.includes(tag)) currentTags = currentTags.filter(t => t !== tag);
+      else currentTags.push(tag);
+      input.value = currentTags.join(', ');
+      renderWishFrequentTagChips();
     }
 
     function openWishlistModal() {
@@ -1552,6 +1805,7 @@
       const radios = document.getElementsByName("inputWishType");
       radios.forEach(r => r.checked = (r.value === activeWishCategory));
       updateWishTypeUI();
+      renderWishFrequentTagChips();
 
       document.getElementById("wishModal").classList.remove("hidden");
     }
@@ -1573,6 +1827,7 @@
       const radios = document.getElementsByName("inputWishType");
       radios.forEach(r => r.checked = (r.value === item.type));
       updateWishTypeUI();
+      renderWishFrequentTagChips();
 
       document.getElementById("wishModal").classList.remove("hidden");
     }
@@ -2386,7 +2641,8 @@
       document.getElementById("filterCountry").value = "";
       selectedDiaryCities.clear();
       updateDiaryCityFilterUI();
-      document.getElementById("filterTag").value = "";
+      selectedDiaryTags.clear();
+      updateDiaryTagFilterUI();
       setYearFilter(year);
     }
 
@@ -2398,10 +2654,9 @@
       selectedYearFilter = "all";
       setYearFilter("all");
 
-      const tagSelect = document.getElementById("filterTag");
-      if (tagSelect) {
-        tagSelect.value = tag;
-      }
+      selectedDiaryTags.clear();
+      selectedDiaryTags.add(tag);
+      updateDiaryTagFilterUI();
       renderListView();
     }
 
@@ -2438,6 +2693,7 @@
         `).join('');
       }
 
+      // 探索類型標籤 (連動日記列表按鈕)
       const tagsContainer = document.getElementById("statTagsList");
       const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
       if (sortedTags.length === 0) {
@@ -2450,6 +2706,7 @@
         `).join('');
       }
 
+      // 年度回憶累積清單 (連動日記列表)
       const yearContainer = document.getElementById("statYearlyTrend");
       const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
       if (sortedYears.length === 0) {
@@ -2646,7 +2903,7 @@
       document.getElementById("entryModal").classList.remove("hidden");
     }
 
-    // 🚀【方案 A 核心實作】：方法一優化為「地址優先精確定位」
+    // 方法一：地址優先自動查找
     async function autoSearchRestaurantLocation() {
       const name = document.getElementById("inputStoreName").value.trim();
       const city = document.getElementById("inputCity").value.trim();
@@ -2660,22 +2917,15 @@
       statusText.innerText = "🔍 正在以地址優先搜尋地圖座標中...";
       statusText.className = "text-[10px] text-center font-bold text-theme animate-pulse";
 
-      // 方案 A 策略清單：有地址時，先查純地址，避免小店名干擾
       const queryList = [];
-
       if (address) {
-        // 1. 純地址 (若沒帶縣市自動補上，成功率最高)
         const fullAddr = address.startsWith(city) ? address : `${city} ${address}`.trim();
         queryList.push({ q: fullAddr, type: 'address' });
         queryList.push({ q: address, type: 'address' });
-        // 2. 縣市 + 店名 + 地址
         if (name) queryList.push({ q: `${city} ${name} ${address}`.trim(), type: 'full' });
       }
-
       if (name) {
-        // 3. 縣市 + 店名
         queryList.push({ q: `${city} ${name}`.trim(), type: 'name' });
-        // 4. 純店名
         queryList.push({ q: name, type: 'name' });
       }
 
@@ -2716,6 +2966,59 @@
       }
     }
 
+    // 🌟【方法二快捷按鈕核心實作】：依上方地址自動智慧換算座標 (免費 0 元，且保留手動修改)
+    async function smartFetchCoordsFromAddress() {
+      const address = document.getElementById("inputStoreAddress").value.trim();
+      const city = document.getElementById("inputCity").value.trim();
+      const name = document.getElementById("inputStoreName").value.trim();
+      const statusText = document.getElementById("geoStatusText");
+
+      if (!address && !name) {
+        return alert("請先填寫上方的「詳細地址」或「地點名稱」！");
+      }
+
+      statusText.innerText = "🪄 正在為您智慧抓取經緯度座標中...";
+      statusText.className = "text-[10px] text-center font-bold text-emerald-700 animate-pulse";
+
+      const fullAddress = address.startsWith(city) ? address : `${city}${address}`;
+
+      // 多段降級清單：完整門牌 ➔ 剔除門牌查路名 ➔ 剔除巷弄查路段 ➔ 純店名
+      const tryQueries = [
+        fullAddress,
+        fullAddress.replace(/\d+號.*$/, ''),
+        fullAddress.replace(/\d+巷.*$/, ''),
+        address,
+        `${city} ${name}`.trim()
+      ].filter(Boolean);
+
+      let found = null;
+      let usedQuery = "";
+
+      for (const q of tryQueries) {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=tw,jp&limit=1&accept-language=zh-TW`);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            found = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+            usedQuery = q;
+            break;
+          }
+        } catch(e) {}
+      }
+
+      if (found) {
+        // 自動填入經緯度輸入框 (使用者依然可以自由修改數字)
+        document.getElementById("inputCoords").value = `${found.lat.toFixed(5)}, ${found.lng.toFixed(5)}`;
+        pendingLocation = found;
+        statusText.innerText = `🎯 成功依「${usedQuery}」換算座標 (${found.lat.toFixed(4)}, ${found.lng.toFixed(4)})！可手動修改`;
+        statusText.className = "text-[10px] text-center font-bold text-emerald-600";
+        if (map) map.flyTo([found.lat, found.lng], 16);
+      } else {
+        statusText.innerText = `❌ 無法自動換算此地址，請手動貼上 Google 座標！`;
+        statusText.className = "text-[10px] text-center font-bold text-amber-600";
+      }
+    }
+
     function handleManualCoordsInput(val) {
       if (!val || !val.trim()) return;
       const match = val.match(/([0-9]+\.[0-9]+)[,\s]+([0-9]+\.[0-9]+)/);
@@ -2725,8 +3028,8 @@
         pendingLocation = { lat, lng };
 
         const statusText = document.getElementById("geoStatusText");
-        statusText.innerText = `🎯 方法二已強制鎖定此座標！(${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-        statusText.className = "text-[10px] text-center font-bold text-theme animate-pulse";
+        statusText.innerText = `🎯 方法二已鎖定手動座標！(${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+        statusText.className = "text-[10px] text-center font-bold text-theme";
 
         if (map) map.flyTo([lat, lng], 16);
       }
@@ -3084,6 +3387,8 @@
       initTagFilter();
       updateDiaryCityFilterUI();
       updateWishCityFilterUI();
+      updateDiaryTagFilterUI();
+      updateWishTagFilterUI();
       renderMapCategoryChips();
       renderMarkers();
       renderListView();
@@ -3095,15 +3400,10 @@
         [...countrySet].map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    function onCountryChange() {
-      renderListView();
-    }
+    function onCountryChange() { renderListView(); }
 
     function initTagFilter() {
-      const tagSet = new Set();
-      appData.forEach(item => (item.tags || []).forEach(t => tagSet.add(t)));
-      document.getElementById("filterTag").innerHTML = `<option value="">全部標籤 (${tagSet.size})</option>` + 
-        [...tagSet].map(t => `<option value="${t}">${t}</option>`).join('');
+      // 標籤篩選已由通用多選彈窗接管
     }
 
     function renderMapCategoryChips() {
@@ -3147,7 +3447,6 @@
       return [];
     }
 
-    // 渲染地圖圖釘 (經典珊瑚赤紅樣式)
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
@@ -3189,9 +3488,10 @@
 
         const navDest = `${item.lat},${item.lng}`;
         const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
+        const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         const content = `
-          <div style="font-family: -apple-system, sans-serif; width: 220px;">
+          <div style="font-family: -apple-system, sans-serif; width: 225px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
               <span style="font-size:10px; background:var(--ui-theme-light); color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">${item.country || ''} · ${item.city || ''}</span>
               ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
@@ -3200,10 +3500,11 @@
             <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:var(--ui-text);">${item.name}</h4>
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:var(--marker-color); font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
             <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;">${latest.review || '無心得'}</p>
-            <div style="display:flex; gap:4px;">
-              <a href="${navUrl}" target="_blank" class="touch-btn" style="flex:1; background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold; text-align:center; text-decoration:none;">🚀 導航</a>
-              <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">📸 拍立得</button>
-              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:11px; font-weight:bold;">✏️ 編輯</button>
+            <div style="display:flex; gap:3px;">
+              <a href="${navUrl}" target="_blank" class="touch-btn" style="flex:1; background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold; text-align:center; text-decoration:none;">🚀 導航</a>
+              <a href="${infoUrl}" target="_blank" class="touch-btn" style="flex:1; background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold; text-align:center; text-decoration:none;">ℹ️ 店家</a>
+              <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold;">📸 拍立得</button>
+              <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold;">✏️ 編輯</button>
             </div>
           </div>
         `;
@@ -3222,10 +3523,9 @@
       }
     }
 
-    // 日記列表渲染
+    // 日記列表渲染 (導航 ＋ 店家資訊 ＋ 標籤複選)
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
-      const tagFilter = document.getElementById("filterTag").value;
       const ratingFilter = document.getElementById("filterRating").value;
       const sortOrder = document.getElementById("sortOrder").value;
 
@@ -3241,7 +3541,11 @@
         list = list.filter(i => i.city && selectedDiaryCities.has(i.city.trim()));
       }
 
-      if (tagFilter) list = list.filter(i => (i.tags || []).includes(tagFilter));
+      // 標籤多選過濾
+      if (selectedDiaryTags.size > 0) {
+        list = list.filter(i => (i.tags || []).some(t => selectedDiaryTags.has(t.trim())));
+      }
+
       if (ratingFilter === "gte_4.5") list = list.filter(i => i.visits[0]?.rating >= 4.5);
       else if (ratingFilter === "lt_3.0") list = list.filter(i => i.visits[0]?.rating < 3.0);
 
@@ -3274,6 +3578,7 @@
           ? `${item.lat},${item.lng}`
           : encodeURIComponent(`${item.city || ''} ${item.name}`.trim());
         const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
+        const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         let photosRenderHtml = "";
         if (photos.length === 1) {
@@ -3312,14 +3617,18 @@
                 <p class="text-[11px] text-sub truncate">${item.address || '無詳細地址'}</p>
               </div>
               
-              <div class="flex items-center space-x-1.5 flex-shrink-0 whitespace-nowrap pt-0.5">
+              <!-- 筆記卡片右上方按鈕群組 (導航 ＋ 店家資訊 ＋ 拍立得 ＋ 編輯) -->
+              <div class="flex items-center space-x-1 flex-shrink-0 whitespace-nowrap pt-0.5">
                 <a href="${navUrl}" target="_blank" title="開啟 Google Maps 路線導航" class="touch-btn text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
                   <i class="fa-solid fa-location-arrow mr-1 text-[10px] text-emerald-600"></i>導航
                 </a>
-                <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
+                <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
+                  <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
+                </a>
+                <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
                   <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得
                 </button>
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex-shrink-0 whitespace-nowrap">
+                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex-shrink-0 whitespace-nowrap">
                   ✏️ 編輯
                 </button>
               </div>
@@ -3367,7 +3676,7 @@
       document.getElementById("inputCity").value = "新竹市";
       document.getElementById("inputStoreAddress").value = "";
       document.getElementById("inputCoords").value = "";
-      document.getElementById("geoStatusText").innerText = "可選擇方法一自動查找、方法二貼座標，或方法三現場定位";
+      document.getElementById("geoStatusText").innerText = "可選擇方法一自動查找、方法二貼座標或智慧抓取，或方法三現場定位";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
       document.getElementById("inputTags").value = "";
       document.getElementById("inputReview").value = "";
@@ -3536,7 +3845,7 @@
 
     function exportData() {
       const backupPayload = {
-        version: "v18_address_priority",
+        version: "v19_fully_free_production",
         exportDate: new Date().toISOString(),
         restaurants: appData,
         wishlists: wishlists
@@ -3591,3 +3900,4 @@
   </script>
 </body>
 </html>
+​
