@@ -31,12 +31,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* 經典專屬美學配置：墨黑文字、薰衣草紫 UI、珊瑚赤紅圖釘 */
     :root {
       --ui-text: #18181B;
       --ui-text-muted: #71717A;
       --ui-theme: #9C95DB;
       --ui-theme-light: #F2F0FB;
-      --marker-color: #E04A4A; /* 經典珊瑚赤紅圖釘 */
+      --marker-color: #E04A4A;
     }
 
     body { color: var(--ui-text); }
@@ -340,7 +341,7 @@
     </div>
   </div>
 
-  <!-- 🌟【通用多選縣市彈跳視窗】 -->
+  <!-- 通用多選縣市彈跳視窗 -->
   <div id="cityMultiSelectModal" class="hidden fixed inset-0 bg-black/60 z-[2600] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[85dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -370,7 +371,7 @@
     </div>
   </div>
 
-  <!-- 🌟【全新：通用標籤多選彈跳視窗】(支援日記與心願清單複選) -->
+  <!-- 通用標籤多選彈跳視窗 -->
   <div id="tagMultiSelectModal" class="hidden fixed inset-0 bg-black/60 z-[2650] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[85dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -487,7 +488,7 @@
         <div id="randomMemoryBox" class="bg-[#FAF8F5] p-3 rounded-2xl border border-[#F0EBE3]"></div>
       </div>
 
-      <!-- 探索回憶統計 (標籤與年度皆連動日記列表) -->
+      <!-- 探索回憶統計 -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-3.5">
         <div class="flex items-center justify-between border-b border-[#F5F0E8] pb-2">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -580,7 +581,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：日記列表 (全筆記導航 ＋ 標籤複選) -->
+    <!-- 頁面 3：日記列表 (店家完整顯示 ＋ 右上角按鈕可橫向滑動) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
       <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
@@ -652,7 +653,7 @@
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
 
-    <!-- 頁面 4：心願清單板塊 (全導航 ＋ 標籤複選篩選) -->
+    <!-- 頁面 4：心願清單板塊 (統一「店家」按鈕位置 ＋ 移除導航) -->
     <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
       
       <!-- 頂部手帳橫幅 -->
@@ -669,7 +670,7 @@
         </button>
       </div>
 
-      <!-- 心願靈感扭蛋機 (隨機抽籤 ＋ GPS 定位找最近) -->
+      <!-- 心願靈感扭蛋機 (已移除導航，保留查看店家) -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -816,7 +817,6 @@
           <textarea id="inputWishReason" rows="3" placeholder="例如: 聽說秋天楓葉超級美、必點招牌鮮魚湯..." class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2.5 leading-relaxed outline-none"></textarea>
         </div>
 
-        <!-- 心願標籤輸入區 -->
         <div class="space-y-1">
           <label class="block font-bold text-main">標籤分類 (逗號分隔)</label>
           <input type="text" id="inputWishTags" placeholder="賞楓, 散步, 私房甜點" class="w-full bg-[#FAF8F5] border border-[#EAE3D9] rounded-xl p-2 outline-none" />
@@ -834,7 +834,7 @@
     </div>
   </div>
 
-  <!-- 記錄日記彈窗 (含方法二智慧抓座標 ＋ 保留手動輸入) -->
+  <!-- 記錄日記彈窗 -->
   <div id="entryModal" class="hidden fixed inset-0 bg-black/60 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full sm:max-w-md max-h-[90dvh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[#EAE3D9] flex justify-between items-center bg-[#FAF8F5]">
@@ -868,13 +868,11 @@
             <input type="text" id="inputStoreAddress" placeholder="輸入路名、門牌 (例: 北門街35號)" class="w-full bg-white border border-[#E0D7CC] rounded-lg p-1.5 text-xs outline-none" />
           </div>
 
-          <!-- 方法一按鈕 -->
           <button type="button" onclick="autoSearchRestaurantLocation()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-magnifying-glass-location text-sm"></i>
             <span>方法一：自動查找地點 (地址優先)</span>
           </button>
 
-          <!-- 🌟 方法二優化：新增「智慧自動抓取座標」快捷鈕，並保留手動輸入 -->
           <div class="bg-white/95 p-2.5 rounded-xl border border-[#E0D7CC] space-y-2">
             <div class="flex justify-between items-center">
               <label class="font-bold text-main text-[11px]">📍 方法二：座標定位 (自動抓取或手動貼上)</label>
@@ -885,7 +883,6 @@
               </div>
             </div>
 
-            <!-- 自動智慧抓座標快捷按鈕 (100% 免費開源) -->
             <button type="button" onclick="smartFetchCoordsFromAddress()" class="touch-btn w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 py-1.5 rounded-lg font-bold text-[11px] flex items-center justify-center space-x-1 shadow-xs active:scale-95 transition">
               <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-emerald-600"></i>
               <span>🪄 依上方地址智慧取得座標 (免費自動填入)</span>
@@ -900,7 +897,6 @@
             <p class="text-[9px] text-sub">💡 可按上方綠色按鈕自動算座標，亦可自行手動修改數值或貼上 Google 座標</p>
           </div>
 
-          <!-- 方法三按鈕 -->
           <button type="button" onclick="autoLocateCurrentSpot()" class="touch-btn w-full bg-theme-light text-theme border border-theme py-2 rounded-xl font-bold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 active:scale-95">
             <i class="fa-solid fa-location-crosshairs text-sm"></i>
             <span>方法三：系統自動定位目前位置 (我在現場)</span>
@@ -1067,12 +1063,10 @@
     let editingWishId = null;
     let unlockingWishId = null;
 
-    // 多選縣市狀態
     let selectedWishCities = new Set();
     let selectedDiaryCities = new Set();
     let currentCityModalContext = 'diary';
 
-    // 🌟 多選標籤狀態
     let selectedWishTags = new Set();
     let selectedDiaryTags = new Set();
     let currentTagModalContext = 'diary';
@@ -1198,7 +1192,7 @@
       document.documentElement.style.setProperty('--ui-theme-light', currentColors.theme + "1A");
     }
 
-    // 城市多選彈窗邏輯
+    // 城市多選彈窗
     function openCityFilterModal(context) {
       currentCityModalContext = context;
       const modal = document.getElementById("cityMultiSelectModal");
@@ -1325,7 +1319,7 @@
       renderWishlistView();
     }
 
-    // 🌟【標籤多選彈窗邏輯】
+    // 標籤多選彈窗邏輯
     function openTagFilterModal(context) {
       currentTagModalContext = context;
       const modal = document.getElementById("tagMultiSelectModal");
@@ -1455,7 +1449,7 @@
       renderWishlistView();
     }
 
-    // 心願靈感扭蛋機 (隨機 ＋ GPS 衛星定位找最近)
+    // 心願靈感扭蛋機 (已移除導航按鈕，保留查看店家)
     function pickRandomWish(isNearest = false, nearestItem = null, distanceKm = null) {
       const box = document.getElementById("wishRandomResultBox");
       const currentList = wishlists.filter(w => w.type === activeWishCategory);
@@ -1476,10 +1470,6 @@
         pickItem = pool[Math.floor(Math.random() * pool.length)];
       }
 
-      const navDest = (pickItem.lat && pickItem.lng)
-        ? `${pickItem.lat},${pickItem.lng}`
-        : encodeURIComponent(`${pickItem.city || ''} ${pickItem.name}`.trim());
-      const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
       const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${pickItem.city || ''} ${pickItem.name}`.trim())}`;
 
       box.innerHTML = `
@@ -1509,11 +1499,7 @@
               <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
               <span>立刻去解鎖 (轉日記)</span>
             </button>
-            <a href="${navUrl}" target="_blank" class="touch-btn px-2.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-emerald-100 transition">
-              <i class="fa-solid fa-location-arrow text-[10px]"></i>
-              <span>導航</span>
-            </a>
-            <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家詳細評價與營業時間" class="touch-btn px-2.5 py-1.5 bg-sky-50 text-sky-800 border border-sky-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-sky-100 transition">
+            <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家詳細營業時間與評論" class="touch-btn px-3 py-1.5 bg-sky-50 text-sky-800 border border-sky-300 font-bold text-xs rounded-xl flex items-center justify-center space-x-1 hover:bg-sky-100 transition">
               <i class="fa-solid fa-circle-info text-[10px] text-sky-600"></i>
               <span>店家</span>
             </a>
@@ -1650,6 +1636,7 @@
       renderWishlistView();
     }
 
+    // 🚀【更新】：心願清單卡片統一「店家」按鈕位置至右上方，移除導航按鈕，店名完整展示
     function renderWishlistView() {
       const container = document.getElementById("wishlistCardsContainer");
       if (!container) return;
@@ -1662,12 +1649,10 @@
 
       let currentList = activeWishCategory === 'spot' ? spotList : foodList;
 
-      // 縣市複選過濾
       if (selectedWishCities.size > 0) {
         currentList = currentList.filter(item => item.city && selectedWishCities.has(item.city.trim()));
       }
 
-      // 標籤複選過濾
       if (selectedWishTags.size > 0) {
         currentList = currentList.filter(item => (item.tags || []).some(t => selectedWishTags.has(t.trim())));
       }
@@ -1686,32 +1671,33 @@
       }
 
       container.innerHTML = currentList.map(item => {
-        const navDest = (item.lat && item.lng)
-          ? `${item.lat},${item.lng}`
-          : encodeURIComponent(`${item.city || ''} ${item.name}`.trim());
-        const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
         const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         return `
           <div class="bg-white rounded-2xl p-4 border border-[#EAE3D9] shadow-xs flex flex-col space-y-2.5">
-            <div class="flex justify-between items-start gap-2">
-              <div class="min-w-0 flex-1">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center space-x-1.5 flex-wrap">
                   <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
                     ${item.type === 'spot' ? '🏞️ 景點' : '🍜 美食'} · ${item.city || item.country || '未設定'}
                   </span>
                   ${(item.tags || []).map(t => `<span class="bg-gray-100 text-sub text-[9px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap">#${t}</span>`).join('')}
                 </div>
-                <h3 class="font-bold text-main text-sm mt-1 truncate">${item.name}</h3>
-                <p class="text-[11px] text-sub truncate">${item.address || '尚未記錄詳細地址'}</p>
+
+                <!-- 統一位置：右上方滑動按鈕列 (店家 ＋ 編輯) -->
+                <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
+                  <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0 shadow-2xs">
+                    <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
+                  </a>
+                  <button onclick="openEditWishModal('${item.id}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition whitespace-nowrap flex-shrink-0">
+                    ✏️ 編輯
+                  </button>
+                </div>
               </div>
 
-              <!-- 右上角動作按鈕 -->
-              <div class="flex items-center space-x-1 flex-shrink-0">
-                <button onclick="openEditWishModal('${item.id}')" class="touch-btn text-sub hover:text-main p-1.5 text-xs rounded-lg hover:bg-gray-100">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-              </div>
+              <!-- 店家名稱完整顯示 (不截斷) -->
+              <h3 class="font-bold text-main text-base leading-snug break-words">${item.name}</h3>
+              <p class="text-[11px] text-sub">${item.address || '尚未記錄詳細地址'}</p>
             </div>
 
             <div class="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#F0EBE3] text-xs text-main leading-relaxed">
@@ -1719,30 +1705,16 @@
               <span>${item.reason || '暫無特別備忘，只想去走走！'}</span>
             </div>
 
-            <!-- 底部動作按鈕列：刪除 ＋ 導航 ＋ 店家資訊 ＋ 解鎖 -->
             <div class="flex justify-between items-center text-[11px] pt-1.5 border-t border-[#F5F0E8]">
               <button onclick="deleteSingleWish('${item.id}')" class="touch-btn text-sub hover:text-red-500 font-medium flex items-center space-x-1">
                 <i class="fa-solid fa-trash-can text-[10px]"></i>
-                <span>刪除</span>
+                <span>刪除心願</span>
               </button>
               
-              <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
-                <a href="${navUrl}" target="_blank" title="開啟 Google Maps 路線導航" class="touch-btn text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1.5 rounded-xl font-bold flex items-center space-x-1 transition active:scale-95 shadow-xs">
-                  <i class="fa-solid fa-location-arrow text-[10px] text-emerald-600"></i>
-                  <span>導航</span>
-                </a>
-
-                <!-- 🌟 店家資訊按鈕 (免費連至 Google 查看商家檔案/評論) -->
-                <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家詳細評價與營業時間" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1.5 rounded-xl font-bold flex items-center space-x-1 transition active:scale-95 shadow-xs">
-                  <i class="fa-solid fa-circle-info text-[10px] text-sky-600"></i>
-                  <span>店家</span>
-                </a>
-
-                <button onclick="unlockWishToDiary('${item.id}')" class="touch-btn bg-theme text-white px-3 py-1.5 rounded-xl font-bold flex items-center space-x-1 shadow-xs active:scale-95 transition">
-                  <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
-                  <span>解鎖為日記</span>
-                </button>
-              </div>
+              <button onclick="unlockWishToDiary('${item.id}')" class="touch-btn bg-theme text-white px-3.5 py-1.5 rounded-xl font-bold flex items-center space-x-1 shadow-xs active:scale-95 transition">
+                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+                <span>✨ 解鎖為日記</span>
+              </button>
             </div>
           </div>
         `;
@@ -2693,7 +2665,6 @@
         `).join('');
       }
 
-      // 探索類型標籤 (連動日記列表按鈕)
       const tagsContainer = document.getElementById("statTagsList");
       const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
       if (sortedTags.length === 0) {
@@ -2706,7 +2677,6 @@
         `).join('');
       }
 
-      // 年度回憶累積清單 (連動日記列表)
       const yearContainer = document.getElementById("statYearlyTrend");
       const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
       if (sortedYears.length === 0) {
@@ -2966,7 +2936,7 @@
       }
     }
 
-    // 🌟【方法二快捷按鈕核心實作】：依上方地址自動智慧換算座標 (免費 0 元，且保留手動修改)
+    // 方法二：依地址自動智慧換算座標
     async function smartFetchCoordsFromAddress() {
       const address = document.getElementById("inputStoreAddress").value.trim();
       const city = document.getElementById("inputCity").value.trim();
@@ -2982,7 +2952,6 @@
 
       const fullAddress = address.startsWith(city) ? address : `${city}${address}`;
 
-      // 多段降級清單：完整門牌 ➔ 剔除門牌查路名 ➔ 剔除巷弄查路段 ➔ 純店名
       const tryQueries = [
         fullAddress,
         fullAddress.replace(/\d+號.*$/, ''),
@@ -3007,7 +2976,6 @@
       }
 
       if (found) {
-        // 自動填入經緯度輸入框 (使用者依然可以自由修改數字)
         document.getElementById("inputCoords").value = `${found.lat.toFixed(5)}, ${found.lng.toFixed(5)}`;
         pendingLocation = found;
         statusText.innerText = `🎯 成功依「${usedQuery}」換算座標 (${found.lat.toFixed(4)}, ${found.lng.toFixed(4)})！可手動修改`;
@@ -3401,10 +3369,7 @@
     }
 
     function onCountryChange() { renderListView(); }
-
-    function initTagFilter() {
-      // 標籤篩選已由通用多選彈窗接管
-    }
+    function initTagFilter() {}
 
     function renderMapCategoryChips() {
       const container = document.getElementById("mapCategoryChips");
@@ -3447,6 +3412,7 @@
       return [];
     }
 
+    // 渲染地圖圖釘 (包含店家資訊按鈕)
     function renderMarkers() {
       if (!map || !markersLayer) return;
       markersLayer.clearLayers();
@@ -3486,8 +3452,6 @@
              </div>` 
           : '';
 
-        const navDest = `${item.lat},${item.lng}`;
-        const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
         const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         const content = `
@@ -3501,7 +3465,6 @@
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:var(--marker-color); font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
             <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;">${latest.review || '無心得'}</p>
             <div style="display:flex; gap:3px;">
-              <a href="${navUrl}" target="_blank" class="touch-btn" style="flex:1; background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold; text-align:center; text-decoration:none;">🚀 導航</a>
               <a href="${infoUrl}" target="_blank" class="touch-btn" style="flex:1; background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold; text-align:center; text-decoration:none;">ℹ️ 店家</a>
               <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold;">📸 拍立得</button>
               <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-text); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold;">✏️ 編輯</button>
@@ -3523,7 +3486,7 @@
       }
     }
 
-    // 日記列表渲染 (導航 ＋ 店家資訊 ＋ 標籤複選)
+    // 🚀【日記列表渲染】：店名完整顯示 ＋ 按鈕橫向滑動列 ＋ 統一「店家」按鈕
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const ratingFilter = document.getElementById("filterRating").value;
@@ -3541,7 +3504,6 @@
         list = list.filter(i => i.city && selectedDiaryCities.has(i.city.trim()));
       }
 
-      // 標籤多選過濾
       if (selectedDiaryTags.size > 0) {
         list = list.filter(i => (i.tags || []).some(t => selectedDiaryTags.has(t.trim())));
       }
@@ -3573,11 +3535,6 @@
         const latest = item.visits[0];
         const photos = getVisitPhotos(latest);
         const hasCoords = item.lat && item.lng;
-
-        const navDest = (item.lat && item.lng)
-          ? `${item.lat},${item.lng}`
-          : encodeURIComponent(`${item.city || ''} ${item.name}`.trim());
-        const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${navDest}`;
         const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
         let photosRenderHtml = "";
@@ -3607,31 +3564,30 @@
 
         return `
           <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
-            <div class="flex justify-between items-start gap-2">
-              <div class="min-w-0 flex-1">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center space-x-1.5 flex-wrap">
                   <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${item.country || ''} · ${item.city || ''}</span>
                   ${!hasCoords ? '<span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap">📍 待補座標</span>' : ''}
                 </div>
-                <h3 class="font-bold text-main text-sm mt-0.5 truncate">${item.name}</h3>
-                <p class="text-[11px] text-sub truncate">${item.address || '無詳細地址'}</p>
+
+                <!-- 統一位置：右上方水平滑動按鈕列 (店家 ＋ 拍立得 ＋ 編輯) -->
+                <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
+                  <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0 shadow-2xs">
+                    <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
+                  </a>
+                  <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0">
+                    <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得
+                  </button>
+                  <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition whitespace-nowrap flex-shrink-0">
+                    ✏️ 編輯
+                  </button>
+                </div>
               </div>
-              
-              <!-- 筆記卡片右上方按鈕群組 (導航 ＋ 店家資訊 ＋ 拍立得 ＋ 編輯) -->
-              <div class="flex items-center space-x-1 flex-shrink-0 whitespace-nowrap pt-0.5">
-                <a href="${navUrl}" target="_blank" title="開啟 Google Maps 路線導航" class="touch-btn text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
-                  <i class="fa-solid fa-location-arrow mr-1 text-[10px] text-emerald-600"></i>導航
-                </a>
-                <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
-                  <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
-                </a>
-                <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center flex-shrink-0 whitespace-nowrap">
-                  <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得
-                </button>
-                <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex-shrink-0 whitespace-nowrap">
-                  ✏️ 編輯
-                </button>
-              </div>
+
+              <!-- 店名完整呈現！不截斷、自動換行 -->
+              <h3 class="font-bold text-main text-base leading-snug break-words">${item.name}</h3>
+              <p class="text-[11px] text-sub">${item.address || '無詳細地址'}</p>
             </div>
 
             ${photosRenderHtml}
@@ -3845,7 +3801,7 @@
 
     function exportData() {
       const backupPayload = {
-        version: "v19_fully_free_production",
+        version: "v20_clean_store_info",
         exportDate: new Date().toISOString(),
         restaurants: appData,
         wishlists: wishlists
