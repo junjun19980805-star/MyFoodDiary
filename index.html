@@ -61,6 +61,13 @@
 
     .touch-btn { touch-action: manipulation; cursor: pointer; }
 
+    /* 📱【修正】：確保手機端文字可正常選取與長按呼出系統選單 */
+    .selectable-text {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+      -webkit-touch-callout: default !important;
+    }
+
     .custom-marker {
       background: var(--marker-color);
       width: 38px;
@@ -83,7 +90,12 @@
     }
   </style>
 </head>
-<body class="flex flex-col h-full w-full relative select-none">
+<body class="flex flex-col h-full w-full relative">
+
+  <!-- 提示小 Toast -->
+  <div id="copyToast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[3500] bg-black/80 text-white text-xs px-3.5 py-1.5 rounded-full shadow-lg transition duration-200">
+    已複製到剪貼簿！
+  </div>
 
   <!-- 頂部導覽列 -->
   <header class="bg-[#FFFFFF]/95 backdrop-blur border-b border-[#EAE3D9] px-3.5 py-2 flex items-center justify-between z-30 shadow-xs relative flex-shrink-0">
@@ -205,7 +217,7 @@
       </button>
     </div>
     <div class="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-3 text-white text-xs mb-2">
-      <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic text-gray-200"></p>
+      <p id="lightboxReview" class="line-clamp-3 leading-relaxed italic text-gray-200 selectable-text"></p>
     </div>
   </div>
 
@@ -581,7 +593,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：日記列表 (店家完整顯示 ＋ 右上角按鈕可橫向滑動) -->
+    <!-- 頁面 3：日記列表 (支援可選取複製店名與地址 ＋ 📋 快捷複製小鈕) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
       <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
@@ -613,7 +625,6 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <!-- 標籤複選篩選鈕 -->
           <div>
             <div class="flex justify-between items-center">
               <label class="font-bold text-main">🏷️ 標籤分類 (可複選)</label>
@@ -653,7 +664,7 @@
       <div id="restaurantCards" class="space-y-3"></div>
     </div>
 
-    <!-- 頁面 4：心願清單板塊 (統一「店家」按鈕位置 ＋ 移除導航) -->
+    <!-- 頁面 4：心願清單板塊 -->
     <div id="wishlistView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-4 pb-32 space-y-3.5">
       
       <!-- 頂部手帳橫幅 -->
@@ -670,7 +681,7 @@
         </button>
       </div>
 
-      <!-- 心願靈感扭蛋機 (已移除導航，保留查看店家) -->
+      <!-- 心願靈感扭蛋機 -->
       <div class="bg-white p-4 rounded-3xl border border-[#EAE3D9] shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-main tracking-wide flex items-center">
@@ -1091,6 +1102,25 @@
     let selectedPolaroidPhotoIndex = 0;
     let currentPolaroidDataUrl = "";
 
+    // 📋 快捷複製小工具
+    async function copyQuickText(text, label = "內容") {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(`已複製${label}：${text}`);
+      } catch (e) {
+        prompt(`請長按複製${label}：`, text);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("copyToast");
+      if (!toast) return;
+      toast.innerText = msg;
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 2000);
+    }
+
     async function initApp() {
       applyAllColors();
       initMap();
@@ -1319,7 +1349,7 @@
       renderWishlistView();
     }
 
-    // 標籤多選彈窗邏輯
+    // 標籤多選彈窗
     function openTagFilterModal(context) {
       currentTagModalContext = context;
       const modal = document.getElementById("tagMultiSelectModal");
@@ -1449,7 +1479,7 @@
       renderWishlistView();
     }
 
-    // 心願靈感扭蛋機 (已移除導航按鈕，保留查看店家)
+    // 心願靈感扭蛋機
     function pickRandomWish(isNearest = false, nearestItem = null, distanceKm = null) {
       const box = document.getElementById("wishRandomResultBox");
       const currentList = wishlists.filter(w => w.type === activeWishCategory);
@@ -1482,15 +1512,15 @@
                 </span>
                 ${distStr}
               </div>
-              <h4 class="font-bold text-main text-sm mt-1 truncate">${pickItem.name}</h4>
-              <p class="text-[10px] text-sub truncate">${pickItem.address || '尚未記錄地址'}</p>
+              <h4 class="font-bold text-main text-sm mt-1 truncate selectable-text">${pickItem.name}</h4>
+              <p class="text-[10px] text-sub truncate selectable-text">${pickItem.address || '尚未記錄地址'}</p>
             </div>
             <button onclick="pickRandomWish(false)" title="再抽一次" class="touch-btn text-theme hover:bg-theme-light p-1.5 rounded-full active:rotate-180 transition">
               <i class="fa-solid fa-rotate-right text-sm"></i>
             </button>
           </div>
 
-          <div class="bg-white p-2 rounded-xl border border-[#EAE3D9] text-xs text-main font-serif italic">
+          <div class="bg-white p-2 rounded-xl border border-[#EAE3D9] text-xs text-main font-serif italic selectable-text">
             "${pickItem.reason || '想去散散步，享受一段美好時光！'}"
           </div>
 
@@ -1636,7 +1666,7 @@
       renderWishlistView();
     }
 
-    // 🚀【更新】：心願清單卡片統一「店家」按鈕位置至右上方，移除導航按鈕，店名完整展示
+    // 心願清單卡片渲染 (支援長按選取 ＋ 📋 快捷複製)
     function renderWishlistView() {
       const container = document.getElementById("wishlistCardsContainer");
       if (!container) return;
@@ -1684,7 +1714,6 @@
                   ${(item.tags || []).map(t => `<span class="bg-gray-100 text-sub text-[9px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap">#${t}</span>`).join('')}
                 </div>
 
-                <!-- 統一位置：右上方滑動按鈕列 (店家 ＋ 編輯) -->
                 <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
                   <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0 shadow-2xs">
                     <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
@@ -1695,12 +1724,26 @@
                 </div>
               </div>
 
-              <!-- 店家名稱完整顯示 (不截斷) -->
-              <h3 class="font-bold text-main text-base leading-snug break-words">${item.name}</h3>
-              <p class="text-[11px] text-sub">${item.address || '尚未記錄詳細地址'}</p>
+              <!-- 店名 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
+              <div class="flex items-baseline space-x-1.5">
+                <h3 class="font-bold text-main text-base leading-snug break-words selectable-text flex-1 cursor-text">${item.name}</h3>
+                <button type="button" onclick="copyQuickText('${item.name.replace(/'/g, "\\'")}', '店名')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+
+              <!-- 地址 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
+              <div class="flex items-baseline space-x-1.5">
+                <p class="text-[11px] text-sub selectable-text flex-1 cursor-text">${item.address || '尚未記錄詳細地址'}</p>
+                ${item.address ? `
+                  <button type="button" onclick="copyQuickText('${item.address.replace(/'/g, "\\'")}', '地址')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                ` : ''}
+              </div>
             </div>
 
-            <div class="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#F0EBE3] text-xs text-main leading-relaxed">
+            <div class="bg-[#FAF8F5] p-2.5 rounded-xl border border-[#F0EBE3] text-xs text-main leading-relaxed selectable-text">
               <span class="text-theme font-bold mr-1">💡 探索備忘：</span>
               <span>${item.reason || '暫無特別備忘，只想去走走！'}</span>
             </div>
@@ -2034,7 +2077,7 @@
           <div class="flex justify-between items-start">
             <div>
               <span class="bg-theme-light text-theme text-[9px] px-2 py-0.5 rounded-full font-bold">${randomItem.city || randomItem.country || '私房角落'}</span>
-              <h4 class="font-bold text-main text-xs mt-1">${randomItem.storeName}</h4>
+              <h4 class="font-bold text-main text-xs mt-1 selectable-text">${randomItem.storeName}</h4>
             </div>
             <div class="text-right">
               <span class="text-amber-500 font-black text-xs">★ ${Number(randomItem.rating).toFixed(1)}</span>
@@ -2048,7 +2091,7 @@
             </div>
           ` : ''}
 
-          <p class="text-[11px] text-main leading-relaxed font-serif italic line-clamp-2">
+          <p class="text-[11px] text-main leading-relaxed font-serif italic line-clamp-2 selectable-text">
             "${randomItem.review || '美好的一天，在此留下足跡。'}"
           </p>
         </div>
@@ -2665,6 +2708,7 @@
         `).join('');
       }
 
+      // 探索類型標籤 (連動日記列表按鈕)
       const tagsContainer = document.getElementById("statTagsList");
       const sortedTags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
       if (sortedTags.length === 0) {
@@ -2677,6 +2721,7 @@
         `).join('');
       }
 
+      // 年度回憶累積清單 (連動日記列表)
       const yearContainer = document.getElementById("statYearlyTrend");
       const sortedYears = Object.entries(yearMap).sort((a, b) => b[0].localeCompare(a[0]));
       if (sortedYears.length === 0) {
@@ -2709,7 +2754,7 @@
               <div class="flex justify-between items-start">
                 <div class="truncate pr-2">
                   <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold">${item.city || item.country || '私房地點'}</span>
-                  <h4 class="font-bold text-main text-sm mt-1 truncate">${item.storeName}</h4>
+                  <h4 class="font-bold text-main text-sm mt-1 truncate selectable-text">${item.storeName}</h4>
                 </div>
                 <div class="text-right flex-shrink-0">
                   <span class="text-amber-500 font-black text-xs">★ ${Number(item.rating).toFixed(1)}</span>
@@ -2728,7 +2773,7 @@
                 </div>
               `}
 
-              <p class="text-xs text-main leading-relaxed line-clamp-2 italic font-serif mt-2">
+              <p class="text-xs text-main leading-relaxed line-clamp-2 italic font-serif mt-2 selectable-text">
                 "${item.review || '美好的一天，在此留下足跡。'}"
               </p>
             </div>
@@ -3461,9 +3506,9 @@
               ${item.visits.length > 1 ? `<span style="font-size:10px; background:#FAF0E6; color:var(--ui-theme); padding:1px 6px; border-radius:4px; font-weight:bold;">已訪 ${item.visits.length} 次</span>` : ''}
             </div>
             ${photoHtml}
-            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:var(--ui-text);">${item.name}</h4>
+            <h4 style="margin:0 0 2px; font-weight:bold; font-size:13px; color:var(--ui-text);" class="selectable-text">${item.name}</h4>
             <div style="font-size:11px; margin-bottom:4px;"><b style="color:var(--marker-color); font-size:13px;">★ ${latest.rating.toFixed(1)}</b> ${revisitBadge}</div>
-            <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;">${latest.review || '無心得'}</p>
+            <p style="font-size:11px; color:var(--ui-text-muted); margin:0 0 6px;" class="selectable-text">${latest.review || '無心得'}</p>
             <div style="display:flex; gap:3px;">
               <a href="${infoUrl}" target="_blank" class="touch-btn" style="flex:1; background:#F0F9FF; color:#0369A1; border:1px solid #BAE6FD; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold; text-align:center; text-decoration:none;">ℹ️ 店家</a>
               <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn" style="flex:1; background:#FAF8F5; color:var(--ui-theme); border:1px solid #EAE3D9; border-radius:8px; padding:4px 0; font-size:10px; font-weight:bold;">📸 拍立得</button>
@@ -3486,7 +3531,7 @@
       }
     }
 
-    // 🚀【日記列表渲染】：店名完整顯示 ＋ 按鈕橫向滑動列 ＋ 統一「店家」按鈕
+    // 🚀【日記列表渲染】：店名/地址完整選取複製 ＋ 📋 快捷拷貝按鈕
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const ratingFilter = document.getElementById("filterRating").value;
@@ -3571,7 +3616,7 @@
                   ${!hasCoords ? '<span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap">📍 待補座標</span>' : ''}
                 </div>
 
-                <!-- 統一位置：右上方水平滑動按鈕列 (店家 ＋ 拍立得 ＋ 編輯) -->
+                <!-- 統一按鈕列 -->
                 <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
                   <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0 shadow-2xs">
                     <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
@@ -3585,9 +3630,23 @@
                 </div>
               </div>
 
-              <!-- 店名完整呈現！不截斷、自動換行 -->
-              <h3 class="font-bold text-main text-base leading-snug break-words">${item.name}</h3>
-              <p class="text-[11px] text-sub">${item.address || '無詳細地址'}</p>
+              <!-- 店名 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
+              <div class="flex items-baseline space-x-1.5">
+                <h3 class="font-bold text-main text-base leading-snug break-words selectable-text flex-1 cursor-text">${item.name}</h3>
+                <button type="button" onclick="copyQuickText('${item.name.replace(/'/g, "\\'")}', '店名')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
+
+              <!-- 地址 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
+              <div class="flex items-baseline space-x-1.5">
+                <p class="text-[11px] text-sub selectable-text flex-1 cursor-text">${item.address || '無詳細地址'}</p>
+                ${item.address ? `
+                  <button type="button" onclick="copyQuickText('${item.address.replace(/'/g, "\\'")}', '地址')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                    <i class="fa-regular fa-copy"></i>
+                  </button>
+                ` : ''}
+              </div>
             </div>
 
             ${photosRenderHtml}
@@ -3603,7 +3662,7 @@
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
-              <p class="text-xs text-main leading-relaxed font-medium">"${latest.review || '無心得記錄'}"</p>
+              <p class="text-xs text-main leading-relaxed font-medium selectable-text">${latest.review || '無心得記錄'}</p>
             </div>
 
             <div class="flex justify-between items-center text-[11px] text-sub pt-1 border-t border-[#F5F0E8]">
@@ -3801,7 +3860,7 @@
 
     function exportData() {
       const backupPayload = {
-        version: "v20_clean_store_info",
+        version: "v21_selectable_text",
         exportDate: new Date().toISOString(),
         restaurants: appData,
         wishlists: wishlists
@@ -3856,4 +3915,3 @@
   </script>
 </body>
 </html>
-​
