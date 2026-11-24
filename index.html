@@ -593,7 +593,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- 頁面 3：日記列表 (支援可選取複製店名與地址 ＋ 📋 快捷複製小鈕) -->
+    <!-- 頁面 3：日記列表 (支援歷屆訪問紀錄完整展示 ＋ 可選取複製店名與地址 ＋ 📋 快捷複製小鈕) -->
     <div id="listView" class="hidden w-full h-full bg-[#FAF8F5] overflow-y-auto px-4 py-3 pb-32">
       <!-- 年度時光膠囊回顧橫向滑動列 -->
       <div class="mb-3 space-y-1">
@@ -1102,6 +1102,20 @@
     let selectedPolaroidPhotoIndex = 0;
     let currentPolaroidDataUrl = "";
 
+    // 整理與確保每筆造訪資料具備獨立 visitId 且依日期新到舊排序
+    function normalizeAppData(list) {
+      (list || []).forEach(store => {
+        if (!Array.isArray(store.visits)) store.visits = [];
+        store.visits.forEach((v, idx) => {
+          if (!v.visitId) {
+            v.visitId = "v_" + Date.now() + "_" + idx + "_" + Math.random().toString(36).substr(2, 4);
+          }
+        });
+        store.visits.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      });
+      return list;
+    }
+
     // 📋 快捷複製小工具
     async function copyQuickText(text, label = "內容") {
       if (!text) return;
@@ -1111,6 +1125,18 @@
       } catch (e) {
         prompt(`請長按複製${label}：`, text);
       }
+    }
+
+    function copyStoreText(storeId, field) {
+      const store = appData.find(s => s.id === storeId);
+      if (!store) return;
+      copyQuickText(store[field], field === 'name' ? '店名' : '地址');
+    }
+
+    function copyWishText(wishId, field) {
+      const wish = wishlists.find(w => w.id === wishId);
+      if (!wish) return;
+      copyQuickText(wish[field], field === 'name' ? '店名' : '地址');
     }
 
     function showToast(msg) {
@@ -1125,7 +1151,7 @@
       applyAllColors();
       initMap();
       await initDB();
-      appData = await dbGetAll();
+      appData = normalizeAppData(await dbGetAll());
       loadWishlistsFromStorage();
 
       const isInitialized = localStorage.getItem("food_diary_initialized");
@@ -1727,7 +1753,7 @@
               <!-- 店名 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
               <div class="flex items-baseline space-x-1.5">
                 <h3 class="font-bold text-main text-base leading-snug break-words selectable-text flex-1 cursor-text">${item.name}</h3>
-                <button type="button" onclick="copyQuickText('${item.name.replace(/'/g, "\\'")}', '店名')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                <button type="button" onclick="copyWishText('${item.id}', 'name')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
                   <i class="fa-regular fa-copy"></i>
                 </button>
               </div>
@@ -1736,7 +1762,7 @@
               <div class="flex items-baseline space-x-1.5">
                 <p class="text-[11px] text-sub selectable-text flex-1 cursor-text">${item.address || '尚未記錄詳細地址'}</p>
                 ${item.address ? `
-                  <button type="button" onclick="copyQuickText('${item.address.replace(/'/g, "\\'")}', '地址')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                  <button type="button" onclick="copyWishText('${item.id}', 'address')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
                     <i class="fa-regular fa-copy"></i>
                   </button>
                 ` : ''}
@@ -1955,6 +1981,7 @@
       document.getElementById("inputTags").value = (wish.tags && wish.tags.length) ? wish.tags.join(', ') : (wish.type === 'spot' ? '景點' : '美食');
       document.getElementById("inputReview").value = wish.reason ? `【心願解鎖】：${wish.reason}\n今天終於親自來到了這裡，心情真好！` : '今天終於親自解鎖了這處心願景點！';
       document.getElementById("inputCost").value = "";
+      document.getElementById("inputRevisit").checked = true;
       document.getElementById("modalDeleteBtn").classList.add("hidden");
 
       renderPhotosThumbnails();
@@ -2909,6 +2936,7 @@
       document.getElementById("inputTags").value = "景點";
       document.getElementById("inputReview").value = "";
       document.getElementById("inputCost").value = "";
+      document.getElementById("inputRevisit").checked = true;
       document.getElementById("modalDeleteBtn").classList.add("hidden");
       
       renderPhotosThumbnails();
@@ -3132,7 +3160,7 @@
                 lng: coords[0],
                 tags: ["Google收藏"],
                 visits: [{
-                  visitId: "v_" + Date.now(),
+                  visitId: "v_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
                   date: new Date().toISOString().split("T")[0],
                   rating: 5.0,
                   cost: null,
@@ -3146,7 +3174,7 @@
             }
           }
 
-          appData = await dbGetAll();
+          appData = normalizeAppData(await dbGetAll());
           refreshViews();
           updateDashboardStats();
           alert(`🎉 成功匯入了 ${count} 個足跡地點！已全數同步至日記。`);
@@ -3274,13 +3302,22 @@
               visit.photos = photosToSave;
               delete visit.photo;
             }
+            store.visits.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
             await dbPut(store);
           }
         } else if (currentModalMode === 'REVISIT') {
           const store = appData.find(s => s.id === editingStoreId);
           if (store) {
+            store.name = name;
+            store.country = country;
+            store.city = city;
+            store.address = address;
+            if (finalCoords) {
+              store.lat = finalCoords.lat;
+              store.lng = finalCoords.lng;
+            }
             store.visits.unshift({
-              visitId: "v_" + Date.now(),
+              visitId: "v_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
               date: date,
               rating: currentRatingValue,
               cost: cost ? Number(cost) : null,
@@ -3288,7 +3325,8 @@
               review: review,
               photos: photosToSave
             });
-            store.tags = Array.from(new Set([...store.tags, ...tags]));
+            store.visits.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            store.tags = Array.from(new Set([...(store.tags || []), ...tags]));
             await dbPut(store);
           }
         } else {
@@ -3302,7 +3340,7 @@
             lng: finalCoords ? finalCoords.lng : null,
             tags: tags.length ? tags : ["回憶"],
             visits: [{
-              visitId: "v_" + Date.now(),
+              visitId: "v_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
               date: date,
               rating: currentRatingValue,
               cost: cost ? Number(cost) : null,
@@ -3531,7 +3569,80 @@
       }
     }
 
-    // 🚀【日記列表渲染】：店名/地址完整選取複製 ＋ 📋 快捷拷貝按鈕
+    // 展開／收合單一地點的歷史造訪紀錄
+    function toggleOlderVisits(storeId) {
+      const box = document.getElementById(`olderVisits_${storeId}`);
+      const btn = document.getElementById(`toggleOlderBtn_${storeId}`);
+      if (!box || !btn) return;
+      const isHidden = box.classList.toggle("hidden");
+      const count = box.getAttribute("data-count") || "";
+      btn.innerText = isHidden ? `展開舊紀錄 (${count}) ▼` : `收合 ▲`;
+    }
+
+    // 建立單次造訪的圖片與筆記區塊 HTML
+    function buildVisitBlockHtml(storeId, visit, visitOrdinal, totalVisits, isLatestOverall) {
+      const photos = getVisitPhotos(visit);
+
+      let photosRenderHtml = "";
+      if (photos.length === 1) {
+        photosRenderHtml = `
+          <div onclick="openLightboxByData('${storeId}', '${visit.visitId}', 0)" class="touch-btn cursor-pointer rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] flex items-center justify-center p-1.5 max-h-72">
+            <img src="${photos[0]}" class="max-h-68 max-w-full object-contain rounded-xl shadow-xs" />
+          </div>
+        `;
+      } else if (photos.length > 1) {
+        photosRenderHtml = `
+          <div class="relative">
+            <div class="flex space-x-2.5 overflow-x-auto no-scrollbar snap-x py-1">
+              ${photos.map((p, pIdx) => `
+                <div onclick="openLightboxByData('${storeId}', '${visit.visitId}', ${pIdx})" class="touch-btn flex-shrink-0 w-[82%] h-52 snap-center rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] relative cursor-pointer flex items-center justify-center p-1.5">
+                  <img src="${p}" class="max-h-full max-w-full object-contain rounded-xl" />
+                  <span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                    ${pIdx + 1} / ${photos.length}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+            <span class="text-[9px] text-sub block text-right mt-0.5 font-medium">👈 左右滑動 · 點擊看大圖</span>
+          </div>
+        `;
+      }
+
+      const ordinalBadge = totalVisits > 1
+        ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLatestOverall ? 'bg-theme text-white' : 'bg-[#EAE3D9] text-main'}">第 ${visitOrdinal} 次${isLatestOverall ? ' · 最新' : ''}</span>`
+        : '';
+
+      return `
+        <div class="space-y-2">
+          ${photosRenderHtml}
+          <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
+            <div class="flex justify-between items-center gap-1 text-xs border-b border-[#F0EBE3] pb-1.5 flex-wrap">
+              <div class="flex items-center space-x-1.5 flex-wrap">
+                ${ordinalBadge}
+                <span class="font-black text-amber-500">★ ${Number(visit.rating || 0).toFixed(1)}</span>
+                <span class="text-sub text-[10px]">(${visit.date || '無日期'})</span>
+                ${visit.cost ? `<span class="text-sub text-[10px]">· $${visit.cost}</span>` : ''}
+                ${visit.revisit ? '<span class="text-theme font-bold text-[10px]">· 值得再訪 👍</span>' : ''}
+              </div>
+              <div class="flex items-center space-x-1 flex-shrink-0">
+                <button type="button" onclick="generatePolaroidCard('${storeId}', '${visit.visitId}')" title="製作拍立得卡片" class="touch-btn text-theme bg-theme-light border border-theme px-2 py-0.5 rounded-lg text-[11px] font-bold active:scale-95 transition flex items-center whitespace-nowrap">
+                  <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得
+                </button>
+                <button type="button" onclick="openEditModal('${storeId}', '${visit.visitId}')" title="編輯本次紀錄" class="touch-btn text-main bg-white border border-[#EAE3D9] px-2 py-0.5 rounded-lg text-[11px] font-bold active:scale-95 transition whitespace-nowrap">
+                  ✏️ 編輯
+                </button>
+                <button type="button" onclick="deleteSingleVisit('${storeId}', '${visit.visitId}')" title="刪除本次筆記" class="touch-btn text-gray-400 hover:text-red-500 p-1 text-xs">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-main leading-relaxed font-medium selectable-text whitespace-pre-line">${visit.review || '無心得記錄'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // 🚀【日記列表渲染】：完整顯示所有歷屆造訪紀錄 ＋ 店名/地址完整選取複製 ＋ 📋 快捷拷貝按鈕
     function renderListView() {
       const countryFilter = document.getElementById("filterCountry").value;
       const ratingFilter = document.getElementById("filterRating").value;
@@ -3553,8 +3664,10 @@
         list = list.filter(i => (i.tags || []).some(t => selectedDiaryTags.has(t.trim())));
       }
 
-      if (ratingFilter === "gte_4.5") list = list.filter(i => i.visits[0]?.rating >= 4.5);
-      else if (ratingFilter === "lt_3.0") list = list.filter(i => i.visits[0]?.rating < 3.0);
+      if (ratingFilter === "gte_4.5") list = list.filter(i => (i.visits || []).some(v => v.rating >= 4.5));
+      else if (ratingFilter === "gte_4.0") list = list.filter(i => (i.visits || []).some(v => v.rating >= 4.0));
+      else if (ratingFilter === "gte_3.0") list = list.filter(i => (i.visits || []).some(v => v.rating >= 3.0));
+      else if (ratingFilter === "lt_3.0") list = list.filter(i => (i.visits || []).some(v => v.rating < 3.0));
 
       list.sort((a, b) => {
         const da = a.visits[0]?.date || "";
@@ -3577,35 +3690,36 @@
       }
 
       container.innerHTML = list.map(item => {
-        const latest = item.visits[0];
-        const photos = getVisitPhotos(latest);
+        const allSortedVisits = [...(item.visits || [])].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        const totalVisits = allSortedVisits.length;
+
+        const indexedVisits = allSortedVisits.map((v, idx) => ({
+          visit: v,
+          ordinal: totalVisits - idx,
+          isLatestOverall: idx === 0
+        }));
+
+        let displayVisits = indexedVisits;
+        if (selectedYearFilter !== 'all') {
+          displayVisits = displayVisits.filter(entry => entry.visit.date?.startsWith(selectedYearFilter));
+        }
+        if (ratingFilter === "gte_4.5") displayVisits = displayVisits.filter(entry => entry.visit.rating >= 4.5);
+        else if (ratingFilter === "gte_4.0") displayVisits = displayVisits.filter(entry => entry.visit.rating >= 4.0);
+        else if (ratingFilter === "gte_3.0") displayVisits = displayVisits.filter(entry => entry.visit.rating >= 3.0);
+        else if (ratingFilter === "lt_3.0") displayVisits = displayVisits.filter(entry => entry.visit.rating < 3.0);
+
+        if (sortOrder === "date_asc") {
+          displayVisits = [...displayVisits].reverse();
+        }
+
+        if (!displayVisits.length) return '';
+
         const hasCoords = item.lat && item.lng;
         const infoUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.city || ''} ${item.name}`.trim())}`;
 
-        let photosRenderHtml = "";
-        if (photos.length === 1) {
-          photosRenderHtml = `
-            <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', 0)" class="touch-btn cursor-pointer rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] flex items-center justify-center p-1.5 max-h-72">
-              <img src="${photos[0]}" class="max-h-68 max-w-full object-contain rounded-xl shadow-xs" />
-            </div>
-          `;
-        } else if (photos.length > 1) {
-          photosRenderHtml = `
-            <div class="relative">
-              <div class="flex space-x-2.5 overflow-x-auto no-scrollbar snap-x py-1">
-                ${photos.map((p, pIdx) => `
-                  <div onclick="openLightboxByData('${item.id}', '${latest.visitId}', ${pIdx})" class="touch-btn flex-shrink-0 w-[82%] h-52 snap-center rounded-2xl overflow-hidden bg-[#F5F0E8]/70 border border-[#F0EBE3] relative cursor-pointer flex items-center justify-center p-1.5">
-                    <img src="${p}" class="max-h-full max-w-full object-contain rounded-xl" />
-                    <span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
-                      ${pIdx + 1} / ${photos.length}
-                    </span>
-                  </div>
-                `).join('')}
-              </div>
-              <span class="text-[9px] text-sub block text-right mt-0.5 font-medium">👈 左右滑動 · 點擊看大圖</span>
-            </div>
-          `;
-        }
+        const primaryVisitEntry = displayVisits[0];
+        const olderVisitEntries = displayVisits.slice(1);
+        const hiddenOtherCount = totalVisits - displayVisits.length;
 
         return `
           <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#EAE3D9] flex flex-col space-y-3">
@@ -3613,27 +3727,23 @@
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center space-x-1.5 flex-wrap">
                   <span class="bg-theme-light text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">${item.country || ''} · ${item.city || ''}</span>
+                  ${totalVisits > 1 ? `<span class="bg-[#FAF0E6] text-theme text-[10px] px-2 py-0.5 rounded-full font-bold whitespace-nowrap">共訪 ${totalVisits} 次</span>` : ''}
                   ${!hasCoords ? '<span class="bg-amber-100 text-amber-800 text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap">📍 待補座標</span>' : ''}
+                  ${(item.tags || []).map(t => `<span class="bg-gray-100 text-sub text-[9px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap">#${t}</span>`).join('')}
                 </div>
 
-                <!-- 統一按鈕列 -->
+                <!-- 統一頂部按鈕 -->
                 <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-0.5 flex-shrink-0">
                   <a href="${infoUrl}" target="_blank" title="查看 Google 地圖店家營業時間與評論" class="touch-btn text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0 shadow-2xs">
                     <i class="fa-solid fa-circle-info mr-1 text-[10px] text-sky-600"></i>店家
                   </a>
-                  <button onclick="generatePolaroidCard('${item.id}', '${latest.visitId}')" class="touch-btn text-theme bg-theme-light border border-theme px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition flex items-center whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-camera mr-1 text-[10px]"></i>拍立得
-                  </button>
-                  <button onclick="openEditModal('${item.id}', '${latest.visitId}')" class="touch-btn text-main bg-[#FAF8F5] border border-[#EAE3D9] px-2.5 py-1 rounded-xl text-xs font-bold active:scale-95 transition whitespace-nowrap flex-shrink-0">
-                    ✏️ 編輯
-                  </button>
                 </div>
               </div>
 
               <!-- 店名 (可直接選取複製 + 點擊小按鈕快捷拷貝) -->
               <div class="flex items-baseline space-x-1.5">
                 <h3 class="font-bold text-main text-base leading-snug break-words selectable-text flex-1 cursor-text">${item.name}</h3>
-                <button type="button" onclick="copyQuickText('${item.name.replace(/'/g, "\\'")}', '店名')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                <button type="button" onclick="copyStoreText('${item.id}', 'name')" title="複製店名" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
                   <i class="fa-regular fa-copy"></i>
                 </button>
               </div>
@@ -3642,28 +3752,39 @@
               <div class="flex items-baseline space-x-1.5">
                 <p class="text-[11px] text-sub selectable-text flex-1 cursor-text">${item.address || '無詳細地址'}</p>
                 ${item.address ? `
-                  <button type="button" onclick="copyQuickText('${item.address.replace(/'/g, "\\'")}', '地址')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
+                  <button type="button" onclick="copyStoreText('${item.id}', 'address')" title="複製地址" class="touch-btn text-gray-400 hover:text-theme p-1 text-xs">
                     <i class="fa-regular fa-copy"></i>
                   </button>
                 ` : ''}
               </div>
             </div>
 
-            ${photosRenderHtml}
+            <!-- 主要顯示的一筆造訪紀錄 -->
+            ${buildVisitBlockHtml(item.id, primaryVisitEntry.visit, primaryVisitEntry.ordinal, totalVisits, primaryVisitEntry.isLatestOverall)}
 
-            <div class="bg-[#FAF8F5] p-3 rounded-xl border border-[#F0EBE3] space-y-1.5">
-              <div class="flex justify-between items-center text-xs border-b border-[#F0EBE3] pb-1">
-                <div class="flex items-center space-x-1">
-                  <span class="font-black text-amber-500">★ ${latest.rating.toFixed(1)}</span>
-                  <span class="text-sub text-[10px]">(${latest.date})</span>
-                  ${latest.revisit ? '<span class="text-theme font-bold text-[10px] ml-1">· 值得再訪 👍</span>' : ''}
+            <!-- 其餘歷次造訪紀錄（預設展開，可點擊收合） -->
+            ${olderVisitEntries.length > 0 ? `
+              <div class="pt-1 space-y-2">
+                <div class="flex items-center justify-between bg-[#F7F3ED] px-3 py-1.5 rounded-xl border border-[#EAE3D9]">
+                  <span class="text-[11px] font-bold text-theme flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> 歷次造訪紀錄（另 ${olderVisitEntries.length} 筆）
+                  </span>
+                  <button type="button" id="toggleOlderBtn_${item.id}" onclick="toggleOlderVisits('${item.id}')" class="touch-btn text-[11px] text-sub hover:text-theme font-bold">
+                    收合 ▲
+                  </button>
                 </div>
-                <button onclick="deleteSingleVisit('${item.id}', '${latest.visitId}')" title="刪除本次筆記" class="touch-btn text-gray-400 hover:text-red-500 p-1 text-xs">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div id="olderVisits_${item.id}" data-count="${olderVisitEntries.length}" class="space-y-3 border-l-2 border-[#E2D8CC] pl-2.5 ml-1">
+                  ${olderVisitEntries.map(entry => buildVisitBlockHtml(item.id, entry.visit, entry.ordinal, totalVisits, entry.isLatestOverall)).join('')}
+                </div>
               </div>
-              <p class="text-xs text-main leading-relaxed font-medium selectable-text">${latest.review || '無心得記錄'}</p>
-            </div>
+            ` : ''}
+
+            ${hiddenOtherCount > 0 ? `
+              <div class="flex items-center justify-between text-[10px] text-sub bg-[#FAF8F5] px-2.5 py-1 rounded-lg border border-dashed border-[#EAE3D9]">
+                <span>另有 ${hiddenOtherCount} 筆其他篩選條件外的造訪紀錄</span>
+                <button type="button" onclick="setYearFilter('all'); document.getElementById('filterRating').value='all'; renderListView();" class="text-theme font-bold underline">顯示全部紀錄</button>
+              </div>
+            ` : ''}
 
             <div class="flex justify-between items-center text-[11px] text-sub pt-1 border-t border-[#F5F0E8]">
               <button onclick="deleteRestaurant('${item.id}')" class="touch-btn text-sub hover:text-red-500 flex items-center space-x-1 font-medium">
@@ -3696,6 +3817,7 @@
       document.getElementById("inputTags").value = "";
       document.getElementById("inputReview").value = "";
       document.getElementById("inputCost").value = "";
+      document.getElementById("inputRevisit").checked = true;
       document.getElementById("modalDeleteBtn").classList.add("hidden");
       renderPhotosThumbnails();
       renderModalQuickTagChips();
@@ -3723,6 +3845,8 @@
       document.getElementById("inputReview").value = "";
       document.getElementById("inputCost").value = store.visits[0]?.cost || "";
       document.getElementById("inputDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("inputTags").value = (store.tags || []).join(', ');
+      document.getElementById("inputRevisit").checked = true;
       document.getElementById("modalDeleteBtn").classList.add("hidden");
       uploadedPhotosList = [];
       renderPhotosThumbnails();
@@ -3744,7 +3868,7 @@
       uploadedPhotosList = [...getVisitPhotos(visit)];
 
       document.getElementById("modalMainTitle").innerText = `編輯回憶筆記 ✏️`;
-      document.getElementById("modalSubTitle").innerText = store.name;
+      document.getElementById("modalSubTitle").innerText = `${store.name} (${visit.date || ''})`;
       document.getElementById("inputStoreName").value = store.name;
       document.getElementById("inputCountry").value = store.country || "台灣";
       document.getElementById("inputCity").value = store.city || "新竹市";
@@ -3755,6 +3879,7 @@
       document.getElementById("inputCost").value = visit.cost || "";
       document.getElementById("inputDate").value = visit.date;
       document.getElementById("inputTags").value = (store.tags || []).join(', ');
+      document.getElementById("inputRevisit").checked = visit.revisit !== false;
       document.getElementById("modalDeleteBtn").classList.remove("hidden");
 
       renderPhotosThumbnails();
@@ -3860,7 +3985,7 @@
 
     function exportData() {
       const backupPayload = {
-        version: "v21_selectable_text",
+        version: "v22_full_visit_history",
         exportDate: new Date().toISOString(),
         restaurants: appData,
         wishlists: wishlists
@@ -3893,8 +4018,9 @@
           }
 
           if (restList.length > 0) {
+            normalizeAppData(restList);
             for (const item of restList) await dbPut(item);
-            appData = await dbGetAll();
+            appData = normalizeAppData(await dbGetAll());
             refreshViews();
             renderWishlistView();
             updateDashboardStats();
